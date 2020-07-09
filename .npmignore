@@ -1,0 +1,11 @@
+node_modules
+.vscode
+src
+Dockerfile
+jest.config.js
+docker-compose.yml
+tsconfig.json
+tsconfig-base.json
+tests
+.github
+*.tgz

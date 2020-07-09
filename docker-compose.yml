@@ -1,0 +1,9 @@
+version: "3"
+services:
+  project:
+    command: "tail -f /dev/null"
+    volumes:
+      - .:/project
+    build: .
+    stdin_open: true
+    tty: true
