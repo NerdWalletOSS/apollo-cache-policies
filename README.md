@@ -1,4 +1,4 @@
-![Build](https://github.com/NerdWallet/apollo-cache-invalidation/workflows/Build/badge.svg)
+![Build](https://github.com/NerdWalletOSS/apollo-invalidation-policies/workflows/Build/badge.svg)
 
 # Apollo Invalidation Policies
 
