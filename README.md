@@ -49,7 +49,7 @@ const cache = new InvalidationPolicyCache({
 
 ```javascript
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import InvalidationPolicyCache from "apollo-invalidation-policies";
+import { InvalidationPolicyCache } from "apollo-invalidation-policies";
 
 export default new ApolloClient({
   uri: "http://localhost:4000",
