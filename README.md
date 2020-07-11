@@ -13,7 +13,7 @@ npm install apollo-invalidation-policies
 ## Usage
 
 ```javascript
-import InvalidationPolicyCache from 'apollo-invalidation-policies';
+import { InvalidationPolicyCache } from 'apollo-invalidation-policies';
 const cache = new InvalidationPolicyCache({
   typePolicies: {...},
   invalidationPolicies: {
