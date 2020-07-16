@@ -1,4 +1,4 @@
-![Build](https://github.com/NerdWallet/apollo-cache-invalidation/workflows/Build/badge.svg)
+![Build](https://github.com/NerdWalletOSS/apollo-invalidation-policies/workflows/Build/badge.svg)
 
 # Apollo Invalidation Policies
 
@@ -13,7 +13,7 @@ npm install apollo-invalidation-policies
 ## Usage
 
 ```javascript
-import InvalidationPolicyCache from 'apollo-invalidation-policies';
+import { InvalidationPolicyCache } from 'apollo-invalidation-policies';
 const cache = new InvalidationPolicyCache({
   typePolicies: {...},
   invalidationPolicies: {
@@ -49,7 +49,7 @@ const cache = new InvalidationPolicyCache({
 
 ```javascript
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import InvalidationPolicyCache from "apollo-invalidation-policies";
+import { InvalidationPolicyCache } from "apollo-invalidation-policies";
 
 export default new ApolloClient({
   uri: "http://localhost:4000",
