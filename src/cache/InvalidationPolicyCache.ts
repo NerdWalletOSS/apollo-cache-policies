@@ -85,7 +85,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
   // Determines whether the cache's data reference is set to the root store. If not, then there is an ongoing optimistic transaction
   // being applied to a new layer.
-  isOperatingonRootData() {
+  isOperatingOnRootData() {
     // @ts-ignore
     return this.data === this.entityStoreRoot;
   }
@@ -156,7 +156,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       !this.invalidationPolicyManager.isPolicyActive(
         InvalidationPolicyEvent.Write
       ) ||
-      !this.isOperatingonRootData()
+      !this.isOperatingOnRootData()
     ) {
       return writeResult;
     }
