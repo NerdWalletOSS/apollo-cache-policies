@@ -145,7 +145,7 @@ export default class InvalidationPolicyManager {
     }
 
     const entityCacheTime =
-      storeFieldName && typeMapEntity.storeFieldNames
+      storeFieldName && typeMapEntity.storeFieldNames && typeMapEntity.storeFieldNames.entries[storeFieldName]
         ? typeMapEntity.storeFieldNames.entries[storeFieldName].cacheTime
         : typeMapEntity.cacheTime;
     const typeTimeToLive = this.getPolicy(typename)?.timeToLive;
