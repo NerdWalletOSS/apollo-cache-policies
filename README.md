@@ -161,7 +161,7 @@ Invalidation in the Apollo cache is limited and is a common source of consternat
 
 The automatic cache invalidation provided by Apollo is missing two categories of cache invalidation:
 
-1. Creating/deleting entities
+### 1. Creating/deleting entities
 
 Because it uses a normalized data cache, any updates to entities in the cache will be consistent across cached queries that contain them such as in lists or nested data objects. This does not work when creating or deleting entities, however, since it does not know to add any new entities to cached queries or remove them when a mutation deletes an entity from the server.
 
@@ -188,7 +188,7 @@ const createEntity = await apolloClient.mutate({
 
 This requires the client to specify an update handler at the mutation call site and manually read, modify and write that data back into the cache. While this works, the code does not scale well across multiple usages of the same mutation or for highly relational data where a mutation needs to invalidate various cached entities.
 
-2. Cache dependencies
+### 2. Cache dependencies
 
 The Apollo cache has powerful utilities for interacting with the cache, but does not have a framework for managing the lifecycle and dependencies between entities in the cache.
 
@@ -201,11 +201,11 @@ If a cache contains multiple entities like a user's profile, messages, and posts
     FAQs
   </summary>
 
-1. What use cases is this project targetting?
+### What use cases is this project targetting?
 
 The Apollo cache is not a relational datastore and as an extension of it, these invalidation policies are not going to be the best solution for every project. At its core it's a for loop that runs for each child x of type T when a matching policy event occurs for parent entity y of type T2. If your cache will consist of thousands of x's and y's dependent on each other with frequent policy triggers, then something like a client-side database would be a better choice. Our goal has been decreasing developer overhead when having to manage the invalidation of multiple of distinct, dependent cached queries.
 
-2. Why a new cache and not a link?
+### Why a new cache and not a link?
 
 Apollo links are great tools for watching queries and mutations hitting the network. There even exists a [Watched Mutation](https://github.com/afafafafafaf/apollo-link-watched-mutation) link which provides some of the desired behavior of this library.
 
@@ -220,7 +220,7 @@ At a low level, links:
 - Links miss directly modified cached data. If eviction of an Employee cache entity occurs because the client called `cache.evict` directly, links will not be able to process
   anything in relation to what should happen in response to that eviction.
 
-3. Why not establish schema relationships on the server?
+### Why not establish schema relationships on the server?
 
 This was also something that was explored, and it is possible to do this with custom directives:
 
