@@ -4,6 +4,7 @@
   "description": "An extension to the InMemoryCache from Apollo for type-based invalidation policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
