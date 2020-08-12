@@ -21,11 +21,11 @@ import { InvalidationPolicyEvent } from "../policies/types";
  * Extension of Apollo in-memory cache which adds support for invalidation policies.
  */
 export default class InvalidationPolicyCache extends InMemoryCache {
-  private entityTypeMap: EntityTypeMap;
-  private invalidationPolicyManager: InvalidationPolicyManager;
-  private cacheResultProcessor: CacheResultProcessor;
-  private entityStoreRoot: EntityStore.Root;
-  private isBroadcasting: boolean;
+  protected entityTypeMap: EntityTypeMap;
+  protected invalidationPolicyManager: InvalidationPolicyManager;
+  protected cacheResultProcessor: CacheResultProcessor;
+  protected entityStoreRoot: EntityStore.Root;
+  protected isBroadcasting: boolean;
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
     const { invalidationPolicies = {}, ...inMemoryCacheConfig } = config;
@@ -56,7 +56,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     });
   }
 
-  private readField<T>(
+  protected readField<T>(
     fieldNameOrOptions: string | ReadFieldOptions | undefined,
     from: StoreObject | Reference
   ) {

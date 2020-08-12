@@ -1,3 +1,8 @@
+1.0.0-beta2 (Dan Reynolds)
+
+- Bumps to latest Apollo version (3.1)
+- Adds audit logging for better entity debugging through the type map and invalidation policy manager
+
 1.0.0-beta1 (Dan Reynolds)
 
 - Initial beta release 🚀
