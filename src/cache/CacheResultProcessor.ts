@@ -236,7 +236,7 @@ export class CacheResultProcessor {
           });
 
           const hasFieldArgs = (field?.arguments?.length ?? 0) > 0;
-          const fieldVariables = variables ?? hasFieldArgs ? {} : undefined;
+          const fieldVariables = variables ?? (hasFieldArgs ? {} : undefined);
 
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
           entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables);
