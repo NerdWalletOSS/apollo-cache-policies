@@ -234,8 +234,12 @@ export class CacheResultProcessor {
             fieldName,
             variables,
           });
+
+          const hasFieldArgs = (field?.arguments?.length ?? 0) > 0;
+          const fieldVariables = variables ?? (hasFieldArgs ? {} : undefined);
+
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
-          entityTypeMap.write(typename, dataId, storeFieldName, variables);
+          entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables);
 
           invalidationPolicyManager.runWritePolicy(typename, {
             parent: {
@@ -243,7 +247,7 @@ export class CacheResultProcessor {
               fieldName,
               storeFieldName,
               ref: makeReference(dataId),
-              variables,
+              variables: fieldVariables,
             },
           });
         }
