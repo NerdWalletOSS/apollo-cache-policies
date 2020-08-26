@@ -57,8 +57,8 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   }
 
   protected readField<T>(
-    fieldNameOrOptions: string | ReadFieldOptions | undefined,
-    from: StoreObject | Reference
+    fieldNameOrOptions?: string | ReadFieldOptions,
+    from?: StoreObject | Reference
   ) {
     if (!fieldNameOrOptions) {
       return;

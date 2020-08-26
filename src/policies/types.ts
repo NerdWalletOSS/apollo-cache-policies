@@ -52,8 +52,8 @@ export type CacheOperations = {
   ) => boolean;
   modify: (options: Cache.ModifyOptions) => boolean;
   readField: (
-    fieldNameOrOptions: string | ReadFieldOptions | undefined,
-    from: StoreObject | Reference
+    fieldNameOrOptions?: string | ReadFieldOptions | undefined,
+    from?: StoreObject | Reference
   ) => StoreValue | undefined;
 };
 
@@ -65,8 +65,8 @@ export type PolicyActionCacheOperations = {
   ) => boolean;
   modify: (options: Omit<Cache.ModifyOptions, "broadcast">) => boolean;
   readField: (
-    fieldNameOrOptions: string | ReadFieldOptions | undefined,
-    from: StoreObject | Reference
+    fieldNameOrOptions?: string | ReadFieldOptions | undefined,
+    from?: StoreObject | Reference
   ) => StoreValue | undefined;
 };
 
