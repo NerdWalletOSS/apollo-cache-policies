@@ -42,9 +42,7 @@ export default class InvalidationPolicyManager {
       (acc, type) => {
         const policy = policyTypes[type];
         acc[InvalidationPolicyEvent.Read] =
-          acc[InvalidationPolicyEvent.Read] ||
-          !!defaultTimeToLive ||
-          !!policy.timeToLive;
+          acc[InvalidationPolicyEvent.Read] || !!policy.timeToLive;
         acc[InvalidationPolicyEvent.Write] =
           acc[InvalidationPolicyEvent.Write] ||
           !!policy[InvalidationPolicyLifecycleEvent.Write];
@@ -54,7 +52,7 @@ export default class InvalidationPolicyManager {
         return acc;
       },
       {
-        [InvalidationPolicyEvent.Read]: false,
+        [InvalidationPolicyEvent.Read]: !!defaultTimeToLive,
         [InvalidationPolicyEvent.Write]: false,
         [InvalidationPolicyEvent.Evict]: false,
       }
