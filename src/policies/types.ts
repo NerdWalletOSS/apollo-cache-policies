@@ -14,7 +14,10 @@ export enum InvalidationPolicyLifecycleEvent {
 }
 
 export interface InvalidationPolicies {
-  [typeName: string]: InvalidationPolicy;
+  timeToLive?: number;
+  types?: {
+    [typeName: string]: InvalidationPolicy;
+  };
 }
 
 export interface PolicyActionFields {

@@ -168,10 +168,12 @@ describe("Cache", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         invalidationPolicies: {
-          DeleteEmployeesResponse: {
-            onWrite: {
-              Employee: ({ evict }, { id, fieldName }) =>
-                evict({ id, fieldName }),
+          types: {
+            DeleteEmployeesResponse: {
+              onWrite: {
+                Employee: ({ evict }, { id, fieldName }) =>
+                  evict({ id, fieldName }),
+              },
             },
           },
         },
@@ -228,15 +230,17 @@ describe("Cache", () => {
       beforeEach(() => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
-            DeleteEmployeesResponse: {
-              onWrite: {
-                Employee: (
-                  { evict, readField },
-                  { id, ref, parent: { variables } }
-                ) => {
-                  if (variables?.deleteEmployeeId === readField("id", ref)) {
-                    evict({ id });
-                  }
+            types: {
+              DeleteEmployeesResponse: {
+                onWrite: {
+                  Employee: (
+                    { evict, readField },
+                    { id, ref, parent: { variables } }
+                  ) => {
+                    if (variables?.deleteEmployeeId === readField("id", ref)) {
+                      evict({ id });
+                    }
+                  },
                 },
               },
             },
@@ -361,16 +365,18 @@ describe("Cache", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         invalidationPolicies: {
-          DeleteEmployeesResponse: {
-            onWrite: {
-              EmployeesResponse: ({ evict }, { id, fieldName }) =>
-                evict({ id, fieldName }),
+          types: {
+            DeleteEmployeesResponse: {
+              onWrite: {
+                EmployeesResponse: ({ evict }, { id, fieldName }) =>
+                  evict({ id, fieldName }),
+              },
             },
-          },
-          EmployeesResponse: {
-            onEvict: {
-              Employee: ({ evict }, { id, fieldName }) =>
-                evict({ id, fieldName }),
+            EmployeesResponse: {
+              onEvict: {
+                Employee: ({ evict }, { id, fieldName }) =>
+                  evict({ id, fieldName }),
+              },
             },
           },
         },
@@ -408,36 +414,40 @@ describe("Cache", () => {
       beforeEach(() => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
-            DeleteEmployeesResponse: {
-              onWrite: {
-                Employee: (
-                  { readField, evict },
-                  { ref, id, parent: { variables } }
-                ) => {
-                  if (variables?.deleteEmployeeId === readField("id", ref)) {
-                    evict({ id });
-                  }
+            types: {
+              DeleteEmployeesResponse: {
+                onWrite: {
+                  Employee: (
+                    { readField, evict },
+                    { ref, id, parent: { variables } }
+                  ) => {
+                    if (variables?.deleteEmployeeId === readField("id", ref)) {
+                      evict({ id });
+                    }
+                  },
                 },
               },
-            },
-            Employee: {
-              onEvict: {
-                EmployeeMessagesResponse: (
-                  { evict },
-                  { id, fieldName, variables }
-                ) => evict({ id, fieldName, args: variables }),
-                EmployeesResponse: ({ evict }, { id, fieldName, variables }) =>
-                  evict({ id, fieldName, args: variables }),
-                EmployeeMessage: (
-                  { evict, readField },
-                  { ref, id, parent }
-                ) => {
-                  if (
-                    readField("id", parent.ref) ===
-                    readField("employee_id", ref)
-                  ) {
-                    evict({ id });
-                  }
+              Employee: {
+                onEvict: {
+                  EmployeeMessagesResponse: (
+                    { evict },
+                    { id, fieldName, variables }
+                  ) => evict({ id, fieldName, args: variables }),
+                  EmployeesResponse: (
+                    { evict },
+                    { id, fieldName, variables }
+                  ) => evict({ id, fieldName, args: variables }),
+                  EmployeeMessage: (
+                    { evict, readField },
+                    { ref, id, parent }
+                  ) => {
+                    if (
+                      readField("id", parent.ref) ===
+                      readField("employee_id", ref)
+                    ) {
+                      evict({ id });
+                    }
+                  },
                 },
               },
             },
@@ -500,14 +510,20 @@ describe("Cache", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         invalidationPolicies: {
-          Employee: {
-            onEvict: {
-              EmployeeMessage: ({ evict, readField }, { id, ref, parent }) => {
-                if (
-                  readField("employee_id", ref) === readField("id", parent.ref)
-                ) {
-                  evict({ id });
-                }
+          types: {
+            Employee: {
+              onEvict: {
+                EmployeeMessage: (
+                  { evict, readField },
+                  { id, ref, parent }
+                ) => {
+                  if (
+                    readField("employee_id", ref) ===
+                    readField("id", parent.ref)
+                  ) {
+                    evict({ id });
+                  }
+                },
               },
             },
           },
@@ -614,26 +630,31 @@ describe("Cache", () => {
       beforeEach(() => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
-            CreateEmployeeResponse: {
-              onWrite: {
-                EmployeesResponse: (
-                  { modify, readField },
-                  { storeFieldName, parent }
-                ) => {
-                  const createEmployeeResponse: any = readField(
-                    parent.storeFieldName,
-                    parent.ref
-                  );
-                  modify({
-                    fields: {
-                      [storeFieldName!]: (existing) => {
-                        return {
-                          ...existing,
-                          data: [...existing.data, createEmployeeResponse.data],
-                        };
+            types: {
+              CreateEmployeeResponse: {
+                onWrite: {
+                  EmployeesResponse: (
+                    { modify, readField },
+                    { storeFieldName, parent }
+                  ) => {
+                    const createEmployeeResponse: any = readField(
+                      parent.storeFieldName,
+                      parent.ref
+                    );
+                    modify({
+                      fields: {
+                        [storeFieldName!]: (existing) => {
+                          return {
+                            ...existing,
+                            data: [
+                              ...existing.data,
+                              createEmployeeResponse.data,
+                            ],
+                          };
+                        },
                       },
-                    },
-                  });
+                    });
+                  },
                 },
               },
             },
@@ -858,23 +879,25 @@ describe("Cache", () => {
       beforeEach(() => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
-            Employee: {
-              onWrite: {
-                EmployeeMessage: (
-                  { modify, readField },
-                  { id, ref, parent }
-                ) => {
-                  if (
-                    readField("employee_id", ref) ===
-                    readField("id", parent.ref)
-                  ) {
-                    modify({
-                      id,
-                      fields: {
-                        employee_message: () => "je pense donc je suis",
-                      },
-                    });
-                  }
+            types: {
+              Employee: {
+                onWrite: {
+                  EmployeeMessage: (
+                    { modify, readField },
+                    { id, ref, parent }
+                  ) => {
+                    if (
+                      readField("employee_id", ref) ===
+                      readField("id", parent.ref)
+                    ) {
+                      modify({
+                        id,
+                        fields: {
+                          employee_message: () => "je pense donc je suis",
+                        },
+                      });
+                    }
+                  },
                 },
               },
             },
@@ -954,19 +977,21 @@ describe("Cache", () => {
         beforeEach(() => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              DeleteEmployeesResponse: {
-                onWrite: {
-                  EmployeesResponse: ({ modify }, { storeFieldName }) => {
-                    modify({
-                      fields: {
-                        [storeFieldName!]: (existing) => {
-                          return {
-                            ...existing,
-                            data: [],
-                          };
+              types: {
+                DeleteEmployeesResponse: {
+                  onWrite: {
+                    EmployeesResponse: ({ modify }, { storeFieldName }) => {
+                      modify({
+                        fields: {
+                          [storeFieldName!]: (existing) => {
+                            return {
+                              ...existing,
+                              data: [],
+                            };
+                          },
                         },
-                      },
-                    });
+                      });
+                    },
                   },
                 },
               },
@@ -1050,26 +1075,28 @@ describe("Cache", () => {
         beforeEach(() => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              Employee: {
-                onWrite: {
-                  EmployeeMessagesResponse: (
-                    { modify, readField },
-                    { storeFieldName, parent }
-                  ) => {
-                    modify({
-                      fields: {
-                        [storeFieldName!]: (existing) => {
-                          return {
-                            ...existing,
-                            data: existing.data.filter(
-                              (employeeMessage: any) =>
-                                readField("employee_id", employeeMessage) ===
-                                readField("id", parent.ref)
-                            ),
-                          };
+              types: {
+                Employee: {
+                  onWrite: {
+                    EmployeeMessagesResponse: (
+                      { modify, readField },
+                      { storeFieldName, parent }
+                    ) => {
+                      modify({
+                        fields: {
+                          [storeFieldName!]: (existing) => {
+                            return {
+                              ...existing,
+                              data: existing.data.filter(
+                                (employeeMessage: any) =>
+                                  readField("employee_id", employeeMessage) ===
+                                  readField("id", parent.ref)
+                              ),
+                            };
+                          },
                         },
-                      },
-                    });
+                      });
+                    },
                   },
                 },
               },
@@ -1123,23 +1150,25 @@ describe("Cache", () => {
       beforeEach(() => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
-            Employee: {
-              onWrite: {
-                EmployeeMessage: (
-                  { modify, readField },
-                  { ref, id, parent }
-                ) => {
-                  if (
-                    readField("employee_id", ref) ===
-                    readField("id", parent.ref)
-                  ) {
-                    modify({
-                      id,
-                      fields: {
-                        employee_message: () => "Cogito ergo sum",
-                      },
-                    });
-                  }
+            types: {
+              Employee: {
+                onWrite: {
+                  EmployeeMessage: (
+                    { modify, readField },
+                    { ref, id, parent }
+                  ) => {
+                    if (
+                      readField("employee_id", ref) ===
+                      readField("id", parent.ref)
+                    ) {
+                      modify({
+                        id,
+                        fields: {
+                          employee_message: () => "Cogito ergo sum",
+                        },
+                      });
+                    }
+                  },
                 },
               },
             },
@@ -1205,35 +1234,37 @@ describe("Cache", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         invalidationPolicies: {
-          DeleteEmployeesResponse: {
-            onWrite: {
-              EmployeesResponse: ({ modify }, { storeFieldName }) => {
-                modify({
-                  fields: {
-                    [storeFieldName!]: (existing) => {
-                      return {
-                        ...existing,
-                        data: [],
-                      };
+          types: {
+            DeleteEmployeesResponse: {
+              onWrite: {
+                EmployeesResponse: ({ modify }, { storeFieldName }) => {
+                  modify({
+                    fields: {
+                      [storeFieldName!]: (existing) => {
+                        return {
+                          ...existing,
+                          data: [],
+                        };
+                      },
                     },
-                  },
-                });
+                  });
+                },
               },
             },
-          },
-          EmployeesResponse: {
-            onWrite: {
-              EmployeeMessagesResponse: ({ modify }, { storeFieldName }) => {
-                modify({
-                  fields: {
-                    [storeFieldName!]: (existing) => {
-                      return {
-                        ...existing,
-                        data: [],
-                      };
+            EmployeesResponse: {
+              onWrite: {
+                EmployeeMessagesResponse: ({ modify }, { storeFieldName }) => {
+                  modify({
+                    fields: {
+                      [storeFieldName!]: (existing) => {
+                        return {
+                          ...existing,
+                          data: [],
+                        };
+                      },
                     },
-                  },
-                });
+                  });
+                },
               },
             },
           },
@@ -1313,8 +1344,10 @@ describe("Cache", () => {
         test("should not evict the query from the cache", () => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              EmployeesResponse: {
-                timeToLive,
+              types: {
+                EmployeesResponse: {
+                  timeToLive,
+                },
               },
             },
           });
@@ -1357,8 +1390,10 @@ describe("Cache", () => {
           beforeEach(() => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                Employee: {
-                  timeToLive,
+                types: {
+                  Employee: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1419,8 +1454,10 @@ describe("Cache", () => {
           beforeEach(() => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                Employee: {
-                  timeToLive,
+                types: {
+                  Employee: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1473,8 +1510,10 @@ describe("Cache", () => {
           test("should not evict the expired query field from the cache", () => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                EmployeesResponse: {
-                  timeToLive,
+                types: {
+                  EmployeesResponse: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1511,11 +1550,13 @@ describe("Cache", () => {
           beforeEach(() => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                EmployeesResponse: {
-                  timeToLive,
-                },
-                EmployeeMessagesResponse: {
-                  timeToLive,
+                types: {
+                  EmployeesResponse: {
+                    timeToLive,
+                  },
+                  EmployeeMessagesResponse: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1606,8 +1647,10 @@ describe("Cache", () => {
             test("should evict the expired query fields with matching variables from the cache", () => {
               cache = new InvalidationPolicyCache({
                 invalidationPolicies: {
-                  EmployeesResponse: {
-                    timeToLive,
+                  types: {
+                    EmployeesResponse: {
+                      timeToLive,
+                    },
                   },
                 },
               });
@@ -1658,8 +1701,10 @@ describe("Cache", () => {
             test("should evict the expired query fields with fields matching the supported subset of variables", () => {
               cache = new InvalidationPolicyCache({
                 invalidationPolicies: {
-                  EmployeesResponse: {
-                    timeToLive,
+                  types: {
+                    EmployeesResponse: {
+                      timeToLive,
+                    },
                   },
                 },
               });
@@ -1692,8 +1737,10 @@ describe("Cache", () => {
             test("should evict the expired query with empty variables", () => {
               cache = new InvalidationPolicyCache({
                 invalidationPolicies: {
-                  EmployeesResponse: {
-                    timeToLive,
+                  types: {
+                    EmployeesResponse: {
+                      timeToLive,
+                    },
                   },
                 },
               });
@@ -1761,8 +1808,10 @@ describe("Cache", () => {
               let queryResult: any;
               cache = new InvalidationPolicyCache({
                 invalidationPolicies: {
-                  EmployeesResponse: {
-                    timeToLive,
+                  types: {
+                    EmployeesResponse: {
+                      timeToLive,
+                    },
                   },
                 },
               });
@@ -1795,8 +1844,10 @@ describe("Cache", () => {
           test("should not evict the query field from the cache", () => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                EmployeesResponse: {
-                  timeToLive,
+                types: {
+                  EmployeesResponse: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1846,11 +1897,13 @@ describe("Cache", () => {
           beforeEach(() => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                EmployeesResponse: {
-                  timeToLive,
-                },
-                Employee: {
-                  timeToLive,
+                types: {
+                  EmployeesResponse: {
+                    timeToLive,
+                  },
+                  Employee: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1900,11 +1953,13 @@ describe("Cache", () => {
           beforeEach(() => {
             cache = new InvalidationPolicyCache({
               invalidationPolicies: {
-                EmployeesResponse: {
-                  timeToLive,
-                },
-                Employee: {
-                  timeToLive,
+                types: {
+                  EmployeesResponse: {
+                    timeToLive,
+                  },
+                  Employee: {
+                    timeToLive,
+                  },
                 },
               },
             });
@@ -1944,8 +1999,10 @@ describe("Cache", () => {
         beforeEach(() => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              EmployeesResponse: {
-                timeToLive,
+              types: {
+                EmployeesResponse: {
+                  timeToLive,
+                },
               },
             },
           });
@@ -1989,8 +2046,10 @@ describe("Cache", () => {
         test("should not evict the query from the cache", () => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              Employee: {
-                timeToLive,
+              types: {
+                Employee: {
+                  timeToLive,
+                },
               },
             },
           });
@@ -2032,8 +2091,10 @@ describe("Cache", () => {
         test("should evict the normalized object from the cache", () => {
           cache = new InvalidationPolicyCache({
             invalidationPolicies: {
-              Employee: {
-                timeToLive,
+              types: {
+                Employee: {
+                  timeToLive,
+                },
               },
             },
           });

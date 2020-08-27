@@ -35,12 +35,16 @@ export default class InvalidationPolicyManager {
   }
 
   private activatePolicies() {
-    const { policies } = this.config;
-    return Object.keys(policies).reduce<InvalidationPolicyActivation>(
+    const { policies = {} } = this.config;
+    const { types: policyTypes = {}, timeToLive: defaultTimeToLive } = policies;
+
+    return Object.keys(policyTypes).reduce<InvalidationPolicyActivation>(
       (acc, type) => {
-        const policy = policies[type];
+        const policy = policyTypes[type];
         acc[InvalidationPolicyEvent.Read] =
-          acc[InvalidationPolicyEvent.Read] || !!policy.timeToLive;
+          acc[InvalidationPolicyEvent.Read] ||
+          !!defaultTimeToLive ||
+          !!policy.timeToLive;
         acc[InvalidationPolicyEvent.Write] =
           acc[InvalidationPolicyEvent.Write] ||
           !!policy[InvalidationPolicyLifecycleEvent.Write];
@@ -58,7 +62,7 @@ export default class InvalidationPolicyManager {
   }
 
   private getPolicy(typeName: string): InvalidationPolicy | null {
-    return this.config.policies[typeName] || null;
+    return this.config.policies?.types?.[typeName] || null;
   }
 
   private getTypePolicyForEvent(
@@ -136,7 +140,7 @@ export default class InvalidationPolicyManager {
     fieldName?: string,
     storeFieldName?: string
   ): boolean {
-    const { cacheOperations, entityTypeMap } = this.config;
+    const { cacheOperations, entityTypeMap, policies } = this.config;
     const entityId = makeEntityId(dataId, fieldName);
     const typeMapEntity = entityTypeMap.readEntityById(entityId);
 
@@ -148,12 +152,13 @@ export default class InvalidationPolicyManager {
       storeFieldName && typeMapEntity.storeFieldNames
         ? typeMapEntity.storeFieldNames.entries[storeFieldName].cacheTime
         : typeMapEntity.cacheTime;
-    const typeTimeToLive = this.getPolicy(typename)?.timeToLive;
+    const timeToLive =
+      this.getPolicy(typename)?.timeToLive || policies.timeToLive;
 
     if (
       _.isNumber(entityCacheTime) &&
-      typeTimeToLive &&
-      Date.now() > entityCacheTime + typeTimeToLive
+      timeToLive &&
+      Date.now() > entityCacheTime + timeToLive
     ) {
       return cacheOperations.evict({
         id: dataId,

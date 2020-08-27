@@ -48,10 +48,12 @@ describe("InvalidationPolicyManager", () => {
       employeePolicyActionSpy = jest.fn();
       employeesResponsePolicyActionSpy = jest.fn();
       policies = {
-        CreateEmployeeResponse: {
-          onEvict: {
-            Employee: employeePolicyActionSpy,
-            EmployeesResponse: employeesResponsePolicyActionSpy,
+        types: {
+          CreateEmployeeResponse: {
+            onEvict: {
+              Employee: employeePolicyActionSpy,
+              EmployeesResponse: employeesResponsePolicyActionSpy,
+            },
           },
         },
       };
@@ -135,15 +137,17 @@ describe("InvalidationPolicyManager", () => {
   describe("#activatePolicies", () => {
     test("should activate all policies with config options", () => {
       policies = {
-        Employee: {
-          timeToLive: 5,
-        },
-        EmployeeResponse: {
-          onWrite: {
-            Employee: () => {},
+        types: {
+          Employee: {
+            timeToLive: 5,
           },
-          onEvict: {
-            Employee: () => {},
+          EmployeeResponse: {
+            onWrite: {
+              Employee: () => {},
+            },
+            onEvict: {
+              Employee: () => {},
+            },
           },
         },
       };
@@ -166,8 +170,10 @@ describe("InvalidationPolicyManager", () => {
 
     test("should not activate policies without config options", () => {
       policies = {
-        Employee: {},
-        EmployeeResponse: {},
+        types: {
+          Employee: {},
+          EmployeeResponse: {},
+        },
       };
       invalidationPolicyManager = new InvalidationPolicyManager({
         entityTypeMap,
