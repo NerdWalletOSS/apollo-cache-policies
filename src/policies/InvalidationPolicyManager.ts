@@ -35,7 +35,7 @@ export default class InvalidationPolicyManager {
   }
 
   private activatePolicies() {
-    const { policies = {} } = this.config;
+    const { policies } = this.config;
     const { types: policyTypes = {}, timeToLive: defaultTimeToLive } = policies;
 
     return Object.keys(policyTypes).reduce<InvalidationPolicyActivation>(
