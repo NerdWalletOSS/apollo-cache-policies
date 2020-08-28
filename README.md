@@ -17,15 +17,23 @@ import { InvalidationPolicyCache } from 'apollo-invalidation-policies';
 const cache = new InvalidationPolicyCache({
   typePolicies: {...},
   invalidationPolicies: {
-    Typename: {
-      timeToLive: Number,
-      PolicyEvent: {
-        Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
-      },
+    timeToLive: Number;
+    types: {
+      Typename: {
+        timeToLive: Number,
+        PolicyEvent: {
+          Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
+        },
+      }
     }
   }
 });
 ```
+
+| Config         | Description                                                                                | Required | Default |
+| ---------------| -------------------------------------------------------------------------------------------|----------|---------|
+| `timeToLive`   | The global time to live in milliseconds for all types in the cache                         | false    | None    |
+| `types`        | The types for which invalidation policies have been defined                                | false    | None    |
 
 | Policy Event   | Description                                                                                | Required |
 | ---------------| -------------------------------------------------------------------------------------------|----------|
@@ -56,7 +64,8 @@ export default new ApolloClient({
   cache: new InvalidationPolicyCache({
     typePolicies: {...},
     invalidationPolicies: {
-      DeleteEmployeeResponse: {
+      types: {
+        DeleteEmployeeResponse: {
           // Delete an entity from the cache when it is deleted on the server
           onWrite: {
             Employee: ({ evict, readField }, { id, ref, parent: { variables } }) => {
@@ -65,42 +74,43 @@ export default new ApolloClient({
               }
             },
           }
-      },
-      Employee: {
-        // Evict every message in the cache for an employee when they are evicted
-        onEvict: {
-          EmployeeMessage: ({ readField, evict }, { id, ref, parent }) => {
-            if (readField('employee_id', ref) === readField('id', parent.ref)) {
-              evict({ id });
-            }
-          },
-        }
-      },
-      CreateEmployeeResponse: {
-        // Add an entity to a cached query when the parent type is written
-        onWrite: {
-          EmployeesResponse: ({ readField, modify }, { storeFieldName, parent }) => {
-            modify({
-              fields: {
-                [storeFieldName]: (employeesResponse) => {
-                  const createdEmployeeResponse = readField(parent.storeFieldName, parent.ref);
-                  return {
-                    ...employeesResponse,
-                    data: [
-                      ...employeesResponse.data,
-                      createdEmployeesResponse.data,
-                    ]
+        },
+        Employee: {
+          // Evict every message in the cache for an employee when they are evicted
+          onEvict: {
+            EmployeeMessage: ({ readField, evict }, { id, ref, parent }) => {
+              if (readField('employee_id', ref) === readField('id', parent.ref)) {
+                evict({ id });
+              }
+            },
+          }
+        },
+        CreateEmployeeResponse: {
+          // Add an entity to a cached query when the parent type is written
+          onWrite: {
+            EmployeesResponse: ({ readField, modify }, { storeFieldName, parent }) => {
+              modify({
+                fields: {
+                  [storeFieldName]: (employeesResponse) => {
+                    const createdEmployeeResponse = readField(parent.storeFieldName, parent.ref);
+                    return {
+                      ...employeesResponse,
+                      data: [
+                        ...employeesResponse.data,
+                        createdEmployeesResponse.data,
+                      ]
+                    }
                   }
                 }
-              }
-            });
-          },
-        }
-      },
-      EmployeesResponse: {
-        // Assign a time-to-live for types in the store. If accessed beyond their TTL,
-        // they are evicted and no data is returned.
-        timeToLive: 3600,
+              });
+            },
+          }
+          EmployeesResponse: {
+            // Assign a time-to-live for types in the store. If accessed beyond their TTL,
+            // they are evicted and no data is returned.
+            timeToLive: 3600,
+          }
+        },
       }
     }
   })
