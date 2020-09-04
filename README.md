@@ -18,9 +18,11 @@ const cache = new InvalidationPolicyCache({
   typePolicies: {...},
   invalidationPolicies: {
     timeToLive: Number;
+    renewalPolicy: RenewalPolicy;
     types: {
       Typename: {
         timeToLive: Number,
+        renewalPolicy: RenewalPolicy,
         PolicyEvent: {
           Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
         },
@@ -30,10 +32,18 @@ const cache = new InvalidationPolicyCache({
 });
 ```
 
-| Config         | Description                                                                                | Required | Default |
-| ---------------| -------------------------------------------------------------------------------------------|----------|---------|
-| `timeToLive`   | The global time to live in milliseconds for all types in the cache                         | false    | None    |
-| `types`        | The types for which invalidation policies have been defined                                | false    | None    |
+| Config          | Description                                                                                | Required | Default   |
+| ----------------| -------------------------------------------------------------------------------------------|----------|-----------|
+| `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | false    | None      |
+| `types`         | The types for which invalidation policies have been defined                                | false    | None      |
+| `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | false    | WriteOnly |
+
+### Renewal policies:
+
+* **AccessOnly** - After first write, the entity in the cache will renew its TTL on read
+* **AccessAndWrite** - After first write, the entity will renew its TTL on read or write
+* **WriteOnly** - After first write, the entity in the cache will renew its TTL on write
+* **None** - After first write, the entity in the cache will never renew its TTL on reads or writes.
 
 | Policy Event   | Description                                                                                | Required |
 | ---------------| -------------------------------------------------------------------------------------------|----------|
