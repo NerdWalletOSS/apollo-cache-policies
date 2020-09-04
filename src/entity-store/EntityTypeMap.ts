@@ -7,10 +7,7 @@ import {
   ExtractedTypeMap,
   TypeMapEntities,
   TypeMapEntity,
-  EntityTypeMapConfig,
 } from "./types";
-import { RenewalPolicy } from "../policies/types";
-import { getRenewalPolicyForType } from "../helpers";
 
 /**
  * Map which stores a relationship between entities in the cache and their type
@@ -105,8 +102,6 @@ export default class EntityTypeMap {
   private entitiesByType: EntitiesByType = {};
   private entitiesById: EntitiesById = {};
 
-  constructor(private config: EntityTypeMapConfig) {}
-
   write(
     typename: string,
     dataId: string,
@@ -119,41 +114,22 @@ export default class EntityTypeMap {
     const entityId = makeEntityId(dataId, fieldName);
     const existingTypeMapEntity = this.readEntityById(entityId);
 
-    let cacheTime = Date.now();
-
     if (existingTypeMapEntity) {
-      const renewalPolicyForType = getRenewalPolicyForType(
-        this.config.policies,
-        typename
-      );
-      const shouldRenewOnWrite =
-        renewalPolicyForType === RenewalPolicy.AccessAndWrite ||
-        RenewalPolicy.WriteOnly;
-
       if (isQuery(dataId) && storeFieldName) {
         const storeFieldNameEntry = existingTypeMapEntity.storeFieldNames!
           .entries[storeFieldName];
         if (storeFieldNameEntry) {
-          if (shouldRenewOnWrite) {
-            storeFieldNameEntry.cacheTime = cacheTime;
-          }
           storeFieldNameEntry.variables = variables;
         } else {
           existingTypeMapEntity.storeFieldNames!.entries[storeFieldName] = {
             variables,
-            cacheTime,
           };
           existingTypeMapEntity.storeFieldNames!.__size++;
         }
-      } else if (shouldRenewOnWrite) {
-        _.set(
-          this.entitiesByType,
-          [typename, entityId, "cacheTime"],
-          cacheTime
-        );
       }
     } else {
       let newEntity: TypeMapEntity;
+      const cacheTime = Date.now();
 
       if (isQuery(dataId) && storeFieldName) {
         newEntity = {
@@ -163,7 +139,7 @@ export default class EntityTypeMap {
           storeFieldNames: {
             __size: 1,
             entries: {
-              [storeFieldName]: { cacheTime, variables },
+              [storeFieldName]: { variables, cacheTime },
             },
           },
         };
@@ -218,6 +194,22 @@ export default class EntityTypeMap {
 
   readEntityById(entityId: string): TypeMapEntity | null {
     return this.entitiesById[entityId] || null;
+  }
+
+  renewEntity(dataId: string, storeFieldName?: string) {
+    const fieldName = storeFieldName
+      ? fieldNameFromStoreName(storeFieldName)
+      : undefined;
+    const entity = this.entitiesById[makeEntityId(dataId, fieldName)];
+
+    if (entity) {
+      const cacheTime = Date.now();
+      if (isQuery(dataId) && storeFieldName) {
+        entity.storeFieldNames!.entries[storeFieldName]!.cacheTime = cacheTime;
+      } else {
+        entity.cacheTime = cacheTime;
+      }
+    }
   }
 
   restore(entitiesById: EntitiesById) {

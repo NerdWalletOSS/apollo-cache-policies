@@ -34,9 +34,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // @ts-ignore
     this.entityStoreRoot = this.data;
     this.isBroadcasting = false;
-    this.entityTypeMap = new EntityTypeMap({
-      policies: invalidationPolicies,
-    });
+    this.entityTypeMap = new EntityTypeMap();
     new EntityStoreWatcher({
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
@@ -155,9 +153,12 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // Do not trigger a write policy if the current write is being applied to an optimistic data layer since
     // the policy will later be applied when the server data response is received.
     if (
-      !this.invalidationPolicyManager.isPolicyActive(
+      (!this.invalidationPolicyManager.isPolicyActive(
         InvalidationPolicyEvent.Write
-      ) ||
+      ) &&
+        !this.invalidationPolicyManager.isPolicyActive(
+          InvalidationPolicyEvent.Read
+        )) ||
       !this.isOperatingOnRootData()
     ) {
       return writeResult;

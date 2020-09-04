@@ -14,7 +14,7 @@ export interface TypeMapEntity {
     __size: number;
     entries: {
       [index: string]: {
-        cacheTime: number;
+        cacheTime?: number;
         variables?: Record<string, any>;
       };
     };

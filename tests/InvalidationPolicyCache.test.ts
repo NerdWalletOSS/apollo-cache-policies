@@ -3,6 +3,7 @@ import { gql } from "@apollo/client";
 import { InvalidationPolicyCache } from "../src";
 import Employee from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
+import { RenewalPolicy } from "../src/policies/types";
 
 describe("Cache", () => {
   let cache: InvalidationPolicyCache;
@@ -1371,7 +1372,6 @@ describe("Cache", () => {
             },
           },
         });
-        debugger;
         const queryResult = cache.readQuery({
           query: employeesAndMessagesQuery,
         });
@@ -2239,6 +2239,252 @@ describe("Cache", () => {
               __typename: "EmployeesResponse",
               data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
             },
+          },
+        });
+      });
+    });
+
+    describe("with an AccessOnly refresh policy", () => {
+      test("should renew the type on read and not evict entities", () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+            renewalPolicy: RenewalPolicy.AccessOnly,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+        const queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+        expect(queryResult).toEqual({
+          employeeMessages: {
+            __typename: "EmployeeMessagesResponse",
+            data: [employeeMessage, employeeMessage2],
+          },
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [employee, employee2],
+          },
+        });
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+      });
+    });
+
+    describe("with an AccessAndWrite refresh policy", () => {
+      test("should renew the type on read and not evict entities", () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+            renewalPolicy: RenewalPolicy.AccessAndWrite,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+        const queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+        expect(queryResult).toEqual({
+          employeeMessages: {
+            __typename: "EmployeeMessagesResponse",
+            data: [employeeMessage, employeeMessage2],
+          },
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [employee, employee2],
+          },
+        });
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+      });
+    });
+
+    describe("with a WriteOnly refresh policy", () => {
+      test("should evict the expired entities on write", () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+            renewalPolicy: RenewalPolicy.WriteOnly,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+        const queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+        expect(queryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          ROOT_QUERY: {
+            __typename: "Query",
+          },
+        });
+      });
+    });
+
+    describe("with a None refresh policy", () => {
+      test("should evict the expired entities on write", () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+            renewalPolicy: RenewalPolicy.None,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+
+        const queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+        expect(queryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          ROOT_QUERY: {
+            __typename: "Query",
           },
         });
       });
