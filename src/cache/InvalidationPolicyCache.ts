@@ -216,6 +216,47 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
+  // Evicts all expired entities whose cache time exceeds their type's timeToLive or as a fallback
+  // the global timeToLive if specified. Returns a list of entity IDs removed from the cache.
+  expire() {
+    const { entitiesById } = this.entityTypeMap.extract();
+    const expiredEntityIds: string[] = [];
+
+    Object.keys(entitiesById).forEach((entityId) => {
+      const entity = entitiesById[entityId];
+      const { storeFieldNames, dataId, fieldName, typename } = entity;
+
+      if (isQuery(dataId) && storeFieldNames) {
+        Object.keys(storeFieldNames.entries).forEach((storeFieldName) => {
+          const evicted = this.invalidationPolicyManager.runReadPolicy(
+            typename,
+            dataId,
+            fieldName,
+            storeFieldName
+          );
+          if (evicted) {
+            expiredEntityIds.push(makeEntityId(dataId, storeFieldName));
+          }
+        });
+      } else {
+        const evicted = this.invalidationPolicyManager.runReadPolicy(
+          typename,
+          dataId,
+          fieldName
+        );
+        if (evicted) {
+          expiredEntityIds.push(makeEntityId(dataId));
+        }
+      }
+    });
+
+    if (expiredEntityIds.length > 0) {
+      this.broadcastWatches();
+    }
+
+    return expiredEntityIds;
+  }
+
   read<T>(options: Cache.ReadOptions<any>): T | null {
     const result = super.read<T>(options);
 
@@ -287,10 +328,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     const extractedCache = super.extract(optimistic);
 
     if (withInvalidation) {
+      // The entitiesById are sufficient alone for reconstructing the type map, so to
+      // minimize payload size only inject the entitiesById object into the extracted cache
       extractedCache.invalidation = _.pick(
         this.entityTypeMap.extract(),
-        // The entitiesById are sufficient alone for reconstructing the type map, so to
-        // minimize payload size only inject the entitiesById object into the extracted cache
         "entitiesById"
       );
     }

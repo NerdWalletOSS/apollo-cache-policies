@@ -225,10 +225,10 @@ export default class EntityTypeMap {
 
   extract(): ExtractedTypeMap {
     const { entitiesById, entitiesByType } = this;
-    return _.cloneDeep({
+    return {
       entitiesById,
       entitiesByType,
-    });
+    };
   }
 
   clear() {
