@@ -2244,7 +2244,7 @@ describe("Cache", () => {
       });
     });
 
-    describe("with an AccessOnly refresh policy", () => {
+    describe("with an AccessOnly renewal policy", () => {
       test("should renew the type on read and not evict entities", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
@@ -2316,7 +2316,7 @@ describe("Cache", () => {
       });
     });
 
-    describe("with an AccessAndWrite refresh policy", () => {
+    describe("with an AccessAndWrite renewal policy", () => {
       test("should renew the type on read and not evict entities", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
@@ -2388,7 +2388,7 @@ describe("Cache", () => {
       });
     });
 
-    describe("with a WriteOnly refresh policy", () => {
+    describe("with a WriteOnly renewal policy", () => {
       test("should evict the expired entities on write", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
@@ -2436,7 +2436,7 @@ describe("Cache", () => {
       });
     });
 
-    describe("with a None refresh policy", () => {
+    describe("with a None renewal policy", () => {
       test("should evict the expired entities on write", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
