@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { InvalidationPolicies, RenewalPolicy } from "./policies/types";
 
 export function isQuery(dataId: string) {
   return dataId === "ROOT_QUERY" || dataId === "ROOT_MUTATION";
@@ -26,3 +27,14 @@ export function makeEntityId(
 // https://github.com/apollographql/apollo-client/blob/master/src/utilities/common/maybeDeepFreeze.ts#L20:L20
 export const maybeDeepClone = (obj: any) =>
   _.isPlainObject(obj) && Object.isFrozen(obj) ? _.cloneDeep(obj) : obj;
+
+export const getRenewalPolicyForType = (
+  policies: InvalidationPolicies,
+  typename: string
+) => {
+  return (
+    policies.types?.[typename]?.renewalPolicy ??
+    policies.renewalPolicy ??
+    RenewalPolicy.WriteOnly
+  );
+};

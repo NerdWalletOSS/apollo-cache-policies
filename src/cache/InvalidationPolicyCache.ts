@@ -34,7 +34,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // @ts-ignore
     this.entityStoreRoot = this.data;
     this.isBroadcasting = false;
-    this.entityTypeMap = new EntityTypeMap();
+    this.entityTypeMap = new EntityTypeMap({
+      policies: invalidationPolicies,
+    });
     new EntityStoreWatcher({
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
@@ -246,7 +248,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
     // Diff calls made by `broadcastWatches` should not trigger the read policy
     // as these are internal reads not reflective of client action and can lead to recursive recomputation of cached data which is an error.
-    // Instead, diffs swill trigger the read policies for client-based reads like `readCache` invocations from watched queries outside
+    // Instead, diffs will trigger the read policies for client-based reads like `readCache` invocations from watched queries outside
     // the scope of broadcasts.
     if (
       !this.invalidationPolicyManager.isPolicyActive(

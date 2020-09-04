@@ -7,7 +7,10 @@ import {
   ExtractedTypeMap,
   TypeMapEntities,
   TypeMapEntity,
+  EntityTypeMapConfig,
 } from "./types";
+import { RenewalPolicy } from "../policies/types";
+import { getRenewalPolicyForType } from "../helpers";
 
 /**
  * Map which stores a relationship between entities in the cache and their type
@@ -102,6 +105,8 @@ export default class EntityTypeMap {
   private entitiesByType: EntitiesByType = {};
   private entitiesById: EntitiesById = {};
 
+  constructor(private config: EntityTypeMapConfig) {}
+
   write(
     typename: string,
     dataId: string,
@@ -112,13 +117,45 @@ export default class EntityTypeMap {
       ? fieldNameFromStoreName(storeFieldName)
       : undefined;
     const entityId = makeEntityId(dataId, fieldName);
-    const typeMapEntity = this.readEntityById(entityId);
+    const existingTypeMapEntity = this.readEntityById(entityId);
 
     let cacheTime = Date.now();
-    let newEntity: TypeMapEntity | null = null;
 
-    if (isQuery(dataId) && storeFieldName) {
-      if (!typeMapEntity) {
+    if (existingTypeMapEntity) {
+      const renewalPolicyForType = getRenewalPolicyForType(
+        this.config.policies,
+        typename
+      );
+      const shouldRenewOnWrite =
+        renewalPolicyForType === RenewalPolicy.AccessAndWrite ||
+        RenewalPolicy.WriteOnly;
+
+      if (isQuery(dataId) && storeFieldName) {
+        const storeFieldNameEntry = existingTypeMapEntity.storeFieldNames!
+          .entries[storeFieldName];
+        if (storeFieldNameEntry) {
+          if (shouldRenewOnWrite) {
+            storeFieldNameEntry.cacheTime = cacheTime;
+          }
+          storeFieldNameEntry.variables = variables;
+        } else {
+          existingTypeMapEntity.storeFieldNames!.entries[storeFieldName] = {
+            variables,
+            cacheTime,
+          };
+          existingTypeMapEntity.storeFieldNames!.__size++;
+        }
+      } else if (shouldRenewOnWrite) {
+        _.set(
+          this.entitiesByType,
+          [typename, entityId, "cacheTime"],
+          cacheTime
+        );
+      }
+    } else {
+      let newEntity: TypeMapEntity;
+
+      if (isQuery(dataId) && storeFieldName) {
         newEntity = {
           dataId,
           typename,
@@ -131,29 +168,13 @@ export default class EntityTypeMap {
           },
         };
       } else {
-        const storeFieldNameEntry = typeMapEntity.storeFieldNames!.entries[
-          storeFieldName
-        ];
-        if (storeFieldNameEntry) {
-          storeFieldNameEntry.cacheTime = cacheTime;
-          storeFieldNameEntry.variables = variables;
-        } else {
-          typeMapEntity.storeFieldNames!.entries[storeFieldName] = {
-            cacheTime,
-            variables,
-          };
-          typeMapEntity.storeFieldNames!.__size++;
-        }
+        newEntity = {
+          dataId,
+          typename,
+          cacheTime,
+        };
       }
-    } else {
-      newEntity = {
-        dataId,
-        typename,
-        cacheTime,
-      };
-    }
 
-    if (newEntity) {
       _.set(this.entitiesByType, [typename, entityId], newEntity);
       this.entitiesById[entityId] = newEntity;
     }

@@ -13,8 +13,16 @@ export enum InvalidationPolicyLifecycleEvent {
   Evict = "onEvict",
 }
 
+export enum RenewalPolicy {
+  AccessOnly = "access-only",
+  AccessAndWrite = "access-and-write",
+  WriteOnly = "write-only",
+  None = "none",
+}
+
 export interface InvalidationPolicies {
   timeToLive?: number;
+  renewalPolicy?: RenewalPolicy;
   types?: {
     [typeName: string]: InvalidationPolicy;
   };
@@ -45,6 +53,7 @@ export type InvalidationPolicy = {
   };
 } & {
   timeToLive?: number;
+  renewalPolicy?: RenewalPolicy;
 };
 
 export type CacheOperations = {
