@@ -1,3 +1,8 @@
+1.0.0.-beta5 (Dan Reynolds)
+
+- Adds support for a `renewalPolicy` type and global config option for specifying how type TTLs should be renewed on write vs access
+- Adds the `expire` API for evicting all entities that have expired in the cache based on their type's or the global TTL.
+
 1.0.0-beta4 (Dan Reynolds)
 
 - [BREAKING CHANGE] Adds support for a default TTL option that applies to all types

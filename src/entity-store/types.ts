@@ -1,4 +1,9 @@
 import { NormalizedCacheObject } from "@apollo/client";
+import { InvalidationPolicies } from "../policies/types";
+
+export interface EntityTypeMapConfig {
+  policies: InvalidationPolicies;
+}
 
 export interface TypeMapEntity {
   dataId: string;
@@ -9,7 +14,7 @@ export interface TypeMapEntity {
     __size: number;
     entries: {
       [index: string]: {
-        cacheTime: number;
+        cacheTime?: number;
         variables?: Record<string, any>;
       };
     };

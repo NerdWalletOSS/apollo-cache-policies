@@ -10,6 +10,7 @@ import {
 } from "./types";
 import { makeEntityId } from "../helpers";
 import { makeReference } from "@apollo/client";
+import { RenewalPolicy } from "./types";
 
 /**
  * Executes invalidation policies for types when they are modified, evicted or read from the cache.
@@ -114,6 +115,15 @@ export default class InvalidationPolicyManager {
         }
       });
     });
+  }
+
+  getRenewalPolicyForType(typename: string) {
+    const { policies } = this.config;
+    return (
+      policies.types?.[typename]?.renewalPolicy ??
+      policies.renewalPolicy ??
+      RenewalPolicy.WriteOnly
+    );
   }
 
   runWritePolicy(typeName: string, policyMeta: PolicyActionMeta) {

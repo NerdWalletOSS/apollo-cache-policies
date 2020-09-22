@@ -16,6 +16,7 @@ import {
   createFragmentMap,
   getFragmentFromSelection,
 } from "@apollo/client/utilities/graphql/fragments";
+import { RenewalPolicy } from "../policies/types";
 
 export enum ReadResultStatus {
   Evicted,
@@ -61,7 +62,7 @@ export class CacheResultProcessor {
     parentResult: any,
     fieldNameOrIndex?: string | number
   ): ReadResultStatus {
-    const { cache, invalidationPolicyManager } = this.config;
+    const { cache, invalidationPolicyManager, entityTypeMap } = this.config;
 
     const result = _.isUndefined(fieldNameOrIndex)
       ? parentResult
@@ -80,6 +81,15 @@ export class CacheResultProcessor {
       if (__typename) {
         const id = cache.identify(result);
         if (id) {
+          const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
+            __typename
+          );
+          if (
+            renewalPolicy === RenewalPolicy.AccessAndWrite ||
+            renewalPolicy === RenewalPolicy.AccessOnly
+          ) {
+            entityTypeMap.renewEntity(id);
+          }
           const evicted = invalidationPolicyManager.runReadPolicy(
             __typename,
             id
@@ -154,6 +164,15 @@ export class CacheResultProcessor {
               field,
               variables,
             });
+            const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
+              typename
+            );
+            if (
+              renewalPolicy === RenewalPolicy.AccessAndWrite ||
+              renewalPolicy === RenewalPolicy.AccessOnly
+            ) {
+              entityTypeMap.renewEntity(dataId, storeFieldName);
+            }
             const evicted = invalidationPolicyManager.runReadPolicy(
               typename,
               dataId,
@@ -185,7 +204,7 @@ export class CacheResultProcessor {
   }
 
   private processWriteSubResult(result: any) {
-    const { cache, invalidationPolicyManager } = this.config;
+    const { cache, invalidationPolicyManager, entityTypeMap } = this.config;
     if (_.isPlainObject(result)) {
       const { __typename } = result;
 
@@ -197,6 +216,16 @@ export class CacheResultProcessor {
         const id = cache.identify(result);
 
         if (id) {
+          const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
+            __typename
+          );
+          if (
+            renewalPolicy === RenewalPolicy.WriteOnly ||
+            renewalPolicy === RenewalPolicy.AccessAndWrite
+          ) {
+            entityTypeMap.renewEntity(id);
+          }
+
           invalidationPolicyManager.runWritePolicy(__typename, {
             parent: {
               id,
@@ -241,6 +270,16 @@ export class CacheResultProcessor {
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
           entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables);
 
+          const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
+            typename
+          );
+          if (
+            renewalPolicy === RenewalPolicy.WriteOnly ||
+            renewalPolicy === RenewalPolicy.AccessAndWrite
+          ) {
+            entityTypeMap.renewEntity(dataId, storeFieldName);
+          }
+
           invalidationPolicyManager.runWritePolicy(typename, {
             parent: {
               id: dataId,
@@ -257,6 +296,16 @@ export class CacheResultProcessor {
         ?.typename;
 
       if (typename) {
+        const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
+          typename
+        );
+        if (
+          renewalPolicy === RenewalPolicy.WriteOnly ||
+          renewalPolicy === RenewalPolicy.AccessAndWrite
+        ) {
+          entityTypeMap.renewEntity(dataId);
+        }
+
         invalidationPolicyManager.runWritePolicy(typename, {
           parent: {
             id: dataId,

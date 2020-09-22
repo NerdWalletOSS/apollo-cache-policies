@@ -112,13 +112,26 @@ export default class EntityTypeMap {
       ? fieldNameFromStoreName(storeFieldName)
       : undefined;
     const entityId = makeEntityId(dataId, fieldName);
-    const typeMapEntity = this.readEntityById(entityId);
+    const existingTypeMapEntity = this.readEntityById(entityId);
 
-    let cacheTime = Date.now();
-    let newEntity: TypeMapEntity | null = null;
+    if (existingTypeMapEntity) {
+      if (isQuery(dataId) && storeFieldName) {
+        const storeFieldNameEntry = existingTypeMapEntity.storeFieldNames!
+          .entries[storeFieldName];
+        if (storeFieldNameEntry) {
+          storeFieldNameEntry.variables = variables;
+        } else {
+          existingTypeMapEntity.storeFieldNames!.entries[storeFieldName] = {
+            variables,
+          };
+          existingTypeMapEntity.storeFieldNames!.__size++;
+        }
+      }
+    } else {
+      let newEntity: TypeMapEntity;
+      const cacheTime = Date.now();
 
-    if (isQuery(dataId) && storeFieldName) {
-      if (!typeMapEntity) {
+      if (isQuery(dataId) && storeFieldName) {
         newEntity = {
           dataId,
           typename,
@@ -126,34 +139,18 @@ export default class EntityTypeMap {
           storeFieldNames: {
             __size: 1,
             entries: {
-              [storeFieldName]: { cacheTime, variables },
+              [storeFieldName]: { variables, cacheTime },
             },
           },
         };
       } else {
-        const storeFieldNameEntry = typeMapEntity.storeFieldNames!.entries[
-          storeFieldName
-        ];
-        if (storeFieldNameEntry) {
-          storeFieldNameEntry.cacheTime = cacheTime;
-          storeFieldNameEntry.variables = variables;
-        } else {
-          typeMapEntity.storeFieldNames!.entries[storeFieldName] = {
-            cacheTime,
-            variables,
-          };
-          typeMapEntity.storeFieldNames!.__size++;
-        }
+        newEntity = {
+          dataId,
+          typename,
+          cacheTime,
+        };
       }
-    } else {
-      newEntity = {
-        dataId,
-        typename,
-        cacheTime,
-      };
-    }
 
-    if (newEntity) {
       _.set(this.entitiesByType, [typename, entityId], newEntity);
       this.entitiesById[entityId] = newEntity;
     }
@@ -199,6 +196,22 @@ export default class EntityTypeMap {
     return this.entitiesById[entityId] || null;
   }
 
+  renewEntity(dataId: string, storeFieldName?: string) {
+    const fieldName = storeFieldName
+      ? fieldNameFromStoreName(storeFieldName)
+      : undefined;
+    const entity = this.entitiesById[makeEntityId(dataId, fieldName)];
+
+    if (entity) {
+      const cacheTime = Date.now();
+      if (isQuery(dataId) && storeFieldName) {
+        entity.storeFieldNames!.entries[storeFieldName]!.cacheTime = cacheTime;
+      } else {
+        entity.cacheTime = cacheTime;
+      }
+    }
+  }
+
   restore(entitiesById: EntitiesById) {
     this.entitiesById = entitiesById;
     Object.keys(entitiesById).forEach((entityId: string) => {
@@ -212,10 +225,10 @@ export default class EntityTypeMap {
 
   extract(): ExtractedTypeMap {
     const { entitiesById, entitiesByType } = this;
-    return _.cloneDeep({
+    return {
       entitiesById,
       entitiesByType,
-    });
+    };
   }
 
   clear() {
