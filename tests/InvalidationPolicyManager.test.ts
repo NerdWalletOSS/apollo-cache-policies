@@ -51,8 +51,8 @@ describe("InvalidationPolicyManager", () => {
         types: {
           CreateEmployeeResponse: {
             onEvict: {
-              Employee: employeePolicyActionSpy,
-              EmployeesResponse: employeesResponsePolicyActionSpy,
+              Employee: (...args) => employeePolicyActionSpy(...args),
+              EmployeesResponse: (...args) => employeesResponsePolicyActionSpy(...args),
             },
           },
         },
@@ -96,6 +96,7 @@ describe("InvalidationPolicyManager", () => {
       expect(employeePolicyActionSpy.mock.calls[0][1]).toEqual({
         id: "Employee:1",
         ref: makeReference("Employee:1"),
+        storage: {},
         parent: actionMeta.parent,
       });
 
@@ -105,6 +106,7 @@ describe("InvalidationPolicyManager", () => {
       expect(employeePolicyActionSpy.mock.calls[1][1]).toEqual({
         id: "Employee:2",
         ref: makeReference("Employee:2"),
+        storage: {},
         parent: actionMeta.parent,
       });
 
@@ -117,6 +119,7 @@ describe("InvalidationPolicyManager", () => {
         storeFieldName: "employees({country: 'US'})",
         ref: makeReference("ROOT_QUERY"),
         variables: { country: "US" },
+        storage: {},
         parent: actionMeta.parent,
       });
 
@@ -129,8 +132,57 @@ describe("InvalidationPolicyManager", () => {
         ref: makeReference("ROOT_QUERY"),
         storeFieldName: "employees({country: 'CAN'})",
         variables: { country: "CAN" },
+        storage: {},
         parent: actionMeta.parent,
       });
+    });
+  
+    test('should persist storage per identifier across multiple policy events', () => {
+      employeePolicyActionSpy = jest.fn((_cacheOperations, policyAction) => {
+        policyAction.storage.count = (policyAction.storage?.count ?? 0) + 1;
+      });
+      invalidationPolicyManager.runEvictPolicy(
+        "CreateEmployeeResponse",
+        actionMeta
+      );
+      expect(employeePolicyActionSpy.mock.calls[0][1]).toEqual(
+        {
+          id: "Employee:1",
+          ref: makeReference("Employee:1"),
+          storage: { count: 1 },
+          parent: actionMeta.parent,
+        }
+      );
+      expect(employeePolicyActionSpy.mock.calls[1][1]).toEqual(
+        {
+          id: "Employee:2",
+          ref: makeReference("Employee:2"),
+          storage: { count: 1 },
+          parent: actionMeta.parent,
+        }
+      );
+
+      invalidationPolicyManager.runEvictPolicy(
+        "CreateEmployeeResponse",
+        actionMeta
+      );
+
+      expect(employeePolicyActionSpy.mock.calls[2][1]).toEqual(
+        {
+          id: "Employee:1",
+          ref: makeReference("Employee:1"),
+          storage: { count: 2 },
+          parent: actionMeta.parent,
+        }
+      );
+      expect(employeePolicyActionSpy.mock.calls[3][1]).toEqual(
+        {
+          id: "Employee:2",
+          ref: makeReference("Employee:2"),
+          storage: { count: 2 },
+          parent: actionMeta.parent,
+        }
+      );
     });
   });
 

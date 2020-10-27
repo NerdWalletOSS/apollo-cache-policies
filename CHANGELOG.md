@@ -1,4 +1,8 @@
-1.0.0.-beta5 (Dan Reynolds)
+1.0.0-beta6 (Dan Reynolds)
+
+- Adds a `storage` dictionary by unique `storeFieldName` for queries or `ID` for normalized entities in the policy action object so that arbitrary meta information can be stored across multiple policy action invocations.
+
+1.0.0-beta5 (Dan Reynolds)
 
 - Adds support for a `renewalPolicy` type and global config option for specifying how type TTLs should be renewed on write vs access
 - Adds the `expire` API for evicting all entities that have expired in the cache based on their type's or the global TTL.
