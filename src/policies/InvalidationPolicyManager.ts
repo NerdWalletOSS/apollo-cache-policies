@@ -7,6 +7,7 @@ import {
   InvalidationPolicyManagerConfig,
   PolicyActionCacheOperations,
   PolicyActionMeta,
+  PolicyActionStorage,
 } from "./types";
 import { makeEntityId } from "../helpers";
 import { makeReference } from "@apollo/client";
@@ -18,6 +19,7 @@ import { RenewalPolicy } from "./types";
 export default class InvalidationPolicyManager {
   private mutedCacheOperations: PolicyActionCacheOperations;
   private policyActivation: InvalidationPolicyActivation;
+  private policyActionStorage: PolicyActionStorage = {};
 
   constructor(private config: InvalidationPolicyManagerConfig) {
     const {
@@ -64,6 +66,16 @@ export default class InvalidationPolicyManager {
     return this.config.policies?.types?.[typeName] || null;
   }
 
+  private getPolicyActionStorage(identifier: string): Record<string, any> {
+    const existingStorage = this.policyActionStorage[identifier];
+
+    if (!existingStorage) {
+      this.policyActionStorage[identifier] = {};
+    }
+
+    return this.policyActionStorage[identifier];
+  }
+
   private getTypePolicyForEvent(
     typeName: string,
     policyEvent: InvalidationPolicyEvent.Evict | InvalidationPolicyEvent.Write
@@ -103,12 +115,14 @@ export default class InvalidationPolicyManager {
               storeFieldName,
               variables: storeFieldNames.entries[storeFieldName].variables,
               ref: makeReference(dataId),
+              storage: this.getPolicyActionStorage(storeFieldName),
               ...policyMeta,
             });
           });
         } else {
           policyAction(mutedCacheOperations, {
             id: dataId,
+            storage: this.getPolicyActionStorage(dataId),
             ref: makeReference(dataId),
             ...policyMeta,
           });

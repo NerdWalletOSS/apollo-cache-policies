@@ -28,18 +28,21 @@ export interface InvalidationPolicies {
   };
 }
 
+export type PolicyActionStorage = Record<string, Record<string, any>>;
+
 export interface PolicyActionFields {
   id: string;
   ref: Reference;
   fieldName?: string;
   storeFieldName?: string;
+  storage: PolicyActionStorage,
   variables?: Record<string, any>;
 }
 
 export type PolicyActionEntity = PolicyActionFields & PolicyActionMeta;
 
 export interface PolicyActionMeta {
-  parent: PolicyActionFields;
+  parent: Omit<PolicyActionFields, 'storage'>;
 }
 
 export type PolicyAction = (
