@@ -1,7 +1,6 @@
 1.0.0-beta6 (Dan Reynolds)
 
-- Adds a `storage` dictionary by unique `storeFieldName` for queries or `ID` for normalized entities in the policy action object so that arbitrary meta information can be stored across
-  multiple policy action invocations.
+- Adds a `storage` dictionary by unique `storeFieldName` for queries or `ID` for normalized entities in the policy action object so that arbitrary meta information can be stored across multiple policy action invocations.
 
 1.0.0-beta5 (Dan Reynolds)
 
