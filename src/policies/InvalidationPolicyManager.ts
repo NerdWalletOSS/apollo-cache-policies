@@ -185,7 +185,6 @@ export default class InvalidationPolicyManager {
 
       entityCacheTime = entityForStoreFieldName.cacheTime;
     } else {
-
       entityCacheTime = typeMapEntity.cacheTime;
     }
 
