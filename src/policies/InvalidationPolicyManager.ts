@@ -170,10 +170,25 @@ export default class InvalidationPolicyManager {
       return true;
     }
 
-    const entityCacheTime =
-      storeFieldName && typeMapEntity.storeFieldNames
-        ? typeMapEntity.storeFieldNames.entries[storeFieldName].cacheTime
-        : typeMapEntity.cacheTime;
+    let entityCacheTime;
+
+    // If a read is done against an entity before it has ever been written, it would not be present in the cache yet and should not attempt
+    // to have read policy eviction run on it. This can occur in the case of fetching a query field over the network for example, where first
+    // before it has come back from the network, the Apollo Client tries to diff it against the store to see what the existing value is for it,
+    // but on first fetch it would not exist.
+    if (storeFieldName && !!typeMapEntity.storeFieldNames) {
+      const entityForStoreFieldName = typeMapEntity.storeFieldNames.entries[storeFieldName];
+
+      if (!entityForStoreFieldName) {
+        return true;
+      }
+
+      entityCacheTime = entityForStoreFieldName.cacheTime;
+    } else {
+
+      entityCacheTime = typeMapEntity.cacheTime;
+    }
+
     const timeToLive =
       this.getPolicy(typename)?.timeToLive || policies.timeToLive;
 
