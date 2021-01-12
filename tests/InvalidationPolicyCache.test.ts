@@ -951,6 +951,11 @@ describe("Cache", () => {
               ],
             },
           },
+          __META: {
+            extraRootIds: [
+              employee.toRef(),
+            ],
+          }
         });
       });
 
