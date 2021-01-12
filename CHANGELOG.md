@@ -1,3 +1,9 @@
+
+1.0.0-beta7 (Dan Reynolds)
+
+- Fix issue where read policies were attempted to be evaluated for non-normalized entities not yet in the cache if they had a different store field name with the same name
+  already written in the cache.
+
 1.0.0-beta6 (Dan Reynolds)
 
 - Adds a `storage` dictionary by unique `storeFieldName` for queries or `ID` for normalized entities in the policy action object so that arbitrary meta information can be stored across multiple policy action invocations.

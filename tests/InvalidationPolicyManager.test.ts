@@ -7,6 +7,7 @@ import {
   InvalidationPolicyEvent,
 } from "../src/policies/types";
 import { makeReference } from "@apollo/client";
+import Employee from "./fixtures/employee";
 
 describe("InvalidationPolicyManager", () => {
   let invalidationPolicyManager: InvalidationPolicyManager;
@@ -18,9 +19,9 @@ describe("InvalidationPolicyManager", () => {
     policies = {};
     entityTypeMap = new EntityTypeMap();
     cacheOperations = {
-      evict: jest.fn((..._args: any[]): any => {}),
-      modify: jest.fn((..._args: any[]): any => {}),
-      readField: jest.fn((..._args: any[]): any => {}),
+      evict: jest.fn((..._args: any[]): any => { }),
+      modify: jest.fn((..._args: any[]): any => { }),
+      readField: jest.fn((..._args: any[]): any => { }),
     };
     invalidationPolicyManager = new InvalidationPolicyManager({
       entityTypeMap,
@@ -136,7 +137,7 @@ describe("InvalidationPolicyManager", () => {
         parent: actionMeta.parent,
       });
     });
-  
+
     test('should persist storage per identifier across multiple policy events', () => {
       employeePolicyActionSpy = jest.fn((_cacheOperations, policyAction) => {
         policyAction.storage.count = (policyAction.storage?.count ?? 0) + 1;
@@ -195,10 +196,10 @@ describe("InvalidationPolicyManager", () => {
           },
           EmployeeResponse: {
             onWrite: {
-              Employee: () => {},
+              Employee: () => { },
             },
             onEvict: {
-              Employee: () => {},
+              Employee: () => { },
             },
           },
         },
@@ -244,4 +245,16 @@ describe("InvalidationPolicyManager", () => {
       ).toEqual(false);
     });
   });
+
+  describe('#runReadPolicy', () => {
+    test('should not evaluate a read policy for normalized entities that are not in the cache', () => {
+      const employee = Employee();
+      expect(invalidationPolicyManager.runReadPolicy(employee.__typename, employee.id)).toEqual(true);
+    });
+
+    test('should not evaluate a read policy for non-normalized entities that are not in the cache', () => {
+      entityTypeMap.write('EmployeesResponse', 'ROOT_QUERY', 'employees({"name":"Tester1"})');
+      expect(invalidationPolicyManager.runReadPolicy('EmployeesResponse', 'ROOT_QUERY', 'employees', 'employees({"name":"Tester2"})')).toEqual(true);
+    });
+  })
 });
