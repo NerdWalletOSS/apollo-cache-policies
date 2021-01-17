@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NerdWallet/apollo-cache-invalidation.git"
+    "url": "git+https://github.com/NerdWalletOSS/apollo-invalidation-policies.git"
   },
   "keywords": [
     "apollo"
@@ -23,9 +23,9 @@
   "author": "Dan Reynolds",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/NerdWallet/apollo-cache-invalidation/issues"
+    "url": "https://github.com/NerdWalletOSS/apollo-invalidation-policies/issues"
   },
-  "homepage": "https://github.com/NerdWallet/apollo-cache-invalidation#readme",
+  "homepage": "https://github.com/NerdWalletOSS/apollo-invalidation-policies#readme",
   "peerDependencies": {
     "@apollo/client": "^3.3.0"
   },
