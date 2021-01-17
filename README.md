@@ -107,7 +107,11 @@ export default new ApolloClient({
               modify({
                 fields: {
                   [storeFieldName]: (employeesResponse) => {
-                    const createdEmployeeResponse = readField(parent.storeFieldName, parent.ref);
+                    const createdEmployeeResponse = readField({
+                      fieldName: parent.fieldName,
+                      args: parent.variables,
+                      ref: parent.ref,
+                    });
                     return {
                       ...employeesResponse,
                       data: [
