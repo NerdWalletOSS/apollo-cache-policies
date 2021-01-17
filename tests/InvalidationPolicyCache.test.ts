@@ -99,6 +99,19 @@ describe("Cache", () => {
     }
   `;
 
+  const createEmployeeMutationWithVariables = gql`
+    query {
+      createEmployee(name: $name) {
+        data {
+          id
+          employee_name
+          employee_salary
+          employee_age
+        }
+      }
+    }
+  `;
+
   const deleteEmployeesMutation = gql`
     mutation {
       deleteEmployees {
@@ -638,10 +651,11 @@ describe("Cache", () => {
                     { modify, readField },
                     { storeFieldName, parent }
                   ) => {
-                    const createEmployeeResponse: any = readField(
-                      parent.storeFieldName,
-                      parent.ref
-                    );
+                    const createEmployeeResponse: any = readField({
+                      fieldName: parent.fieldName!,
+                      args: parent.variables,
+                      from: parent.ref,
+                    });
                     modify({
                       fields: {
                         [storeFieldName!]: (existing) => {
@@ -752,6 +766,40 @@ describe("Cache", () => {
       });
 
       describe("with query arguments", () => {
+        test("should update the entity with a Write policy", () => {
+          cache.writeQuery({
+            query: employeesWithVariablesQuery,
+            data: employeesResponse,
+            variables: {
+              name: "Tester McTest",
+            },
+          });
+          cache.writeQuery({
+            query: createEmployeeMutation,
+            data: createEmployeeResponse,
+          });
+          expect(cache.extract(true, false)).toEqual({
+            [employee.toRef()]: employee,
+            [employee2.toRef()]: employee2,
+            [employee3.toRef()]: employee3,
+            ROOT_QUERY: {
+              __typename: "Query",
+              createEmployee: {
+                __typename: "CreateEmployeeResponse",
+                data: { __ref: employee3.toRef() },
+              },
+              'employees({"name":"Tester McTest"})': {
+                __typename: "EmployeesResponse",
+                data: [
+                  { __ref: employee.toRef() },
+                  { __ref: employee2.toRef() },
+                  { __ref: employee3.toRef() },
+                ],
+              },
+            },
+          });
+        });
+
         describe("with matching variables passed", () => {
           test("should write the store field name with the matching variables into the entity type map", () => {
             const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
@@ -840,6 +888,42 @@ describe("Cache", () => {
           });
         });
       });
+
+      describe("with mutation arguments", () => {
+        test("should update the entity with a Write policy", () => {
+          cache.writeQuery({
+            query: employeesQuery,
+            data: employeesResponse,
+          });
+          cache.writeQuery({
+            query: createEmployeeMutationWithVariables,
+            data: createEmployeeResponse,
+            variables: {
+              name: 'Tester McTest'
+            }
+          });
+          expect(cache.extract(true, false)).toEqual({
+            [employee.toRef()]: employee,
+            [employee2.toRef()]: employee2,
+            [employee3.toRef()]: employee3,
+            ROOT_QUERY: {
+              __typename: "Query",
+              'createEmployee({"name":"Tester McTest"})': {
+                __typename: "CreateEmployeeResponse",
+                data: { __ref: employee3.toRef() },
+              },
+              employees: {
+                __typename: "EmployeesResponse",
+                data: [
+                  { __ref: employee.toRef() },
+                  { __ref: employee2.toRef() },
+                  { __ref: employee3.toRef() },
+                ],
+              },
+            },
+          });
+        });
+      })
 
       describe("while operating on an optimistic layer", () => {
         test("should not trigger write policies", () => {

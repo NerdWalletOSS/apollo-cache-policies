@@ -1,3 +1,6 @@
+1.0.0-beta8 (Dan Reynolds)
+
+- Add test for Write-on-Write policies where the mutation has arguments and fix the Readme to illustrate how to correctly write the invalidation policy in that case
 
 1.0.0-beta7 (Dan Reynolds)
 
