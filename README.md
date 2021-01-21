@@ -110,7 +110,7 @@ export default new ApolloClient({
                     const createdEmployeeResponse = readField({
                       fieldName: parent.fieldName,
                       args: parent.variables,
-                      ref: parent.ref,
+                      from: parent.ref,
                     });
                     return {
                       ...employeesResponse,
