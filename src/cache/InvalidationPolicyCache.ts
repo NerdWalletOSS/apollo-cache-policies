@@ -67,9 +67,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return this.policies.readField<T>(
       typeof fieldNameOrOptions === "string"
         ? {
-            fieldName: fieldNameOrOptions,
-            from,
-          }
+          fieldName: fieldNameOrOptions,
+          from,
+        }
         : fieldNameOrOptions,
       {
         store: this.entityStoreRoot,
@@ -195,10 +195,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
         const storeFieldName =
           isQuery(id) && fieldName
             ? this.policies.getStoreFieldName({
-                typename,
-                fieldName,
-                args,
-              })
+              typename,
+              fieldName,
+              args,
+            })
             : undefined;
 
         this.invalidationPolicyManager.runEvictPolicy(typename, {
@@ -216,9 +216,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
-  // Evicts all expired entities whose cache time exceeds their type's timeToLive or as a fallback
-  // the global timeToLive if specified. Returns a list of entity IDs removed from the cache.
-  expire() {
+  // Returns all expired entities whose cache time exceeds their type's timeToLive or as a fallback
+  // the global timeToLive if specified. Evicts the expired entities by default, with an option to only report
+  // them.
+  _expire(reportOnly = false) {
     const { entitiesById } = this.entityTypeMap.extract();
     const expiredEntityIds: string[] = [];
 
@@ -228,23 +229,25 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
       if (isQuery(dataId) && storeFieldNames) {
         Object.keys(storeFieldNames.entries).forEach((storeFieldName) => {
-          const evicted = this.invalidationPolicyManager.runReadPolicy(
+          const isExpired = this.invalidationPolicyManager.runReadPolicy({
             typename,
             dataId,
             fieldName,
-            storeFieldName
-          );
-          if (evicted) {
+            storeFieldName,
+            reportOnly,
+          });
+          if (isExpired) {
             expiredEntityIds.push(makeEntityId(dataId, storeFieldName));
           }
         });
       } else {
-        const evicted = this.invalidationPolicyManager.runReadPolicy(
+        const isExpired = this.invalidationPolicyManager.runReadPolicy({
           typename,
           dataId,
-          fieldName
-        );
-        if (evicted) {
+          fieldName,
+          reportOnly,
+        });
+        if (isExpired) {
           expiredEntityIds.push(makeEntityId(dataId));
         }
       }
@@ -255,6 +258,14 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return expiredEntityIds;
+  }
+
+  expire() {
+    return this._expire(false);
+  }
+
+  expiredEntities() {
+    return this._expire(true);
   }
 
   read<T>(options: Cache.ReadOptions<any>): T | null {

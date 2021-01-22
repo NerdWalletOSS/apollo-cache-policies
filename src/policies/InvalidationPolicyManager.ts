@@ -156,18 +156,26 @@ export default class InvalidationPolicyManager {
     );
   }
 
-  runReadPolicy(
+  // Runs the read poliy on the entity, returning whether its TTL was expired.
+  runReadPolicy({
+    typename,
+    dataId,
+    fieldName,
+    storeFieldName,
+    reportOnly = false,
+  }: {
     typename: string,
     dataId: string,
     fieldName?: string,
-    storeFieldName?: string
-  ): boolean {
+    storeFieldName?: string,
+    reportOnly?: boolean,
+  }): boolean {
     const { cacheOperations, entityTypeMap, policies } = this.config;
     const entityId = makeEntityId(dataId, fieldName);
     const typeMapEntity = entityTypeMap.readEntityById(entityId);
 
     if (!typeMapEntity) {
-      return true;
+      return false;
     }
 
     let entityCacheTime;
@@ -180,7 +188,7 @@ export default class InvalidationPolicyManager {
       const entityForStoreFieldName = typeMapEntity.storeFieldNames.entries[storeFieldName];
 
       if (!entityForStoreFieldName) {
-        return true;
+        return false;
       }
 
       entityCacheTime = entityForStoreFieldName.cacheTime;
@@ -196,11 +204,14 @@ export default class InvalidationPolicyManager {
       timeToLive &&
       Date.now() > entityCacheTime + timeToLive
     ) {
-      return cacheOperations.evict({
-        id: dataId,
-        fieldName: storeFieldName,
-        broadcast: false,
-      });
+      if (!reportOnly) {
+        cacheOperations.evict({
+          id: dataId,
+          fieldName: storeFieldName,
+          broadcast: false,
+        });
+      }
+      return true;
     }
     return false;
   }

@@ -249,12 +249,20 @@ describe("InvalidationPolicyManager", () => {
   describe('#runReadPolicy', () => {
     test('should not evaluate a read policy for normalized entities that are not in the cache', () => {
       const employee = Employee();
-      expect(invalidationPolicyManager.runReadPolicy(employee.__typename, employee.id)).toEqual(true);
+      expect(invalidationPolicyManager.runReadPolicy({
+        typename: employee.__typename,
+        dataId: employee.id
+      })).toEqual(false);
     });
 
     test('should not evaluate a read policy for non-normalized entities that are not in the cache', () => {
       entityTypeMap.write('EmployeesResponse', 'ROOT_QUERY', 'employees({"name":"Tester1"})');
-      expect(invalidationPolicyManager.runReadPolicy('EmployeesResponse', 'ROOT_QUERY', 'employees', 'employees({"name":"Tester2"})')).toEqual(true);
+      expect(invalidationPolicyManager.runReadPolicy({
+        typename: 'EmployeesResponse',
+        dataId: 'ROOT_QUERY',
+        fieldName: 'employees',
+        storeFieldName: 'employees({"name":"Tester2"})',
+      })).toEqual(false);
     });
   })
 });
