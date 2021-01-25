@@ -1,3 +1,7 @@
+1.0.0-beta11 (Dan Reynolds)
+
+- Default the `readPolicy` function in the policy action to use the ROOT_QUERY similarly to how the policies module does in apollo/client
+
 1.0.0-beta10 (Dan Reynolds)
 
 - Add support for a default policy action to perform side effects whenever a specific type is written/evicted from the cache
