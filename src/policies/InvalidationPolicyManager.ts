@@ -101,9 +101,19 @@ export default class InvalidationPolicyManager {
     if (!typePolicyForEvent) {
       return;
     }
-    Object.keys(typePolicyForEvent).forEach((typeName: string) => {
-      const typeMapEntities = entityTypeMap.readEntitiesByType(typeName) ?? {};
-      const policyAction = typePolicyForEvent[typeName];
+
+    const { __default: defaultPolicyAction, ...restTypes } = typePolicyForEvent;
+
+    if (defaultPolicyAction) {
+      defaultPolicyAction(mutedCacheOperations, {
+        storage: this.getPolicyActionStorage(`${typeName}__default`),
+        ...policyMeta,
+      });
+    }
+
+    Object.keys(restTypes).forEach((typePolicyTypeName: string) => {
+      const typeMapEntities = entityTypeMap.readEntitiesByType(typePolicyTypeName) ?? {};
+      const policyAction = typePolicyForEvent[typePolicyTypeName];
 
       Object.values(typeMapEntities).forEach((typeMapEntity) => {
         const { dataId, fieldName, storeFieldNames } = typeMapEntity;

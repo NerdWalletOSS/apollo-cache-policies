@@ -1,3 +1,7 @@
+1.0.0-beta10 (Dan Reynolds)
+
+- Add support for a default policy action to perform side effects whenever a specific type is written/evicted from the cache
+
 1.0.0-beta9 (Dan Reynolds)
 
 - Add `expiredEntities` API for accessing the expired entities in the cache without evicting them
