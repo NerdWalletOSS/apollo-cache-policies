@@ -1,3 +1,7 @@
+1.0.0-beta9 (Dan Reynolds)
+
+- Add `expiredEntities` API for accessing the expired entities in the cache without evicting them
+
 1.0.0-beta8 (Dan Reynolds)
 
 - Add test for Write-on-Write policies where the mutation has arguments and fix the Readme to illustrate how to correctly write the invalidation policy in that case
