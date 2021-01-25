@@ -24,12 +24,19 @@ export default class InvalidationPolicyManagerAuditor extends InvalidationPolicy
     this.auditLog = config.auditLog;
   }
 
-  runReadPolicy(
+  runReadPolicy({
+    typename,
+    dataId,
+    fieldName,
+    storeFieldName,
+    reportOnly = false,
+  }: {
     typename: string,
     dataId: string,
     fieldName?: string,
-    storeFieldName?: string
-  ) {
+    storeFieldName?: string,
+    reportOnly: boolean,
+  }) {
     this.auditLog.log(
       "Running read policy",
       AuditType.Read,
@@ -42,7 +49,13 @@ export default class InvalidationPolicyManagerAuditor extends InvalidationPolicy
       }
     );
 
-    return super.runReadPolicy(typename, dataId, fieldName, storeFieldName);
+    return super.runReadPolicy({
+      typename,
+      dataId,
+      fieldName,
+      storeFieldName,
+      reportOnly,
+    });
   }
 
   runWritePolicy(typeName: string, policyMeta: PolicyActionMeta) {

@@ -90,10 +90,10 @@ export class CacheResultProcessor {
           ) {
             entityTypeMap.renewEntity(id);
           }
-          const evicted = invalidationPolicyManager.runReadPolicy(
-            __typename,
-            id
-          );
+          const evicted = invalidationPolicyManager.runReadPolicy({
+            typename: __typename,
+            dataId: id
+          });
 
           if (evicted) {
             if (_.isPlainObject(parentResult) && fieldNameOrIndex) {
@@ -173,12 +173,12 @@ export class CacheResultProcessor {
             ) {
               entityTypeMap.renewEntity(dataId, storeFieldName);
             }
-            const evicted = invalidationPolicyManager.runReadPolicy(
+            const evicted = invalidationPolicyManager.runReadPolicy({
               typename,
               dataId,
               fieldName,
               storeFieldName
-            );
+            });
 
             if (evicted) {
               delete (result as Record<string, any>)[fieldName];

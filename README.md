@@ -56,9 +56,10 @@ const cache = new InvalidationPolicyCache({
 | `modify`                      | `modify` API from Apollo cache     |
 | `readField`                   | `readField` API from Apollo cache  |
 
-| Extended cache API | Description                                                                                | Return Type                                           |
-| -------------------| -------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| `expire`           | Evicts all expired entities from the cache based on their type's or the global timeToLive. | String[] - List of entity IDs evicted from the cache. |
+| Extended cache API | Description                                                                                | Return Type                                                   |
+| -------------------| -------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| `expire`           | Evicts all expired entities from the cache based on their type's or the global timeToLive. | String[] - List of expired entity IDs evicted from the cache. |
+| `expiredEntities`  | Returns all expired entities still present in the cache                                    | String[] - List of expired entities in the cache.             |
 
 | Policy Action Entity | Description                                             | Type               | Example                                                                                     |
 | ---------------------| --------------------------------------------------------|--------------------| ---------------------------------------------------------------------------------------------|
