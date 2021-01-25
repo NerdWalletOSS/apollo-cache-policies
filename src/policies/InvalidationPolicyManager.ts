@@ -102,7 +102,7 @@ export default class InvalidationPolicyManager {
       return;
     }
 
-    const { __default: defaultPolicyAction, ...restTypes } = typePolicyForEvent;
+    const { __default: defaultPolicyAction, ...restTypePolicyTypeNames } = typePolicyForEvent;
 
     if (defaultPolicyAction) {
       defaultPolicyAction(mutedCacheOperations, {
@@ -111,7 +111,7 @@ export default class InvalidationPolicyManager {
       });
     }
 
-    Object.keys(restTypes).forEach((typePolicyTypeName: string) => {
+    Object.keys(restTypePolicyTypeNames).forEach((typePolicyTypeName: string) => {
       const typeMapEntities = entityTypeMap.readEntitiesByType(typePolicyTypeName) ?? {};
       const policyAction = typePolicyForEvent[typePolicyTypeName];
 
