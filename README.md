@@ -25,6 +25,7 @@ const cache = new InvalidationPolicyCache({
         renewalPolicy: RenewalPolicy,
         PolicyEvent: {
           Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
+          __default: (PolicyActionCacheOperation, DefaultPolicyActionEntity) => {}
         },
       }
     }
@@ -71,6 +72,11 @@ const cache = new InvalidationPolicyCache({
 | `storage`            | An object for storing unique entity metadata across policy action invocations | Object            | `{}`                                                                        |
 | `parent`             | The parent entity that triggered the PolicyEvent        | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
 
+| Default Policy Action Entity | Description                                                                   | Type               | Example                                                                                     |
+| -----------------------------| ------------------------------------------------------------------------------|---------------------| ---------------------------------------------------------------------------------------------|
+| `storage`                    | An object for storing unique entity metadata across policy action invocations | Object              | `{}`                                                                        |
+| `parent`                     | The parent entity that triggered the PolicyEvent                              | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
+
 ```javascript
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { InvalidationPolicyCache } from "apollo-invalidation-policies";
@@ -101,6 +107,14 @@ export default new ApolloClient({
             },
           }
         },
+        EmployeeMessage: {
+          // Perform a side-effect whenever an employee message is evicted
+          onEvict: {
+            __default: (_cacheOperations, { parent: { id } }) => {
+              console.log(`Employee message ${id} was evicted`);
+            },
+          },
+        },
         CreateEmployeeResponse: {
           // Add an entity to a cached query when the parent type is written
           onWrite: {
@@ -124,7 +138,7 @@ export default new ApolloClient({
                 }
               });
             },
-          }
+          },
           EmployeesResponse: {
             // Assign a time-to-live for types in the store. If accessed beyond their TTL,
             // they are evicted and no data is returned.

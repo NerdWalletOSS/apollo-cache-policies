@@ -50,9 +50,16 @@ export type PolicyAction = (
   entity: PolicyActionEntity
 ) => void;
 
+export type DefaultPolicyAction = (
+  cacheOperations: PolicyActionCacheOperations,
+  entity: Pick<PolicyActionEntity, 'storage' | 'parent'>
+) => void;
+
 export type InvalidationPolicy = {
   [lifecycleEvent in InvalidationPolicyLifecycleEvent]?: {
     [typeName: string]: PolicyAction;
+  } & {
+    __default?: DefaultPolicyAction;
   };
 } & {
   timeToLive?: number;
