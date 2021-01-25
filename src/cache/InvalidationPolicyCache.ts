@@ -64,13 +64,19 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       return;
     }
 
+    const options = typeof fieldNameOrOptions === "string"
+      ? {
+        fieldName: fieldNameOrOptions,
+        from,
+      }
+      : fieldNameOrOptions;
+
+    if (void 0 === options.from) {
+      options.from = { __ref: 'ROOT_QUERY' };
+    }
+
     return this.policies.readField<T>(
-      typeof fieldNameOrOptions === "string"
-        ? {
-          fieldName: fieldNameOrOptions,
-          from,
-        }
-        : fieldNameOrOptions,
+      options,
       {
         store: this.entityStoreRoot,
       }
