@@ -57,10 +57,13 @@ const cache = new InvalidationPolicyCache({
 | `modify`                      | `modify` API from Apollo cache     |
 | `readField`                   | `readField` API from Apollo cache  |
 
-| Extended cache API | Description                                                                                | Return Type                                                   |
-| -------------------| -------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| `expire`           | Evicts all expired entities from the cache based on their type's or the global timeToLive. | String[] - List of expired entity IDs evicted from the cache. |
-| `expiredEntities`  | Returns all expired entities still present in the cache                                    | String[] - List of expired entities in the cache.             |
+| Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                 |
+| -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|---------------------------|
+| `expire`                 | Evicts all expired entities from the cache based on their type's or the global timeToLive | String[] - List of expired entity IDs evicted from the cache | N/A                       |
+| `expiredEntities`        | Returns all expired entities still present in the cache                                   | String[] - List of expired entities in the cache             | N/A                       |
+| `activePolicyEvents`     | Returns all active policy events (Read, Write, Evict)                                     | InvalidationPolicyEvent[] - List of active policy events     | N/A                       |
+| `activatePolicyEvents`   | Activates the provided policy events, defaults to all                                     | void                                                         | InvalidationPolicyEvent[] |
+| `deactivatePolicyEvents` | Dectivates the provided policy events, defaults to all                                    | void                                                         | InvalidationPolicyEvent[] |
 
 | Policy Action Entity | Description                                             | Type               | Example                                                                                     |
 | ---------------------| --------------------------------------------------------|--------------------| ---------------------------------------------------------------------------------------------|

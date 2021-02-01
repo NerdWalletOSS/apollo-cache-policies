@@ -211,13 +211,13 @@ describe("InvalidationPolicyManager", () => {
       });
 
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Read)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Read)
       ).toEqual(true);
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Write)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Write)
       ).toEqual(true);
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Evict)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Evict)
       ).toEqual(true);
     });
 
@@ -235,13 +235,13 @@ describe("InvalidationPolicyManager", () => {
       });
 
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Read)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Read)
       ).toEqual(false);
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Write)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Write)
       ).toEqual(false);
       expect(
-        invalidationPolicyManager.isPolicyActive(InvalidationPolicyEvent.Evict)
+        invalidationPolicyManager.isPolicyEventActive(InvalidationPolicyEvent.Evict)
       ).toEqual(false);
     });
   });

@@ -100,7 +100,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     const modifyResult = super.modify(options);
 
     if (
-      !this.invalidationPolicyManager.isPolicyActive(
+      !this.invalidationPolicyManager.isPolicyEventActive(
         InvalidationPolicyEvent.Write
       ) ||
       !modifyResult
@@ -159,10 +159,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // Do not trigger a write policy if the current write is being applied to an optimistic data layer since
     // the policy will later be applied when the server data response is received.
     if (
-      (!this.invalidationPolicyManager.isPolicyActive(
+      (!this.invalidationPolicyManager.isPolicyEventActive(
         InvalidationPolicyEvent.Write
       ) &&
-        !this.invalidationPolicyManager.isPolicyActive(
+        !this.invalidationPolicyManager.isPolicyEventActive(
           InvalidationPolicyEvent.Read
         )) ||
       !this.isOperatingOnRootData()
@@ -190,7 +190,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     if (
-      this.invalidationPolicyManager.isPolicyActive(
+      this.invalidationPolicyManager.isPolicyEventActive(
         InvalidationPolicyEvent.Evict
       )
     ) {
@@ -225,7 +225,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // Returns all expired entities whose cache time exceeds their type's timeToLive or as a fallback
   // the global timeToLive if specified. Evicts the expired entities by default, with an option to only report
   // them.
-  _expire(reportOnly = false) {
+  private _expire(reportOnly = false) {
     const { entitiesById } = this.entityTypeMap.extract();
     const expiredEntityIds: string[] = [];
 
@@ -266,19 +266,57 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return expiredEntityIds;
   }
 
+  // Expires all entities still present in the cache that have exceeded their timeToLive. By default entities are evicted
+  // lazily on read if their entity is expired. Use this expire API to eagerly remove expired entities.
   expire() {
     return this._expire(false);
   }
 
+  // Returns all expired entities still present in the cache.
   expiredEntities() {
     return this._expire(true);
+  }
+
+  // Activates the provided policy events (on read, on write, on evict) or by default all policy events.
+  activatePolicyEvents(...policyEvents: InvalidationPolicyEvent[]) {
+    if (policyEvents.length > 0) {
+      this.invalidationPolicyManager.activatePolicies(...policyEvents);
+    } else {
+      this.invalidationPolicyManager.activatePolicies(
+        InvalidationPolicyEvent.Read,
+        InvalidationPolicyEvent.Write,
+        InvalidationPolicyEvent.Evict
+      );
+    }
+  }
+
+  // Deactivates the provided policy events (on read, on write, on evict) or by default all policy events.
+  deactivatePolicyEvents(...policyEvents: InvalidationPolicyEvent[]) {
+    if (policyEvents.length > 0) {
+      this.invalidationPolicyManager.deactivatePolicies(...policyEvents);
+    } else {
+      this.invalidationPolicyManager.deactivatePolicies(
+        InvalidationPolicyEvent.Read,
+        InvalidationPolicyEvent.Write,
+        InvalidationPolicyEvent.Evict
+      );
+    }
+  }
+
+  // Returns the policy events that are currently active.
+  activePolicyEvents() {
+    return [
+      InvalidationPolicyEvent.Read,
+      InvalidationPolicyEvent.Write,
+      InvalidationPolicyEvent.Evict
+    ].filter(policyEvent => this.invalidationPolicyManager.isPolicyEventActive(policyEvent));
   }
 
   read<T>(options: Cache.ReadOptions<any>): T | null {
     const result = super.read<T>(options);
 
     if (
-      !this.invalidationPolicyManager.isPolicyActive(
+      !this.invalidationPolicyManager.isPolicyEventActive(
         InvalidationPolicyEvent.Read
       )
     ) {
@@ -310,7 +348,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // Instead, diffs will trigger the read policies for client-based reads like `readCache` invocations from watched queries outside
     // the scope of broadcasts.
     if (
-      !this.invalidationPolicyManager.isPolicyActive(
+      !this.invalidationPolicyManager.isPolicyEventActive(
         InvalidationPolicyEvent.Read
       ) ||
       this.isBroadcasting
