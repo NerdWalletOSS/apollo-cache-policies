@@ -1,3 +1,8 @@
+
+1.0.0-beta12 (Dan Reynolds)
+
+- Add support for dynamically activating/deactivating policy events
+
 1.0.0-beta11 (Dan Reynolds)
 
 - Default the `readPolicy` function in the policy action to use the ROOT_QUERY similarly to how the policies module does in apollo/client

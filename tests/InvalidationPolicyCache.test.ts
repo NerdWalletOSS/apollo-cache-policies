@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 import { InvalidationPolicyCache } from "../src";
 import Employee from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
-import { RenewalPolicy } from "../src/policies/types";
+import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 
 describe("Cache", () => {
   let cache: InvalidationPolicyCache;
@@ -2792,7 +2792,70 @@ describe("Cache", () => {
         },
       });
     });
-  })
+  });
+
+  describe('#activatePolicies', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache();
+    });
+
+    describe('with no policies passed', () => {
+      test('should activate all policies', () => {
+        expect(cache.activePolicyEvents()).toEqual([]);
+        cache.activatePolicyEvents();
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
+          InvalidationPolicyEvent.Read,
+          InvalidationPolicyEvent.Write,
+          InvalidationPolicyEvent.Evict,
+        ]));
+      })
+    });
+
+    describe('with policies passed', () => {
+      test('should activate the provided policies', () => {
+        expect(cache.activePolicyEvents()).toEqual([]);
+        cache.activatePolicyEvents(InvalidationPolicyEvent.Read);
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
+          InvalidationPolicyEvent.Read,
+        ]));
+      })
+    });
+  });
+
+  describe('#deactivatePolicies', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache();
+    });
+
+    describe('with no policies passed', () => {
+      test('should deactivate all policies', () => {
+        cache.activatePolicyEvents();
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
+          InvalidationPolicyEvent.Read,
+          InvalidationPolicyEvent.Write,
+          InvalidationPolicyEvent.Evict,
+        ]));
+        cache.deactivatePolicyEvents();
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([]));
+      })
+    });
+
+    describe('with policies passed', () => {
+      test('should deactivate the provided policies', () => {
+        cache.activatePolicyEvents();
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
+          InvalidationPolicyEvent.Read,
+          InvalidationPolicyEvent.Write,
+          InvalidationPolicyEvent.Evict,
+        ]));
+        cache.deactivatePolicyEvents(InvalidationPolicyEvent.Read);
+        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
+          InvalidationPolicyEvent.Write,
+          InvalidationPolicyEvent.Evict,
+        ]));
+      })
+    });
+  });
 
   describe("#extract", () => {
     describe("without invalidation extracted", () => {

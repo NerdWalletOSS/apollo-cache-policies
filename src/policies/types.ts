@@ -98,6 +98,6 @@ export interface InvalidationPolicyManagerConfig {
   entityTypeMap: EntityTypeMap;
 }
 
-export type InvalidationPolicyActivation = {
+export type InvalidationPolicyEventActivation = {
   [key in InvalidationPolicyEvent]: boolean;
 };

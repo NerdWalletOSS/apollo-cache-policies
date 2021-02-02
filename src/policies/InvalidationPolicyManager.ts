@@ -1,7 +1,7 @@
 import _ from "lodash";
 import {
   InvalidationPolicy,
-  InvalidationPolicyActivation,
+  InvalidationPolicyEventActivation,
   InvalidationPolicyEvent,
   InvalidationPolicyLifecycleEvent,
   InvalidationPolicyManagerConfig,
@@ -18,7 +18,7 @@ import { RenewalPolicy } from "./types";
  */
 export default class InvalidationPolicyManager {
   private mutedCacheOperations: PolicyActionCacheOperations;
-  private policyActivation: InvalidationPolicyActivation;
+  private activePolicyEvents: InvalidationPolicyEventActivation;
   private policyActionStorage: PolicyActionStorage = {};
 
   constructor(private config: InvalidationPolicyManagerConfig) {
@@ -34,14 +34,14 @@ export default class InvalidationPolicyManager {
       modify: (options) => modify({ ...options, broadcast: false }),
     };
 
-    this.policyActivation = this.activatePolicies();
+    this.activePolicyEvents = this.activateInitialPolicyEvents();
   }
 
-  private activatePolicies() {
+  private activateInitialPolicyEvents() {
     const { policies } = this.config;
     const { types: policyTypes = {}, timeToLive: defaultTimeToLive } = policies;
 
-    return Object.keys(policyTypes).reduce<InvalidationPolicyActivation>(
+    return Object.keys(policyTypes).reduce<InvalidationPolicyEventActivation>(
       (acc, type) => {
         const policy = policyTypes[type];
         acc[InvalidationPolicyEvent.Read] =
@@ -226,7 +226,15 @@ export default class InvalidationPolicyManager {
     return false;
   }
 
-  isPolicyActive(policyEvent: InvalidationPolicyEvent) {
-    return this.policyActivation[policyEvent];
+  activatePolicies(...policyEvents: InvalidationPolicyEvent[]) {
+    policyEvents.forEach(policyEvent => this.activePolicyEvents[policyEvent] = true);
+  }
+
+  deactivatePolicies(...policyEvents: InvalidationPolicyEvent[]) {
+    policyEvents.forEach(policyEvent => this.activePolicyEvents[policyEvent] = false);
+  }
+
+  isPolicyEventActive(policyEvent: InvalidationPolicyEvent) {
+    return this.activePolicyEvents[policyEvent];
   }
 }
