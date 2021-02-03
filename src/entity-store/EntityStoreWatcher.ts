@@ -1,9 +1,8 @@
 import _ from "lodash";
 import { StoreObject } from "@apollo/client";
+import { EntityStore, Policies } from "@apollo/client/cache";
 import EntityTypeMap from "./EntityTypeMap";
-import { EntityStore } from "@apollo/client/cache/inmemory/entityStore";
 import { NormalizedCacheObjectWithInvalidation } from "./types";
-import { Policies } from "@apollo/client/cache/inmemory/policies";
 import { makeEntityId, isQuery } from "../helpers";
 
 interface EntityStoreWatcherConfig {

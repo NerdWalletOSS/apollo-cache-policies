@@ -1,3 +1,6 @@
+1.0.0-beta13 (David Barnes)
+
+- Update import paradigm from `@apollo/client` to support node environments (avoid ES imports)
 
 1.0.0-beta12 (Dan Reynolds)
 

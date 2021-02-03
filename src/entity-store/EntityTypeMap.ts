@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { fieldNameFromStoreName } from "@apollo/client/cache/inmemory/helpers";
+import { fieldNameFromStoreName } from "@apollo/client/cache";
 import { makeEntityId, isQuery } from "../helpers";
 import {
   EntitiesByType,

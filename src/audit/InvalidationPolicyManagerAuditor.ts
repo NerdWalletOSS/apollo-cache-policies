@@ -31,11 +31,11 @@ export default class InvalidationPolicyManagerAuditor extends InvalidationPolicy
     storeFieldName,
     reportOnly = false,
   }: {
-    typename: string,
-    dataId: string,
-    fieldName?: string,
-    storeFieldName?: string,
-    reportOnly: boolean,
+    typename: string;
+    dataId: string;
+    fieldName?: string;
+    storeFieldName?: string;
+    reportOnly: boolean;
   }) {
     this.auditLog.log(
       "Running read policy",
