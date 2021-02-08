@@ -1,3 +1,7 @@
+1.0.0-beta13 (Dan Reynolds)
+
+- Short-term fix that adds support for running the lib in environments that cannot handle import statements by removing imports from non-public Apollo APIs.
+The required imports will be made available in an upcoming version of Apollo Client and we'll switch to that better fix at that time.
 
 1.0.0-beta12 (Dan Reynolds)
 
