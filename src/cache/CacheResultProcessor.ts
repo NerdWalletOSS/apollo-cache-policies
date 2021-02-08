@@ -1,21 +1,17 @@
 import _ from "lodash";
 import { FieldNode, SelectionNode } from "graphql";
 import { Cache, makeReference } from "@apollo/client";
-import { maybeDeepFreeze } from "@apollo/client/utilities/common/maybeDeepFreeze";
-import {
-  getFragmentDefinitions,
-  getOperationDefinition,
-} from "@apollo/client/utilities/graphql/getFromAST";
-import { CacheResultProcessorConfig } from "./types";
-import { makeEntityId, isQuery } from "../helpers";
-import {
-  resultKeyNameFromField,
-  isField,
-} from "@apollo/client/utilities/graphql/storeUtils";
 import {
   createFragmentMap,
+  getFragmentDefinitions,
   getFragmentFromSelection,
-} from "@apollo/client/utilities/graphql/fragments";
+  getOperationDefinition,
+  isField,
+  maybeDeepFreeze,
+  resultKeyNameFromField,
+} from "@apollo/client/utilities";
+import { CacheResultProcessorConfig } from "./types";
+import { makeEntityId, isQuery } from "../helpers";
 import { RenewalPolicy } from "../policies/types";
 
 export enum ReadResultStatus {

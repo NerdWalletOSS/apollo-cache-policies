@@ -7,15 +7,12 @@ import {
   StoreObject,
   makeReference,
 } from "@apollo/client";
-import { ReadFieldOptions } from "@apollo/client/cache/core/types/common";
-import { EntityStore } from "@apollo/client/cache/inmemory/entityStore";
-import { fieldNameFromStoreName } from "@apollo/client/cache/inmemory/helpers";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
-import { makeEntityId, isQuery, maybeDeepClone } from "../helpers";
+import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
 import { InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
-import { InvalidationPolicyEvent } from "../policies/types";
+import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 
 /**
  * Extension of Apollo in-memory cache which adds support for invalidation policies.
@@ -24,7 +21,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected entityTypeMap: EntityTypeMap;
   protected invalidationPolicyManager: InvalidationPolicyManager;
   protected cacheResultProcessor: CacheResultProcessor;
-  protected entityStoreRoot: EntityStore.Root;
+  protected entityStoreRoot: any;
   protected isBroadcasting: boolean;
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
