@@ -1,6 +1,17 @@
+import { FieldNode } from 'graphql';
 import { Cache, Reference, StoreObject, StoreValue } from "@apollo/client";
-import { ReadFieldOptions } from "@apollo/client/cache/core/types/common";
 import EntityTypeMap from "../entity-store/EntityTypeMap";
+export interface FieldSpecifier {
+  typename?: string;
+  fieldName: string;
+  field?: FieldNode;
+  args?: Record<string, any>;
+  variables?: Record<string, any>;
+}
+
+export interface ReadFieldOptions extends FieldSpecifier {
+  from?: StoreObject | Reference;
+}
 
 export enum InvalidationPolicyEvent {
   Write = "Write",

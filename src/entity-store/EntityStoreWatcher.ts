@@ -1,22 +1,20 @@
 import _ from "lodash";
 import { StoreObject } from "@apollo/client";
 import EntityTypeMap from "./EntityTypeMap";
-import { EntityStore } from "@apollo/client/cache/inmemory/entityStore";
 import { NormalizedCacheObjectWithInvalidation } from "./types";
-import { Policies } from "@apollo/client/cache/inmemory/policies";
 import { makeEntityId, isQuery } from "../helpers";
 
 interface EntityStoreWatcherConfig {
-  entityStore: EntityStore;
+  entityStore: any;
   entityTypeMap: EntityTypeMap;
-  policies: Policies;
+  policies: any;
 }
 
 type EntityStoreWatcherStoreFunctions = {
-  clear: EntityStore["clear"];
-  delete: EntityStore["delete"];
-  merge: EntityStore["merge"];
-  replace: EntityStore["replace"];
+  clear: any;
+  delete: any;
+  merge: any;
+  replace: any;
 };
 
 /**
@@ -58,10 +56,10 @@ export default class EntityStoreWatcher {
     const storeFieldName =
       fieldName && args
         ? policies.getStoreFieldName({
-            typename: entity ? entity.typename : undefined,
-            fieldName,
-            args,
-          })
+          typename: entity ? entity.typename : undefined,
+          fieldName,
+          args,
+        })
         : undefined;
     entityTypeMap.evict(dataId, storeFieldName || fieldName);
 

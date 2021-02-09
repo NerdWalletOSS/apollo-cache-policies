@@ -26,3 +26,9 @@ export function makeEntityId(
 // https://github.com/apollographql/apollo-client/blob/master/src/utilities/common/maybeDeepFreeze.ts#L20:L20
 export const maybeDeepClone = (obj: any) =>
   _.isPlainObject(obj) && Object.isFrozen(obj) ? _.cloneDeep(obj) : obj;
+
+export var TypeOrFieldNameRegExp = /^[_a-z][_0-9a-z]*/i;
+export function fieldNameFromStoreName(storeFieldName: string) {
+  var match = storeFieldName.match(TypeOrFieldNameRegExp);
+  return match ? match[0] : storeFieldName;
+}
