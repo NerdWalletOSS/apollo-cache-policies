@@ -1,4 +1,4 @@
-import { NormalizedCacheObject } from "@apollo/client";
+import { NormalizedCacheObject } from "@apollo/client/core";
 import { InvalidationPolicies } from "../policies/types";
 
 export interface EntityTypeMapConfig {

@@ -1,4 +1,4 @@
-import { Cache, InMemoryCacheConfig } from "@apollo/client";
+import { Cache, InMemoryCacheConfig } from "@apollo/client/core";
 import { InvalidationPolicies, PolicyActionMeta } from "../policies/types";
 import { EntityTypeMap } from "../entity-store";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
