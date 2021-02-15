@@ -6,7 +6,7 @@ import {
   PolicyActionMeta,
   InvalidationPolicyEvent,
 } from "../src/policies/types";
-import { makeReference } from "@apollo/client";
+import { makeReference } from "@apollo/client/core";
 import Employee from "./fixtures/employee";
 
 describe("InvalidationPolicyManager", () => {

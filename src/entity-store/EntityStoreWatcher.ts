@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { StoreObject } from "@apollo/client";
+import { StoreObject } from "@apollo/client/core";
 import EntityTypeMap from "./EntityTypeMap";
 import { NormalizedCacheObjectWithInvalidation } from "./types";
 import { makeEntityId, isQuery } from "../helpers";

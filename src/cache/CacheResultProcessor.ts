@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { FieldNode, SelectionNode } from "graphql";
-import { Cache, makeReference } from "@apollo/client";
+import { Cache, makeReference } from "@apollo/client/core";
 import {
   createFragmentMap,
   getFragmentDefinitions,
