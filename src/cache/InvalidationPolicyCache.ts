@@ -41,9 +41,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       policies: invalidationPolicies,
       entityTypeMap: this.entityTypeMap,
       cacheOperations: {
-        evict: this.evict.bind(this),
-        modify: this.modify.bind(this),
-        readField: this.readField.bind(this),
+        evict: (...args) => this.evict(...args),
+        modify: (...args) => this.modify(...args),
+        readField: (...args) => this.readField(...args),
       },
     });
     this.cacheResultProcessor = new CacheResultProcessor({

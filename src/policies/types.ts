@@ -78,11 +78,7 @@ export type InvalidationPolicy = {
 };
 
 export type CacheOperations = {
-  evict: (
-    options: Cache.EvictOptions,
-    fieldName?: string,
-    args?: Record<string, any>
-  ) => boolean;
+  evict: (options: Cache.EvictOptions) => boolean;
   modify: (options: Cache.ModifyOptions) => boolean;
   readField: (
     fieldNameOrOptions?: string | ReadFieldOptions | undefined,
@@ -91,11 +87,7 @@ export type CacheOperations = {
 };
 
 export type PolicyActionCacheOperations = {
-  evict: (
-    options: Omit<Cache.EvictOptions, "broadcast">,
-    fieldName?: string,
-    args?: Record<string, any>
-  ) => boolean;
+  evict: (options: Omit<Cache.EvictOptions, "broadcast">) => boolean;
   modify: (options: Omit<Cache.ModifyOptions, "broadcast">) => boolean;
   readField: (
     fieldNameOrOptions?: string | ReadFieldOptions | undefined,
