@@ -302,4 +302,51 @@ describe("EntityTypeMap", () => {
       });
     });
   });
+
+  describe('#renewEntity', () => {
+    describe('when renewing a normalized entity', () => {
+      describe('that is present in the type map', () => {
+        test('should renew the entity', () => {
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          entityTypeMap = new EntityTypeMap();
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          entityTypeMap.write("Employee", "Employee:1");
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(50);
+          entityTypeMap.renewEntity("Employee:1");
+          expect(entityTypeMap.readEntityById("Employee:1")?.cacheTime).toEqual(50);
+        });
+      });
+
+      describe('that is not present in the type map', () => {
+        test('should not renew the entity', () => {
+          entityTypeMap = new EntityTypeMap();
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          expect(() => entityTypeMap.renewEntity("Employee:1")).not.toThrow();
+        });
+      });
+    });
+
+    describe('when renewing a query entity', () => {
+      describe('that is present in the type map', () => {
+        test('should renew the entity', () => {
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          entityTypeMap = new EntityTypeMap();
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          entityTypeMap.write("EmployeesResponse", "ROOT_QUERY", "employees({id:1})");
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(50);
+          entityTypeMap.renewEntity("ROOT_QUERY", "employees({id:1})");
+          expect(entityTypeMap.readEntityById("ROOT_QUERY.employees")!.storeFieldNames!.entries['employees({id:1})'].cacheTime).toEqual(50);
+        });
+      });
+
+      describe('that is not present in the type map', () => {
+        test('should not renew the entity', () => {
+          entityTypeMap = new EntityTypeMap();
+          dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+          entityTypeMap.write("EmployeesResponse", "ROOT_QUERY", "employees");
+          expect(() => entityTypeMap.renewEntity("ROOT_QUERY", "employees({id:1})")).not.toThrow();
+        });
+      });
+    });
+  });
 });

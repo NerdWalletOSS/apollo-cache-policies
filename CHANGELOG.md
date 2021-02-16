@@ -1,3 +1,7 @@
+1.0.0-beta15 (Dan Reynolds)
+
+- Fix bug where a renew-on-read policy would try to update the cache time for entities not present in the cache
+
 1.0.0-beta14 (Dan Reynolds)
 
 - Bugfix for fixing eviction/mutation changes to the cache via the wrapper `wrapDestructiveCacheMethod` function. 
