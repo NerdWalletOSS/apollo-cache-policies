@@ -204,7 +204,10 @@ export default class EntityTypeMap {
     if (entity) {
       const cacheTime = Date.now();
       if (isQuery(dataId) && storeFieldName) {
-        entity.storeFieldNames!.entries[storeFieldName]!.cacheTime = cacheTime;
+        const storeFieldNameEntry = entity.storeFieldNames!.entries[storeFieldName];
+        if (storeFieldNameEntry) {
+          storeFieldNameEntry.cacheTime = cacheTime;
+        }
       } else {
         entity.cacheTime = cacheTime;
       }
