@@ -11,7 +11,7 @@
     "build": "tsc --build src",
     "ts-jest": "ts-jest",
     "format": "prettier --write src",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
