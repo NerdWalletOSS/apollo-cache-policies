@@ -1,6 +1,6 @@
 {
   "name": "apollo-invalidation-policies",
-  "version": "1.0.0-beta13",
+  "version": "1.0.0-beta14",
   "description": "An extension to the InMemoryCache from Apollo for type-based invalidation policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

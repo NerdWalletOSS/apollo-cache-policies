@@ -1,3 +1,7 @@
+1.0.0-beta14 (Dan Reynolds)
+
+- Bugfix for fixing eviction/mutation changes to the cache via the wrapper `wrapDestructiveCacheMethod` function. 
+
 1.0.0-beta13 (Dan Reynolds)
 
 - Short-term fix that adds support for running the lib in environments that cannot handle import statements by removing imports from non-public Apollo APIs.
