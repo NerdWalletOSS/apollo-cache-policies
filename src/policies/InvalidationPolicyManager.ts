@@ -10,7 +10,7 @@ import {
   PolicyActionStorage,
 } from "./types";
 import { makeEntityId } from "../helpers";
-import { makeReference } from "@apollo/client";
+import { makeReference } from "@apollo/client/core";
 import { RenewalPolicy } from "./types";
 
 /**

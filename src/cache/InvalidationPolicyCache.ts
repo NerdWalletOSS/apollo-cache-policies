@@ -6,7 +6,7 @@ import {
   Reference,
   StoreObject,
   makeReference,
-} from "@apollo/client";
+} from "@apollo/client/core";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";

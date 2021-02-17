@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client/core";
 import { InvalidationPolicyCache } from "../src";
 import Employee from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
