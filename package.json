@@ -31,10 +31,10 @@
   },
   "dependencies": {
     "@types/graphql": "^14.5.0",
-    "@types/lodash": "^4.14.168",
+    "@types/lodash-es": "^4.17.4",
     "@types/uuid": "^7.0.4",
     "graphql": "^15.5.0",
-    "lodash": "^4.17.20",
+    "lodash-es": "^4.17.21",
     "typescript": "^3.9.9",
     "uuid": "^7.0.3"
   },

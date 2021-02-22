@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { set as _set } from "lodash-es";
 import { makeEntityId, isQuery, fieldNameFromStoreName } from "../helpers";
 import {
   EntitiesByType,
@@ -11,7 +11,7 @@ import {
 /**
  * Map which stores a relationship between entities in the cache and their type
  * for efficient access of entities by type and types by entities on top of the Apollo EntityStore cache.
- * 
+ *
  * An Apollo cache entry might look like this:
  * ```javascript
     {
@@ -150,7 +150,7 @@ export default class EntityTypeMap {
         };
       }
 
-      _.set(this.entitiesByType, [typename, entityId], newEntity);
+      _set(this.entitiesByType, [typename, entityId], newEntity);
       this.entitiesById[entityId] = newEntity;
     }
   }
@@ -204,7 +204,9 @@ export default class EntityTypeMap {
     if (entity) {
       const cacheTime = Date.now();
       if (isQuery(dataId) && storeFieldName) {
-        const storeFieldNameEntry = entity.storeFieldNames!.entries[storeFieldName];
+        const storeFieldNameEntry = entity.storeFieldNames!.entries[
+          storeFieldName
+        ];
         if (storeFieldNameEntry) {
           storeFieldNameEntry.cacheTime = cacheTime;
         }

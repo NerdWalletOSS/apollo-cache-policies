@@ -1,4 +1,8 @@
-import _ from "lodash";
+import {
+  cloneDeep as _cloneDeep,
+  compact as _compact,
+  isPlainObject as _isPlainObject,
+} from "lodash-es";
 
 export function isQuery(dataId: string) {
   return dataId === "ROOT_QUERY" || dataId === "ROOT_MUTATION";
@@ -16,7 +20,7 @@ export function makeEntityId(
   fieldName?: string | null
 ): string {
   if (isQuery(dataId)) {
-    return _.compact([dataId, fieldName]).join(".");
+    return _compact([dataId, fieldName]).join(".");
   }
   return dataId;
 }
@@ -25,7 +29,7 @@ export function makeEntityId(
 // on a cloned object. This has no impact in production since objects are not frozen and will not be cloned:
 // https://github.com/apollographql/apollo-client/blob/master/src/utilities/common/maybeDeepFreeze.ts#L20:L20
 export const maybeDeepClone = (obj: any) =>
-  _.isPlainObject(obj) && Object.isFrozen(obj) ? _.cloneDeep(obj) : obj;
+  _isPlainObject(obj) && Object.isFrozen(obj) ? _cloneDeep(obj) : obj;
 
 export var TypeOrFieldNameRegExp = /^[_a-z][_0-9a-z]*/i;
 export function fieldNameFromStoreName(storeFieldName: string) {

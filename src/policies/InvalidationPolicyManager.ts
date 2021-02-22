@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { isNumber as _isNumber } from "lodash-es";
 import {
   InvalidationPolicy,
   InvalidationPolicyEventActivation,
@@ -102,7 +102,10 @@ export default class InvalidationPolicyManager {
       return;
     }
 
-    const { __default: defaultPolicyAction, ...restTypePolicyTypeNames } = typePolicyForEvent;
+    const {
+      __default: defaultPolicyAction,
+      ...restTypePolicyTypeNames
+    } = typePolicyForEvent;
 
     if (defaultPolicyAction) {
       defaultPolicyAction(mutedCacheOperations, {
@@ -111,34 +114,37 @@ export default class InvalidationPolicyManager {
       });
     }
 
-    Object.keys(restTypePolicyTypeNames).forEach((typePolicyTypeName: string) => {
-      const typeMapEntities = entityTypeMap.readEntitiesByType(typePolicyTypeName) ?? {};
-      const policyAction = typePolicyForEvent[typePolicyTypeName];
+    Object.keys(restTypePolicyTypeNames).forEach(
+      (typePolicyTypeName: string) => {
+        const typeMapEntities =
+          entityTypeMap.readEntitiesByType(typePolicyTypeName) ?? {};
+        const policyAction = typePolicyForEvent[typePolicyTypeName];
 
-      Object.values(typeMapEntities).forEach((typeMapEntity) => {
-        const { dataId, fieldName, storeFieldNames } = typeMapEntity;
-        if (storeFieldNames) {
-          Object.keys(storeFieldNames.entries).forEach((storeFieldName) => {
+        Object.values(typeMapEntities).forEach((typeMapEntity) => {
+          const { dataId, fieldName, storeFieldNames } = typeMapEntity;
+          if (storeFieldNames) {
+            Object.keys(storeFieldNames.entries).forEach((storeFieldName) => {
+              policyAction(mutedCacheOperations, {
+                id: dataId,
+                fieldName,
+                storeFieldName,
+                variables: storeFieldNames.entries[storeFieldName].variables,
+                ref: makeReference(dataId),
+                storage: this.getPolicyActionStorage(storeFieldName),
+                ...policyMeta,
+              });
+            });
+          } else {
             policyAction(mutedCacheOperations, {
               id: dataId,
-              fieldName,
-              storeFieldName,
-              variables: storeFieldNames.entries[storeFieldName].variables,
+              storage: this.getPolicyActionStorage(dataId),
               ref: makeReference(dataId),
-              storage: this.getPolicyActionStorage(storeFieldName),
               ...policyMeta,
             });
-          });
-        } else {
-          policyAction(mutedCacheOperations, {
-            id: dataId,
-            storage: this.getPolicyActionStorage(dataId),
-            ref: makeReference(dataId),
-            ...policyMeta,
-          });
-        }
-      });
-    });
+          }
+        });
+      }
+    );
   }
 
   getRenewalPolicyForType(typename: string) {
@@ -174,11 +180,11 @@ export default class InvalidationPolicyManager {
     storeFieldName,
     reportOnly = false,
   }: {
-    typename: string,
-    dataId: string,
-    fieldName?: string,
-    storeFieldName?: string,
-    reportOnly?: boolean,
+    typename: string;
+    dataId: string;
+    fieldName?: string;
+    storeFieldName?: string;
+    reportOnly?: boolean;
   }): boolean {
     const { cacheOperations, entityTypeMap, policies } = this.config;
     const entityId = makeEntityId(dataId, fieldName);
@@ -195,7 +201,8 @@ export default class InvalidationPolicyManager {
     // before it has come back from the network, the Apollo Client tries to diff it against the store to see what the existing value is for it,
     // but on first fetch it would not exist.
     if (storeFieldName && !!typeMapEntity.storeFieldNames) {
-      const entityForStoreFieldName = typeMapEntity.storeFieldNames.entries[storeFieldName];
+      const entityForStoreFieldName =
+        typeMapEntity.storeFieldNames.entries[storeFieldName];
 
       if (!entityForStoreFieldName) {
         return false;
@@ -210,7 +217,7 @@ export default class InvalidationPolicyManager {
       this.getPolicy(typename)?.timeToLive || policies.timeToLive;
 
     if (
-      _.isNumber(entityCacheTime) &&
+      _isNumber(entityCacheTime) &&
       timeToLive &&
       Date.now() > entityCacheTime + timeToLive
     ) {
@@ -227,11 +234,15 @@ export default class InvalidationPolicyManager {
   }
 
   activatePolicies(...policyEvents: InvalidationPolicyEvent[]) {
-    policyEvents.forEach(policyEvent => this.activePolicyEvents[policyEvent] = true);
+    policyEvents.forEach(
+      (policyEvent) => (this.activePolicyEvents[policyEvent] = true)
+    );
   }
 
   deactivatePolicies(...policyEvents: InvalidationPolicyEvent[]) {
-    policyEvents.forEach(policyEvent => this.activePolicyEvents[policyEvent] = false);
+    policyEvents.forEach(
+      (policyEvent) => (this.activePolicyEvents[policyEvent] = false)
+    );
   }
 
   isPolicyEventActive(policyEvent: InvalidationPolicyEvent) {

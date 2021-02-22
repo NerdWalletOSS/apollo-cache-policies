@@ -1,4 +1,4 @@
-import { FieldNode } from 'graphql';
+import { FieldNode } from "graphql";
 import { Cache, Reference, StoreObject, StoreValue } from "@apollo/client/core";
 import EntityTypeMap from "../entity-store/EntityTypeMap";
 export interface FieldSpecifier {
@@ -46,14 +46,14 @@ export interface PolicyActionFields {
   ref: Reference;
   fieldName?: string;
   storeFieldName?: string;
-  storage: PolicyActionStorage,
+  storage: PolicyActionStorage;
   variables?: Record<string, any>;
 }
 
 export type PolicyActionEntity = PolicyActionFields & PolicyActionMeta;
 
 export interface PolicyActionMeta {
-  parent: Omit<PolicyActionFields, 'storage'>;
+  parent: Omit<PolicyActionFields, "storage">;
 }
 
 export type PolicyAction = (
@@ -63,7 +63,7 @@ export type PolicyAction = (
 
 export type DefaultPolicyAction = (
   cacheOperations: PolicyActionCacheOperations,
-  entity: Pick<PolicyActionEntity, 'storage' | 'parent'>
+  entity: Pick<PolicyActionEntity, "storage" | "parent">
 ) => void;
 
 export type InvalidationPolicy = {

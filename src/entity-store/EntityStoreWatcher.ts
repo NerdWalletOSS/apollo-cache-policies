@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { StoreObject } from "@apollo/client/core";
 import EntityTypeMap from "./EntityTypeMap";
 import { NormalizedCacheObjectWithInvalidation } from "./types";
@@ -56,10 +55,10 @@ export default class EntityStoreWatcher {
     const storeFieldName =
       fieldName && args
         ? policies.getStoreFieldName({
-          typename: entity ? entity.typename : undefined,
-          fieldName,
-          args,
-        })
+            typename: entity ? entity.typename : undefined,
+            fieldName,
+            args,
+          })
         : undefined;
     entityTypeMap.evict(dataId, storeFieldName || fieldName);
 

@@ -1,4 +1,3 @@
-import _ from "lodash";
 import "jest-extended";
 import { InMemoryCache, StoreObject } from "@apollo/client/core";
 import { EntityStoreWatcher, EntityTypeMap } from "../src/entity-store";

@@ -1,4 +1,7 @@
-import _ from "lodash";
+import {
+ omit as _omit,
+ times as _times
+} from 'lodash-es';
 import { gql } from "@apollo/client/core";
 import { InvalidationPolicyCache } from "../src";
 import Employee from "./fixtures/employee";
@@ -8,7 +11,7 @@ import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 describe("Cache", () => {
   let cache: InvalidationPolicyCache;
 
-  const [employee, employee2, employee3] = _.times(3, () => Employee());
+  const [employee, employee2, employee3] = _times(3, () => Employee());
   const [employeeMessage, employeeMessage2] = [
     EmployeeMessage({ employee_id: employee.id }),
     EmployeeMessage({ employee_id: employee2.id }),
@@ -631,7 +634,7 @@ describe("Cache", () => {
               ],
             },
           },
-          [employee.toRef()]: _.omit(employee, "employee_name"),
+          [employee.toRef()]: _omit(employee, "employee_name"),
           [employee2.toRef()]: employee2,
           [employeeMessage2.toRef()]: employeeMessage2,
         });

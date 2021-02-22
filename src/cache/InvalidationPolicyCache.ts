@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { pick as _pick } from "lodash-es";
 import {
   InMemoryCache,
   Cache,
@@ -9,7 +9,12 @@ import {
 } from "@apollo/client/core";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
-import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
+import {
+  makeEntityId,
+  isQuery,
+  maybeDeepClone,
+  fieldNameFromStoreName,
+} from "../helpers";
 import { InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
@@ -61,23 +66,21 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       return;
     }
 
-    const options = typeof fieldNameOrOptions === "string"
-      ? {
-        fieldName: fieldNameOrOptions,
-        from,
-      }
-      : fieldNameOrOptions;
+    const options =
+      typeof fieldNameOrOptions === "string"
+        ? {
+            fieldName: fieldNameOrOptions,
+            from,
+          }
+        : fieldNameOrOptions;
 
     if (void 0 === options.from) {
-      options.from = { __ref: 'ROOT_QUERY' };
+      options.from = { __ref: "ROOT_QUERY" };
     }
 
-    return this.policies.readField<T>(
-      options,
-      {
-        store: this.entityStoreRoot,
-      }
-    );
+    return this.policies.readField<T>(options, {
+      store: this.entityStoreRoot,
+    });
   }
 
   protected broadcastWatches() {
@@ -198,10 +201,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
         const storeFieldName =
           isQuery(id) && fieldName
             ? this.policies.getStoreFieldName({
-              typename,
-              fieldName,
-              args,
-            })
+                typename,
+                fieldName,
+                args,
+              })
             : undefined;
 
         this.invalidationPolicyManager.runEvictPolicy(typename, {
@@ -305,8 +308,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return [
       InvalidationPolicyEvent.Read,
       InvalidationPolicyEvent.Write,
-      InvalidationPolicyEvent.Evict
-    ].filter(policyEvent => this.invalidationPolicyManager.isPolicyEventActive(policyEvent));
+      InvalidationPolicyEvent.Evict,
+    ].filter((policyEvent) =>
+      this.invalidationPolicyManager.isPolicyEventActive(policyEvent)
+    );
   }
 
   read<T>(options: Cache.ReadOptions<any>): T | null {
@@ -382,7 +387,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     if (withInvalidation) {
       // The entitiesById are sufficient alone for reconstructing the type map, so to
       // minimize payload size only inject the entitiesById object into the extracted cache
-      extractedCache.invalidation = _.pick(
+      extractedCache.invalidation = _pick(
         this.entityTypeMap.extract(),
         "entitiesById"
       );
