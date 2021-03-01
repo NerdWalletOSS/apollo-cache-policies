@@ -1,3 +1,7 @@
+1.0.0-beta16 (Dan Reynolds)
+
+- Release new version with React dependencies removed.
+
 1.0.0-beta15 (Dan Reynolds)
 
 - Fix bug where a renew-on-read policy would try to update the cache time for entities not present in the cache
