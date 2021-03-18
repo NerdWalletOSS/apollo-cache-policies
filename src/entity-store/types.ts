@@ -48,7 +48,7 @@ export interface ExtractedTypeMap {
 
 export interface NormalizedCacheObjectWithInvalidation
   extends NormalizedCacheObject {
-  invalidation: {
+  invalidation?: {
     entitiesById: EntitiesById;
   };
 }
