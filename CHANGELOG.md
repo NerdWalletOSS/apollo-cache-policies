@@ -1,3 +1,7 @@
+1.0.0-beta17 (Jesse Bye)
+
+- Release new version with Typescript dependency updated to ^4.x.
+
 1.0.0-beta16 (Dan Reynolds)
 
 - Release new version with React dependencies removed.
