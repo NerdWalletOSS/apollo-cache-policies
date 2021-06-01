@@ -1,6 +1,6 @@
 ![Build](https://github.com/NerdWalletOSS/apollo-invalidation-policies/workflows/Build/badge.svg)
 
-# Apollo Invalidation Policies
+# Apollo Cache Policies
 
 An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides a framework for managing the lifecycle and relationships of cache data through the use of invalidation policies.
 
@@ -256,7 +256,7 @@ The Apollo cache is not a relational datastore and as an extension of it, these 
 
 Apollo links are great tools for watching queries and mutations hitting the network. There even exists a [Watched Mutation](https://github.com/afafafafafaf/apollo-link-watched-mutation) link which provides some of the desired behavior of this library.
 
-At a high level, links run on the network-bound queries/mutations. Invalidation policies run on the types
+At a high level, links run on the network-bound queries/mutations. These additional policies run on the types
 that are being written and evicted from your cache, which this library believes is a better level at which to manage cache operations.
 
 At a low level, links:
