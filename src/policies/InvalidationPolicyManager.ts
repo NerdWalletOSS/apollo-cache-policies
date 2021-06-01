@@ -14,7 +14,7 @@ import { makeReference } from "@apollo/client/core";
 import { RenewalPolicy } from "./types";
 
 /**
- * Executes invalidation policies for types when they are modified, evicted or read from the cache.
+ * Executes cache policies for types when they are modified, evicted or read from the cache.
  */
 export default class InvalidationPolicyManager {
   private mutedCacheOperations: PolicyActionCacheOperations;

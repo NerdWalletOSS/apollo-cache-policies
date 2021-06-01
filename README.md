@@ -1,19 +1,19 @@
-![Build](https://github.com/NerdWalletOSS/apollo-invalidation-policies/workflows/Build/badge.svg)
+![Build](https://github.com/NerdWalletOSS/apollo-cache-policies/workflows/Build/badge.svg)
 
 # Apollo Cache Policies
 
-An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides a framework for managing the lifecycle and relationships of cache data through the use of invalidation policies.
+An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides a framework for managing the lifecycle and relationships of cache data through the use of additional cache policies.
 
 ## Installation
 
 ```
-npm install apollo-invalidation-policies
+npm install @nerdwallet/apollo-cache-policies
 ```
 
 ## Usage
 
 ```javascript
-import { InvalidationPolicyCache } from 'apollo-invalidation-policies';
+import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
 const cache = new InvalidationPolicyCache({
   typePolicies: {...},
   invalidationPolicies: {
@@ -36,7 +36,7 @@ const cache = new InvalidationPolicyCache({
 | Config          | Description                                                                                | Required | Default   |
 | ----------------| -------------------------------------------------------------------------------------------|----------|-----------|
 | `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | false    | None      |
-| `types`         | The types for which invalidation policies have been defined                                | false    | None      |
+| `types`         | The types for which cache policies have been defined                                       | false    | None      |
 | `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | false    | WriteOnly |
 
 ### Renewal policies:
@@ -82,7 +82,7 @@ const cache = new InvalidationPolicyCache({
 
 ```javascript
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { InvalidationPolicyCache } from "apollo-invalidation-policies";
+import { InvalidationPolicyCache } from "@nerdwallet/apollo-cache-policies";
 
 export default new ApolloClient({
   uri: "http://localhost:4000",
@@ -250,7 +250,7 @@ If a cache contains multiple entities like a user's profile, messages, and posts
 
 ### What use cases is this project targetting?
 
-The Apollo cache is not a relational datastore and as an extension of it, these invalidation policies are not going to be the best solution for every project. At its core it's a for loop that runs for each child x of type T when a matching policy event occurs for parent entity y of type T2. If your cache will consist of thousands of x's and y's dependent on each other with frequent policy triggers, then something like a client-side database would be a better choice. Our goal has been decreasing developer overhead when having to manage the invalidation of multiple of distinct, dependent cached queries.
+The Apollo cache is not a relational datastore and as an extension of it, these cache policies are not going to be the best solution for every project. At its core it's a for loop that runs for each child x of type T when a matching policy event occurs for parent entity y of type T2. If your cache will consist of thousands of x's and y's dependent on each other with frequent policy triggers, then something like a client-side database would be a better choice. Our goal has been decreasing developer overhead when having to manage the invalidation of multiple of distinct, dependent cached queries.
 
 ### Why a new cache and not a link?
 

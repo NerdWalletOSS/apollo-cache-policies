@@ -21,7 +21,7 @@ export enum ReadResultStatus {
 }
 
 /**
- * Processes the result of a cache read/write to run invalidation policies on the deeply nested objects.
+ * Processes the result of a cache read/write to run cache policies on the deeply nested objects.
  */
 export class CacheResultProcessor {
   constructor(private config: CacheResultProcessorConfig) { }

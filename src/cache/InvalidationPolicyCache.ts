@@ -15,7 +15,7 @@ import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 
 /**
- * Extension of Apollo in-memory cache which adds support for invalidation policies.
+ * Extension of Apollo in-memory cache which adds support for cache policies.
  */
 export default class InvalidationPolicyCache extends InMemoryCache {
   protected entityTypeMap: EntityTypeMap;
