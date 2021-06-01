@@ -1,3 +1,7 @@
+1.1.0 (Dan Reynolds)
+
+- Rename library to Apollo Cache Policies and release under the NerdWallet org at `@nerdwallet/apollo-cache-policies`
+
 1.0.0-beta16 (Dan Reynolds)
 
 - Release new version with React dependencies removed.

@@ -2,6 +2,8 @@
 
 # Apollo Cache Policies
 
+> Update: This library is now called Apollo Cache Policies and available at `@nerdwallet/apollo-cache-policies`.
+
 An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides a framework for managing the lifecycle and relationships of cache data through the use of additional cache policies.
 
 ## Installation
