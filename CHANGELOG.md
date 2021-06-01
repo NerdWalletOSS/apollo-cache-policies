@@ -1,3 +1,7 @@
+1.2.0 (Dan Reynolds)
+
+- Update to TypeScript ^4.0
+
 1.1.0 (Dan Reynolds)
 
 - Rename library to Apollo Cache Policies and release under the NerdWallet org at `@nerdwallet/apollo-cache-policies`
