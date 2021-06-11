@@ -1,3 +1,7 @@
+1.2.1 (Dan Reynolds)
+
+- Publish publicly. Sorry OSS friends!
+
 1.2.0 (Dan Reynolds)
 
 - Update to TypeScript ^4.0
