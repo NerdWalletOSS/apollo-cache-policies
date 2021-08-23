@@ -43,6 +43,8 @@ function _generateQueryFromFragment({
   };
 }
 
+// Returns a query that can be used to watch a normalized cache entity by converting the fragment to a query
+// and dynamically adding a type policy that returns the entity.
 export function buildWatchFragmentQuery(
   options: WatchFragmentOptions & {
     policies: Policies,
@@ -57,7 +59,9 @@ export function buildWatchFragmentQuery(
     fieldName: fragmentName,
   });
 
-  // @ts-ignore
+  // @ts-ignore The getFieldPolicy is private but we need it here to determine
+  // if the dynamic type policy we generate for the corresponding fragment has
+  // already been added
   if (!policies.getFieldPolicy('Query', fragmentName)) {
     policies.addTypePolicies({
       Query: {
@@ -75,6 +79,8 @@ export function buildWatchFragmentQuery(
   return query;
 }
 
+// Returns a query that can be used to watch a filtered list of normalized cache entities by converting the fragment to a query
+// and dynamically adding a type policy that returns the list of matching entities.
 export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmentWhereOptions<FragmentType> & {
   cache: InvalidationPolicyCache,
   policies: Policies,
@@ -89,7 +95,9 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
     fieldName: fragmentName,
   });
 
-  // @ts-ignore
+  // @ts-ignore The getFieldPolicy is private but we need it here to determine
+  // if the dynamic type policy we generate for the corresponding fragment has
+  // already been added
   if (!policies.getFieldPolicy('Query', fragmentName)) {
     policies.addTypePolicies({
       Query: {

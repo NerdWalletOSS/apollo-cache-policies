@@ -235,7 +235,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       this.writeFragment({
         id: collectionEntityId,
         fragment: gql`
-          fragment X on CacheExtensionsCollectionEntity {
+          fragment InitializeCollectionEntity on CacheExtensionsCollectionEntity {
             data
             id
           }
@@ -437,6 +437,8 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return extractedCache;
   }
 
+  // Supports reading a collection of entities by type from the cache and filtering them by the given fields. Returns
+  // a list of the dereferenced matching entities from the cache based on the given fragment.
   readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
     filters: Partial<Record<keyof FragmentType, any>>
   }): FragmentType[] {
@@ -460,6 +462,8 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return _.compact(matchingFragments);
   }
 
+  // Supports reading a collection of references by type from the cache and filtering them by the given fields. Returns a
+  // list of the matching references.
   readReferenceWhere<T>(options: Partial<Record<keyof T, any>> & {
     __typename: string,
   }) {

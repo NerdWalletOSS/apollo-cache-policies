@@ -9,6 +9,8 @@ import { buildWatchFragmentQuery, buildWatchFragmentWhereQuery } from './utils';
 import { InvalidationPolicyCache } from '../cache';
 import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
 
+// An extension of the Apollo client that add support for watching updates to entities
+// and collections of entities based on the provided filters.
 export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TCacheShape> {
   protected policies: Policies;
 
