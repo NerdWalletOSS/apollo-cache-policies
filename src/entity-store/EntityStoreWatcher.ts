@@ -3,11 +3,14 @@ import { StoreObject } from "@apollo/client/core";
 import EntityTypeMap from "./EntityTypeMap";
 import { NormalizedCacheObjectWithInvalidation } from "./types";
 import { makeEntityId, isQuery } from "../helpers";
+import { Policies } from '@apollo/client/cache/inmemory/policies';
+import { cacheExtensionsCanonicalEntityTypename } from '../cache/utils';
 
 interface EntityStoreWatcherConfig {
   entityStore: any;
   entityTypeMap: EntityTypeMap;
-  policies: any;
+  policies: Policies;
+  updateCanonicalField: (typename: string, dataId: string) => void;
 }
 
 type EntityStoreWatcherStoreFunctions = {
@@ -92,7 +95,8 @@ export default class EntityStoreWatcher {
     } else {
       const typename = incomingStoreObject.__typename;
       // If the incoming data is empty, the dataId entry in the cache is being deleted so do nothing
-      if (dataId && typename) {
+      if (dataId && typename && typename !== cacheExtensionsCanonicalEntityTypename) {
+        this.config.updateCanonicalField(typename, dataId);
         entityTypeMap.write(typename, dataId);
       }
     }

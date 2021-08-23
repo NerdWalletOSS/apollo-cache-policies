@@ -1,5 +1,6 @@
 import _ from "lodash";
 import {
+  gql,
   InMemoryCache,
   Cache,
   NormalizedCacheObject,
@@ -13,6 +14,8 @@ import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from ".
 import { InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
+import { FragmentDefinitionNode } from 'graphql';
+import { cacheExtensionsCanonicalEntityTypename, canonicalEntityIdForType } from './utils';
 
 /**
  * Extension of Apollo in-memory cache which adds support for cache policies.
@@ -32,11 +35,14 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     this.entityStoreRoot = this.data;
     this.isBroadcasting = false;
     this.entityTypeMap = new EntityTypeMap();
+
     new EntityStoreWatcher({
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
+      updateCanonicalField: this.updateCanonicalField.bind(this),
     });
+
     this.invalidationPolicyManager = new InvalidationPolicyManager({
       policies: invalidationPolicies,
       entityTypeMap: this.entityTypeMap,
@@ -219,6 +225,46 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
+  protected updateCanonicalField(typename: string, dataId: string) {
+    const canonicalEntityId = canonicalEntityIdForType(typename);
+    const canonicalFieldForTypeExists = !!this.readField<Record<string, any[]>>('id', makeReference(canonicalEntityId));
+
+    // If the canonical field for the type does not exist in the cache, then initialize it as
+    // an empty array.
+    if (!canonicalFieldForTypeExists) {
+      this.writeFragment({
+        id: canonicalEntityId,
+        fragment: gql`
+          fragment X on CacheExtensionsCanonicalEntity {
+            data
+            id
+          }
+        `,
+        data: {
+          __typename: cacheExtensionsCanonicalEntityTypename,
+          id: typename,
+          data: [],
+        },
+      });
+    }
+
+    // If the entity does not already exist in the cache, add it to the canonical field policy for its type
+    if (!this.entityTypeMap.readEntityById(dataId)) {
+      this.modify({
+        broadcast: false,
+        id: canonicalEntityId,
+        fields: {
+          data: (existing) => {
+            return [
+              ...existing,
+              makeReference(dataId),
+            ]
+          }
+        }
+      });
+    }
+  }
+
   // Returns all expired entities whose cache time exceeds their type's timeToLive or as a fallback
   // the global timeToLive if specified. Evicts the expired entities by default, with an option to only report
   // them.
@@ -389,5 +435,56 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return extractedCache;
+  }
+
+  readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
+    filters: Partial<Record<keyof FragmentType, any>>
+  }): FragmentType[] {
+    const { fragment, filters, ...restOptions } = options;
+    const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
+    const __typename = fragmentDefinition.typeCondition.name.value;
+
+    const matchingRefs = this.readReferenceWhere(
+      {
+        __typename,
+        ...filters
+      }
+    );
+
+    const matchingFragments = matchingRefs.map(ref => this.readFragment({
+      ...restOptions,
+      fragment,
+      id: ref.__ref,
+    }));
+
+    return _.compact(matchingFragments);
+  }
+
+  readReferenceWhere<T>(options: Partial<Record<keyof T, any>> & {
+    __typename: string,
+  }) {
+    const { __typename, ...filters } = options;
+    const canonicalEntityName = canonicalEntityIdForType(__typename);
+    const entityReferences = this.readField<Reference[]>('data', makeReference(canonicalEntityName));
+
+    if (!entityReferences) {
+      return [];
+    }
+
+    return entityReferences.filter(ref => {
+      const entityFilterResults = Object.keys(filters).map(filterField => {
+        // @ts-ignore
+        const filterValue = filters[filterField];
+        const entityValueForFilter = this.readField(filterField, ref);
+
+        if (_.isFunction(filterValue)) {
+          return filterValue(entityValueForFilter);
+        }
+
+        return filterValue === entityValueForFilter;
+      });
+
+      return _.every(entityFilterResults, Boolean);
+    });
   }
 }

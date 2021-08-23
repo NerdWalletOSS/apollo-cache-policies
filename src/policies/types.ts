@@ -1,6 +1,7 @@
-import { FieldNode } from 'graphql';
-import { Cache, Reference, StoreObject, StoreValue } from "@apollo/client/core";
 import EntityTypeMap from "../entity-store/EntityTypeMap";
+import { DocumentNode, FieldNode } from 'graphql';
+import { Cache, FieldFunctionOptions, Reference, StoreObject, StoreValue } from '@apollo/client';
+
 export interface FieldSpecifier {
   typename?: string;
   fieldName: string;
@@ -104,3 +105,30 @@ export interface InvalidationPolicyManagerConfig {
 export type InvalidationPolicyEventActivation = {
   [key in InvalidationPolicyEvent]: boolean;
 };
+export interface TypePoliciesSchemaInterface<TypedTypePolicies> {
+  typeDefs?: DocumentNode;
+  typePolicies: TypedTypePolicies;
+}
+
+export type DeepReference<SourceType> = SourceType extends Record<string, any>
+  ? SourceType extends { id: string }
+  ? Reference
+  : {
+    [K in keyof SourceType]: DeepReference<SourceType[K]>;
+  }
+  : SourceType extends Array<{ id: string }>
+  ? Array<Reference>
+  : SourceType;
+
+export interface ReadFieldFunction {
+  <T, K extends keyof T = keyof T>(
+    context: FieldFunctionOptions,
+    options: ReadFieldOptions
+  ): DeepReference<T[K]>;
+
+  <T, K extends keyof T = keyof T>(
+    context: FieldFunctionOptions,
+    fieldName: K,
+    from?: Reference | StoreObject | undefined
+  ): DeepReference<T[K]>;
+}

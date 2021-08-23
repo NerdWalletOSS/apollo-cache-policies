@@ -18,3 +18,7 @@ export interface CacheResultProcessorConfig {
   invalidationPolicyManager: InvalidationPolicyManager;
   cache: InvalidationPolicyCache;
 }
+
+export interface InvalidationPolicyCacheExtensions {
+  readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables>) : null;
+}

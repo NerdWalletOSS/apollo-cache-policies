@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { gql } from "@apollo/client/core";
 import { InvalidationPolicyCache } from "../src";
-import Employee from "./fixtures/employee";
+import Employee, { EmployeeType } from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
 import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 
@@ -177,6 +177,65 @@ describe("Cache", () => {
       data: { success: false },
     },
   };
+
+  describe('readFragmentWhere', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache({
+      });
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    describe('with non-functional filters', () => {
+      test.only('should return matching entities', () => {
+        const employeeFragment = gql`
+          fragment employee on Employee {
+            id
+            employee_name
+            employee_age
+            employee_salary
+          }
+        `;
+
+        const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+          fragment: employeeFragment,
+          filters: {
+            employee_name: employee.employee_name,
+            employee_salary: employee.employee_salary,
+          },
+        });
+
+        expect(matchingEntities).toEqual([employee]);
+      });
+    });
+
+    describe('with functional filters', () => {
+      test('should return matching entities', () => {
+        const employeeFragment = gql`
+          fragment employee on Employee {
+            id
+            employee_name
+            employee_age
+            employee_salary
+          }
+        `;
+
+
+        const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+          fragment: employeeFragment,
+          filters: {
+            employee_name: (entityName: string) => entityName === employee.employee_name,
+            employee_salary: employee.employee_salary,
+          },
+        });
+
+        expect(matchingEntities).toEqual([employee]);
+      });
+    })
+  });
+
 
   describe("with an Evict-on-Write cache policy", () => {
     beforeEach(() => {
