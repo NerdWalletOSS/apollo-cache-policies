@@ -3,7 +3,7 @@ import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
 import { InvalidationPolicyCache } from '../cache';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
 import { makeReference } from '@apollo/client/core';
-// import { canonicalEntityIdForType } from '../cache/utils';
+// import { collectionEntityIdForType } from '../cache/utils';
 
 function _generateQueryFromFragment({
   fieldName,

@@ -23,7 +23,7 @@ describe("#EntityStoreWatcher", () => {
       policies,
       entityTypeMap,
       entityStore,
-      updateCanonicalField: () => { }
+      updateCollectionField: () => { }
     });
   });
 
@@ -48,7 +48,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
-        updateCanonicalField: () => { }
+        updateCollectionField: () => { }
       });
       const mergeArgs: [string, StoreObject] = [
         "ROOT_QUERY",
@@ -107,7 +107,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
-        updateCanonicalField: () => { }
+        updateCollectionField: () => { }
       });
       entityStore.delete("ROOT_QUERY", "employees", undefined);
       expect(deleteSpy).toHaveBeenCalledWith(
@@ -155,7 +155,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
-        updateCanonicalField: () => { }
+        updateCollectionField: () => { }
       });
       entityStore.clear();
       expect(clearSpy).toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
-        updateCanonicalField: () => { }
+        updateCollectionField: () => { }
       });
     });
 
@@ -232,7 +232,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
-        updateCanonicalField: () => { }
+        updateCollectionField: () => { }
       });
       const entityStoreWatcherMergeSpy = jest
         // @ts-ignore

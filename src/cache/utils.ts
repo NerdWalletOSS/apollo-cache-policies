@@ -1,5 +1,5 @@
-export const cacheExtensionsCanonicalEntityTypename = 'CacheExtensionsCanonicalEntity';
+export const cacheExtensionsCollectionTypename = 'CacheExtensionsCollectionEntity';
 
-export function canonicalEntityIdForType(typename: string) {
-  return `${cacheExtensionsCanonicalEntityTypename}:${typename}`;
+export function collectionEntityIdForType(typename: string) {
+  return `${cacheExtensionsCollectionTypename}:${typename}`;
 }

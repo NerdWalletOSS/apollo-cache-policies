@@ -15,7 +15,7 @@ import { InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
-import { cacheExtensionsCanonicalEntityTypename, canonicalEntityIdForType } from './utils';
+import { cacheExtensionsCollectionTypename, collectionEntityIdForType } from './utils';
 
 /**
  * Extension of Apollo in-memory cache which adds support for cache policies.
@@ -40,7 +40,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
-      updateCanonicalField: this.updateCanonicalField.bind(this),
+      updateCollectionField: this.updateCollectionField.bind(this),
     });
 
     this.invalidationPolicyManager = new InvalidationPolicyManager({
@@ -225,34 +225,34 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
-  protected updateCanonicalField(typename: string, dataId: string) {
-    const canonicalEntityId = canonicalEntityIdForType(typename);
-    const canonicalFieldForTypeExists = !!this.readField<Record<string, any[]>>('id', makeReference(canonicalEntityId));
+  protected updateCollectionField(typename: string, dataId: string) {
+    const collectionEntityId = collectionEntityIdForType(typename);
+    const collectionFieldExists = !!this.readField<Record<string, any[]>>('id', makeReference(collectionEntityId));
 
-    // If the canonical field for the type does not exist in the cache, then initialize it as
+    // If the collection field for the type does not exist in the cache, then initialize it as
     // an empty array.
-    if (!canonicalFieldForTypeExists) {
+    if (!collectionFieldExists) {
       this.writeFragment({
-        id: canonicalEntityId,
+        id: collectionEntityId,
         fragment: gql`
-          fragment X on CacheExtensionsCanonicalEntity {
+          fragment X on CacheExtensionsCollectionEntity {
             data
             id
           }
         `,
         data: {
-          __typename: cacheExtensionsCanonicalEntityTypename,
+          __typename: cacheExtensionsCollectionTypename,
           id: typename,
           data: [],
         },
       });
     }
 
-    // If the entity does not already exist in the cache, add it to the canonical field policy for its type
+    // If the entity does not already exist in the cache, add it to the collection field policy for its type
     if (!this.entityTypeMap.readEntityById(dataId)) {
       this.modify({
         broadcast: false,
-        id: canonicalEntityId,
+        id: collectionEntityId,
         fields: {
           data: (existing) => {
             return [
@@ -464,8 +464,8 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     __typename: string,
   }) {
     const { __typename, ...filters } = options;
-    const canonicalEntityName = canonicalEntityIdForType(__typename);
-    const entityReferences = this.readField<Reference[]>('data', makeReference(canonicalEntityName));
+    const collectionEntityName = collectionEntityIdForType(__typename);
+    const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityName));
 
     if (!entityReferences) {
       return [];
