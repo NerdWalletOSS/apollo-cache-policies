@@ -2,6 +2,7 @@ import _ from "lodash";
 import { FieldNode, SelectionNode } from "graphql";
 import { Cache, makeReference } from "@apollo/client/core";
 import {
+  argumentsObjectFromField,
   createFragmentMap,
   getFragmentDefinitions,
   getFragmentFromSelection,
@@ -260,11 +261,11 @@ export class CacheResultProcessor {
             variables,
           });
 
-          const hasFieldArgs = (field?.arguments?.length ?? 0) > 0;
-          const fieldVariables = variables ?? (hasFieldArgs ? {} : undefined);
+          const fieldArgs = argumentsObjectFromField(field, variables);
+          const fieldVariables = variables ?? (fieldArgs !== null ? {} : undefined);
 
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
-          entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables);
+          entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables, fieldArgs);
 
           const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
             typename
@@ -283,6 +284,7 @@ export class CacheResultProcessor {
               storeFieldName,
               ref: makeReference(dataId),
               variables: fieldVariables,
+              args: fieldArgs,
             },
           });
         }
