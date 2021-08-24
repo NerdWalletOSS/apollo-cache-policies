@@ -74,7 +74,8 @@ const cache = new InvalidationPolicyCache({
 | `fieldName`          | The field for the entity in the Apollo cache            | string?             | `employees`                                                                                 |
 | `storeFieldName`     | The `fieldName` combined with its distinct variables    | string?             | `employees({ location: 'US' })`                                                             |
 | `variables`          | The variables the entity was written with               | Object?             | `{ location: 'US' }`                                                                        |
-| `storage`            | An object for storing unique entity metadata across policy action invocations | Object            | `{}`                                                                        |
+| `args`               | The args the field was written with                     | Object?             | `{ location: 'US' }`                                                                        |
+| `storage`            | An object for storing unique entity metadata across policy action invocations | Object            | `{}`                                                                    |
 | `parent`             | The parent entity that triggered the PolicyEvent        | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
 
 | Default Policy Action Entity | Description                                                                   | Type               | Example                                                                                     |

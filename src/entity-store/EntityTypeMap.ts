@@ -105,7 +105,8 @@ export default class EntityTypeMap {
     typename: string,
     dataId: string,
     storeFieldName?: string | null,
-    variables?: Record<string, any>
+    variables?: Record<string, any>,
+    args?: Record<string, any> | null
   ) {
     const fieldName = storeFieldName
       ? fieldNameFromStoreName(storeFieldName)
@@ -119,9 +120,11 @@ export default class EntityTypeMap {
           .entries[storeFieldName];
         if (storeFieldNameEntry) {
           storeFieldNameEntry.variables = variables;
+          storeFieldNameEntry.args = args;
         } else {
           existingTypeMapEntity.storeFieldNames!.entries[storeFieldName] = {
             variables,
+            args,
           };
           existingTypeMapEntity.storeFieldNames!.__size++;
         }
@@ -138,7 +141,7 @@ export default class EntityTypeMap {
           storeFieldNames: {
             __size: 1,
             entries: {
-              [storeFieldName]: { variables, cacheTime },
+              [storeFieldName]: { variables, args, cacheTime },
             },
           },
         };

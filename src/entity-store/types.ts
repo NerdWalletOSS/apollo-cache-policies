@@ -16,6 +16,7 @@ export interface TypeMapEntity {
       [index: string]: {
         cacheTime?: number;
         variables?: Record<string, any>;
+        args?: Record<string, any> | null;
       };
     };
   };

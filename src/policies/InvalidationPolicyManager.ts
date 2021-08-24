@@ -124,6 +124,7 @@ export default class InvalidationPolicyManager {
               fieldName,
               storeFieldName,
               variables: storeFieldNames.entries[storeFieldName].variables,
+              args: storeFieldNames.entries[storeFieldName].args,
               ref: makeReference(dataId),
               storage: this.getPolicyActionStorage(storeFieldName),
               ...policyMeta,

@@ -48,6 +48,7 @@ export interface PolicyActionFields {
   storeFieldName?: string;
   storage: PolicyActionStorage,
   variables?: Record<string, any>;
+  args?: Record<string, any> | null;
 }
 
 export type PolicyActionEntity = PolicyActionFields & PolicyActionMeta;
