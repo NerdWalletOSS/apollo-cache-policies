@@ -4,163 +4,236 @@
 
 > Update: This library is now called Apollo Cache Policies and available at `@nerdwallet/apollo-cache-policies`.
 
-An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides a framework for managing the lifecycle and relationships of cache data through the use of additional cache policies.
+An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides extensions to the Apollo cache including:
 
+* Type-based `time-to-live` (TTL) support.
+* Invalidation policies that codify relationships between types in the cache when entities are written or evicted `(Ex. On write X, update Y)`.
+* More features coming soon!
 ## Installation
 
 ```
 npm install @nerdwallet/apollo-cache-policies
 ```
 
-## Usage
+<details>
+  <summary>
+    Type TTLs
+  </summary>
 
-```javascript
-import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
-const cache = new InvalidationPolicyCache({
-  typePolicies: {...},
-  invalidationPolicies: {
-    timeToLive: Number;
-    renewalPolicy: RenewalPolicy;
-    types: {
-      Typename: {
-        timeToLive: Number,
-        renewalPolicy: RenewalPolicy,
-        PolicyEvent: {
-          Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
-          __default: (PolicyActionCacheOperation, DefaultPolicyActionEntity) => {}
-        },
+  <br>
+
+  ## Summary
+
+  Type-based TTLs are useful when you want to specify requirements on how long an instance of a specific type should live in the cache before it becomes stale and unusable. When an entity is attempted to be read from the cache, it will be lazily evicted if its TTL has expired and will trigger any queries watching that data to rerun in order to
+  fetch the latest values.
+
+  ## Usage
+
+  ```javascript
+  import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
+
+  const cache = new InvalidationPolicyCache({
+    typePolicies: {...},
+    invalidationPolicies: {
+      timeToLive: Number;
+      renewalPolicy: RenewalPolicy;
+      types: {
+        Typename: {
+          timeToLive: Number,
+          renewalPolicy: RenewalPolicy,
+        }
       }
     }
-  }
-});
-```
+  });
+  ```
+  ### Extended Type API
 
-| Config          | Description                                                                                | Required | Default   |
-| ----------------| -------------------------------------------------------------------------------------------|----------|-----------|
-| `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | false    | None      |
-| `types`         | The types for which cache policies have been defined                                       | false    | None      |
-| `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | false    | WriteOnly |
+  | Config          | Description                                                                                | Required | Default   |
+  | ----------------| -------------------------------------------------------------------------------------------|----------|-----------|
+  | `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | false    | None      |
+  | `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | false    | WriteOnly |
 
-### Renewal policies:
+  ### Extended Cache APIs
 
-* **AccessOnly** - After first write, the entity in the cache will renew its TTL on read
-* **AccessAndWrite** - After first write, the entity will renew its TTL on read or write
-* **WriteOnly** - After first write, the entity in the cache will renew its TTL on write
-* **None** - After first write, the entity in the cache will never renew its TTL on reads or writes.
+  | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
+  | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
+  | `expire`                 | Evicts all expired entities from the cache based on their type's or the global timeToLive | String[] - List of expired entity IDs evicted from the cache | N/A                          |
+  | `expiredEntities`        | Returns all expired entities still present in the cache                                   | String[] - List of expired entities in the cache             | N/A                          |
 
-| Policy Event   | Description                                                                                | Required |
-| ---------------| -------------------------------------------------------------------------------------------|----------|
-| `onWrite`      | On writing parent entity into cache, perform action for each type under the parent         | false    |
-| `onEvict`      | On evicting parent entity from cache, perform policy action for each type under the parent | false    |
+  ### Renewal Policies
 
-| Policy Action Cache Operation | Description                        |
-| ------------------------------| -----------------------------------|
-| `evict`                       | `evict` API from Apollo cache      |
-| `modify`                      | `modify` API from Apollo cache     |
-| `readField`                   | `readField` API from Apollo cache  |
+  The renewal policy for a type TTL determines when the TTL should be renewed, such as when the entity is re-written into the cache from a recent network query.
 
-| Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
-| -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
-| `expire`                 | Evicts all expired entities from the cache based on their type's or the global timeToLive | String[] - List of expired entity IDs evicted from the cache | N/A                          |
-| `expiredEntities`        | Returns all expired entities still present in the cache                                   | String[] - List of expired entities in the cache             | N/A                          |
-| `activePolicyEvents`     | Returns all active policy events (Read, Write, Evict)                                     | InvalidationPolicyEvent[] - List of active policy events     | N/A                          |
-| `activatePolicyEvents`   | Activates the provided policy events, defaults to all                                     | void                                                         | ...InvalidationPolicyEvent[] |
-| `deactivatePolicyEvents` | Dectivates the provided policy events, defaults to all                                    | void                                                         | ...InvalidationPolicyEvent[] |
+  * **AccessOnly** - After first write, the entity in the cache will renew its TTL on read
+  * **AccessAndWrite** - After first write, the entity will renew its TTL on read or write
+  * **WriteOnly** - After first write, the entity in the cache will renew its TTL on write
+  * **None** - After first write, the entity in the cache will never renew its TTL on reads or writes.
 
-| Policy Action Entity | Description                                             | Type               | Example                                                                                     |
-| ---------------------| --------------------------------------------------------|--------------------| ---------------------------------------------------------------------------------------------|
-| `id`                 | The id of the entity in the Apollo cache                | string              | `Employee:1`, `ROOT_QUERY`                                                                  |
-| `ref`                | The reference object for the entity in the Apollo cache | Reference           | `{ __ref: 'Employee:1' }`, `{ __ref: 'ROOT_QUERY' }`                                        |
-| `fieldName`          | The field for the entity in the Apollo cache            | string?             | `employees`                                                                                 |
-| `storeFieldName`     | The `fieldName` combined with its distinct variables    | string?             | `employees({ location: 'US' })`                                                             |
-| `variables`          | The variables the entity was written with               | Object?             | `{ location: 'US' }`                                                                        |
-| `args`               | The args the field was written with                     | Object?             | `{ location: 'US' }`                                                                        |
-| `storage`            | An object for storing unique entity metadata across policy action invocations | Object            | `{}`                                                                    |
-| `parent`             | The parent entity that triggered the PolicyEvent        | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
+  | Policy Event   | Description                                                                                | Required |
+  | ---------------| -------------------------------------------------------------------------------------------|----------|
+  | `onWrite`      | On writing parent entity into cache, perform action for each type under the parent         | false    |
+  | `onEvict`      | On evicting parent entity from cache, perform policy action for each type under the parent | false    |
 
-| Default Policy Action Entity | Description                                                                   | Type               | Example                                                                                     |
-| -----------------------------| ------------------------------------------------------------------------------|---------------------| ---------------------------------------------------------------------------------------------|
-| `storage`                    | An object for storing unique entity metadata across policy action invocations | Object              | `{}`                                                                        |
-| `parent`                     | The parent entity that triggered the PolicyEvent                              | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
+  | Policy Action Cache Operation | Description                        |
+  | ------------------------------| -----------------------------------|
+  | `evict`                       | `evict` API from Apollo cache      |
+  | `modify`                      | `modify` API from Apollo cache     |
+  | `readField`                   | `readField` API from Apollo cache  |
 
-```javascript
-import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { InvalidationPolicyCache } from "@nerdwallet/apollo-cache-policies";
+</details>
 
-export default new ApolloClient({
-  uri: "http://localhost:4000",
-  cache: new InvalidationPolicyCache({
+<details>
+  <summary>
+    Invalidation policies
+  </summary>
+
+  <br>
+
+  ## Summary
+
+  Invalidation policies codify relationships between different types in the cache. Since the default `InMemoryCache` from Apollo is a key-value store, it does not maintain relationships between different cache entities. Invalidation policies introduce event-based (onWrite, onEvict) policies between parent/child type entities.
+
+  ## Usage
+
+  ```javascript
+  import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
+
+  const cache = new InvalidationPolicyCache({
     typePolicies: {...},
     invalidationPolicies: {
       types: {
-        DeleteEmployeeResponse: {
-          // Delete an entity from the cache when it is deleted on the server
-          onWrite: {
-            Employee: ({ evict, readField }, { id, ref, parent: { variables } }) => {
-              if (parent.variables.employeeId === readField('id', ref)) {
-                evict({ id });
-              }
-            },
-          }
-        },
-        Employee: {
-          // Evict every message in the cache for an employee when they are evicted
-          onEvict: {
-            EmployeeMessage: ({ readField, evict }, { id, ref, parent }) => {
-              if (readField('employee_id', ref) === readField('id', parent.ref)) {
-                evict({ id });
-              }
-            },
-          }
-        },
-        EmployeeMessage: {
-          // Perform a side-effect whenever an employee message is evicted
-          onEvict: {
-            __default: (_cacheOperations, { parent: { id } }) => {
-              console.log(`Employee message ${id} was evicted`);
-            },
+        Typename: {
+          PolicyEvent: {
+            Typename: (PolicyActionCacheOperation, PolicyActionEntity) => {}
+            __default: (PolicyActionCacheOperation, DefaultPolicyActionEntity) => {}
           },
-        },
-        CreateEmployeeResponse: {
-          // Add an entity to a cached query when the parent type is written
-          onWrite: {
-            EmployeesResponse: ({ readField, modify }, { storeFieldName, parent }) => {
-              modify({
-                fields: {
-                  [storeFieldName]: (employeesResponse) => {
-                    const createdEmployeeResponse = readField({
-                      fieldName: parent.fieldName,
-                      args: parent.variables,
-                      from: parent.ref,
-                    });
-                    return {
-                      ...employeesResponse,
-                      data: [
-                        ...employeesResponse.data,
-                        createdEmployeesResponse.data,
-                      ]
-                    }
-                  }
-                }
-              });
-            },
-          },
-          EmployeesResponse: {
-            // Assign a time-to-live for types in the store. If accessed beyond their TTL,
-            // they are evicted and no data is returned.
-            timeToLive: 3600,
-          }
-        },
+        }
       }
     }
-  })
-});
-```
+  });
+  ```
+
+  ### Extended Cache API
+
+  The extended policies are by default triggered for on read, write or eviction of entities in the cache by type. If you want to enable or disable particular support for particular events in your application,
+  this can be done with the extended cache APIs for policy events.
+
+  | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
+  | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
+  | `activePolicyEvents`     | Returns all active policy events (Read, Write, Evict)                                     | InvalidationPolicyEvent[] - List of active policy events     | N/A                          |
+  | `activatePolicyEvents`   | Activates the provided policy events, defaults to all                                     | void                                                         | ...InvalidationPolicyEvent[] |
+  | `deactivatePolicyEvents` | Dectivates the provided policy events, defaults to all                                    | void                                                         | ...InvalidationPolicyEvent[] |
+
+  ### Policy Action Entity API
+
+  When an invalidation policy event is triggered, it will provide you with all the metadata required about which parent entity triggered the event and which child entity is affected.
+
+  | Policy Action Entity | Description                                             | Type               | Example                                                                                     |
+  | ---------------------| --------------------------------------------------------|--------------------| ---------------------------------------------------------------------------------------------|
+  | `id`                 | The id of the entity in the Apollo cache                | string              | `Employee:1`, `ROOT_QUERY`                                                                  |
+  | `ref`                | The reference object for the entity in the Apollo cache | Reference           | `{ __ref: 'Employee:1' }`, `{ __ref: 'ROOT_QUERY' }`                                        |
+  | `fieldName`          | The field for the entity in the Apollo cache            | string?             | `employees`                                                                                 |
+  | `storeFieldName`     | The `fieldName` combined with its distinct variables    | string?             | `employees({ location: 'US' })`                                                             |
+  | `variables`          | The variables the entity was written with               | Object?             | `{ location: 'US' }`                                                                        |
+  | `args`               | The args the field was written with                     | Object?             | `{ location: 'US' }`                                                                        |
+  | `storage`            | An object for storing unique entity metadata across policy action invocations | Object            | `{}`                                                                    |
+  | `parent`             | The parent entity that triggered the PolicyEvent        | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
+
+  | Default Policy Action Entity | Description                                                                   | Type               | Example                                                                                     |
+  | -----------------------------| ------------------------------------------------------------------------------|---------------------| ---------------------------------------------------------------------------------------------|
+  | `storage`                    | An object for storing unique entity metadata across policy action invocations | Object              | `{}`                                                                        |
+  | `parent`                     | The parent entity that triggered the PolicyEvent                              | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
+</details>
+
+
+<details>
+  <summary>
+    Example usage
+  </summary>
+
+  <br>
+
+  ```javascript
+  import { ApolloClient, InMemoryCache } from "@apollo/client";
+  import { InvalidationPolicyCache } from "@nerdwallet/apollo-cache-policies";
+
+  export default new ApolloClient({
+    uri: "http://localhost:4000",
+    cache: new InvalidationPolicyCache({
+      typePolicies: {...},
+      invalidationPolicies: {
+        types: {
+          DeleteEmployeeResponse: {
+            // Delete an entity from the cache when it is deleted on the server
+            onWrite: {
+              Employee: ({ evict, readField }, { id, ref, parent: { variables } }) => {
+                if (parent.variables.employeeId === readField('id', ref)) {
+                  evict({ id });
+                }
+              },
+            }
+          },
+          Employee: {
+            // Evict every message in the cache for an employee when they are evicted
+            onEvict: {
+              EmployeeMessage: ({ readField, evict }, { id, ref, parent }) => {
+                if (readField('employee_id', ref) === readField('id', parent.ref)) {
+                  evict({ id });
+                }
+              },
+            }
+          },
+          EmployeeMessage: {
+            // Perform a side-effect whenever an employee message is evicted
+            onEvict: {
+              __default: (_cacheOperations, { parent: { id } }) => {
+                console.log(`Employee message ${id} was evicted`);
+              },
+            },
+          },
+          CreateEmployeeResponse: {
+            // Add an entity to a cached query when the parent type is written
+            onWrite: {
+              EmployeesResponse: ({ readField, modify }, { storeFieldName, parent }) => {
+                modify({
+                  fields: {
+                    [storeFieldName]: (employeesResponse) => {
+                      const createdEmployeeResponse = readField({
+                        fieldName: parent.fieldName,
+                        args: parent.variables,
+                        from: parent.ref,
+                      });
+                      return {
+                        ...employeesResponse,
+                        data: [
+                          ...employeesResponse.data,
+                          createdEmployeesResponse.data,
+                        ]
+                      }
+                    }
+                  }
+                });
+              },
+            },
+            EmployeesResponse: {
+              // Assign a time-to-live for types in the store. If accessed beyond their TTL,
+              // they are evicted and no data is returned.
+              timeToLive: 3600,
+            }
+          },
+        }
+      }
+    })
+  });
+  ```
+</details>
 
 <details>
   <summary>
     Why does this exist?
   </summary>
+
+  <br>
 
 The Apollo client cache is a powerful tool for managing client data with support for optimistic data, request retrying, polling and with Apollo 3.0, robust cache modification and eviction.
 
@@ -251,11 +324,13 @@ If a cache contains multiple entities like a user's profile, messages, and posts
     FAQs
   </summary>
 
+  <br>
+
 ### What use cases is this project targetting?
 
 The Apollo cache is not a relational datastore and as an extension of it, these cache policies are not going to be the best solution for every project. At its core it's a for loop that runs for each child x of type T when a matching policy event occurs for parent entity y of type T2. If your cache will consist of thousands of x's and y's dependent on each other with frequent policy triggers, then something like a client-side database would be a better choice. Our goal has been decreasing developer overhead when having to manage the invalidation of multiple of distinct, dependent cached queries.
 
-### Why a new cache and not a link?
+### Why extend the cache instead of using an Apollo link?
 
 Apollo links are great tools for watching queries and mutations hitting the network. There even exists a [Watched Mutation](https://github.com/afafafafafaf/apollo-link-watched-mutation) link which provides some of the desired behavior of this library.
 
