@@ -9,11 +9,18 @@ An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing
 * Type-based `time-to-live` (TTL) support.
 * Invalidation policies that codify relationships between types in the cache when entities are written or evicted `(Ex. On write X, update Y)`.
 * More features coming soon!
-## Installation
 
-```
-npm install @nerdwallet/apollo-cache-policies
-```
+<details>
+  <summary>
+    Installation
+  </summary>
+
+  <br>
+
+  ```
+  npm install @nerdwallet/apollo-cache-policies
+  ```
+</details>
 
 <details>
   <summary>
