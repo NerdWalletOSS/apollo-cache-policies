@@ -178,9 +178,10 @@ describe("Cache", () => {
     },
   };
 
-  describe('readFragmentWhere', () => {
+  describe('with collections enabled', () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
+        enableCollections: true,
       });
       cache.writeQuery({
         query: employeesQuery,
@@ -188,52 +189,77 @@ describe("Cache", () => {
       });
     });
 
-    describe('with non-functional filters', () => {
-      test.only('should return matching entities', () => {
-        const employeeFragment = gql`
-          fragment employee on Employee {
-            id
-            employee_name
-            employee_age
-            employee_salary
-          }
-        `;
-
-        const matchingEntities = cache.readFragmentWhere<EmployeeType>({
-          fragment: employeeFragment,
-          filters: {
-            employee_name: employee.employee_name,
-            employee_salary: employee.employee_salary,
+    test('should record refs under the correct collection entity by type', () => {
+      expect(cache.extract(true, false)).toEqual({
+        "CacheExtensionsCollectionEntity:Employee": {
+          __typename: 'CacheExtensionsCollectionEntity',
+          id: 'Employee',
+          data: [
+            { __ref: employee.toRef() }, { __ref: employee2.toRef() }
+          ],
+        },
+        [employee.toRef()]: employee,
+        [employee2.toRef()]: employee2,
+        ROOT_QUERY: {
+          __typename: "Query",
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
           },
-        });
-
-        expect(matchingEntities).toEqual([employee]);
+        },
+        __META: {
+          extraRootIds: [
+            'CacheExtensionsCollectionEntity:Employee'
+          ]
+        }
       });
     });
 
-    describe('with functional filters', () => {
-      test('should return matching entities', () => {
-        const employeeFragment = gql`
-          fragment employee on Employee {
-            id
-            employee_name
-            employee_age
-            employee_salary
-          }
-        `;
+    describe('readFragmentWhere', () => {
+      describe('with an object filter', () => {
+        test('should return matching entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
 
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            filter: {
+              employee_name: employee.employee_name,
+              employee_salary: employee.employee_salary,
+            },
+          });
 
-        const matchingEntities = cache.readFragmentWhere<EmployeeType>({
-          fragment: employeeFragment,
-          filters: {
-            employee_name: (entityName: string) => entityName === employee.employee_name,
-            employee_salary: employee.employee_salary,
-          },
+          expect(matchingEntities).toEqual([employee]);
         });
-
-        expect(matchingEntities).toEqual([employee]);
       });
-    })
+
+      describe('with a function filter', () => {
+        test('should return matching entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            filter: (ref, readField) => readField('employee_name', ref) === employee.employee_name,
+          });
+
+          expect(matchingEntities).toEqual([employee]);
+        });
+      });
+    });
   });
 
 

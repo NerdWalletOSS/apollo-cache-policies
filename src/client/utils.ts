@@ -84,7 +84,7 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
   cache: InvalidationPolicyCache,
   policies: Policies,
 }): DocumentNode {
-  const { fragment, filters, policies, cache } = options;
+  const { fragment, filter, policies, cache } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
   const fragmentName = fragmentDefinition.name.value;
   const __typename = fragmentDefinition.typeCondition.name.value;
@@ -105,7 +105,7 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
             read(_existing) {
               return cache.readReferenceWhere({
                 __typename,
-                ...filters,
+                filter,
               });
             }
           }

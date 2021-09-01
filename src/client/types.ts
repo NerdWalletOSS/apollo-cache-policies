@@ -1,4 +1,5 @@
 import { DocumentNode } from 'graphql';
+import { Reference } from "@apollo/client/core";
 
 export type WatchFragmentOptions = {
   fragment: DocumentNode,
@@ -7,5 +8,5 @@ export type WatchFragmentOptions = {
 
 export type WatchFragmentWhereOptions<FragmentType> = {
   fragment: DocumentNode;
-  filters: Partial<Record<keyof FragmentType, any>>;
+  filter: Partial<Record<keyof FragmentType, any>> | ((__ref: Reference) => boolean);
 }

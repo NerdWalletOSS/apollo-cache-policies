@@ -26,13 +26,15 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected cacheResultProcessor: CacheResultProcessor;
   protected entityStoreRoot: any;
   protected isBroadcasting: boolean;
+  protected enableCollections: boolean;
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
-    const { invalidationPolicies = {}, ...inMemoryCacheConfig } = config;
+    const { invalidationPolicies = {}, enableCollections = false, ...inMemoryCacheConfig } = config;
     super(inMemoryCacheConfig);
 
     // @ts-ignore
     this.entityStoreRoot = this.data;
+    this.enableCollections = enableCollections;
     this.isBroadcasting = false;
     this.entityTypeMap = new EntityTypeMap();
 
@@ -226,6 +228,11 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   }
 
   protected updateCollectionField(typename: string, dataId: string) {
+    // Since colletion support is still experimental, only record entities in collections if enabled
+    if (!this.enableCollections) {
+      return;
+    }
+
     const collectionEntityId = collectionEntityIdForType(typename);
     const collectionFieldExists = !!this.readField<Record<string, any[]>>('id', makeReference(collectionEntityId));
 
@@ -440,16 +447,16 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // Supports reading a collection of entities by type from the cache and filtering them by the given fields. Returns
   // a list of the dereferenced matching entities from the cache based on the given fragment.
   readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
-    filters: Partial<Record<keyof FragmentType, any>>
+    filter: Partial<Record<keyof FragmentType, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);
   }): FragmentType[] {
-    const { fragment, filters, ...restOptions } = options;
+    const { fragment, filter, ...restOptions } = options;
     const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
     const __typename = fragmentDefinition.typeCondition.name.value;
 
     const matchingRefs = this.readReferenceWhere(
       {
         __typename,
-        ...filters
+        filter
       }
     );
 
@@ -464,10 +471,11 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
   // Supports reading a collection of references by type from the cache and filtering them by the given fields. Returns a
   // list of the matching references.
-  readReferenceWhere<T>(options: Partial<Record<keyof T, any>> & {
+  readReferenceWhere<T>(options: {
     __typename: string,
+    filter: Partial<Record<keyof T, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);
   }) {
-    const { __typename, ...filters } = options;
+    const { __typename, filter } = options;
     const collectionEntityName = collectionEntityIdForType(__typename);
     const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityName));
 
@@ -476,14 +484,15 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return entityReferences.filter(ref => {
-      const entityFilterResults = Object.keys(filters).map(filterField => {
-        // @ts-ignore
-        const filterValue = filters[filterField];
-        const entityValueForFilter = this.readField(filterField, ref);
+      debugger;
+      if (_.isFunction(filter)) {
+        return filter(ref, this.readField.bind(this));
+      }
 
-        if (_.isFunction(filterValue)) {
-          return filterValue(entityValueForFilter);
-        }
+      const entityFilterResults = Object.keys(filter).map(filterField => {
+        // @ts-ignore
+        const filterValue = filter[filterField];
+        const entityValueForFilter = this.readField(filterField, ref);
 
         return filterValue === entityValueForFilter;
       });

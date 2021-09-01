@@ -6,6 +6,7 @@ import { InvalidationPolicyCache } from ".";
 
 export interface InvalidationPolicyCacheConfig extends InMemoryCacheConfig {
   invalidationPolicies?: InvalidationPolicies;
+  enableCollections?: boolean;
 }
 
 export interface InvalidationPolicyCacheEvictOptions
