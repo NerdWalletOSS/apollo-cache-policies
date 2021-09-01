@@ -28,7 +28,7 @@
   "homepage": "https://github.com/NerdWalletOSS/apollo-cache-policies#readme",
   "peerDependencies": {
     "@apollo/client": "^3.3.0",
-    "react": "^16.0.0"
+    "react": "^16.8.0"
   },
   "dependencies": {
     "@types/graphql": "^14.5.0",
