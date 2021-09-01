@@ -484,7 +484,6 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return entityReferences.filter(ref => {
-      debugger;
       if (_.isFunction(filter)) {
         return filter(ref, this.readField.bind(this));
       }
