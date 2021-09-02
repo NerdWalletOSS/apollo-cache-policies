@@ -11,7 +11,7 @@ import {
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
-import { InvalidationPolicyCacheConfig } from "./types";
+import { FragmentWhereFilter, InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
@@ -447,7 +447,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // Supports reading a collection of entities by type from the cache and filtering them by the given fields. Returns
   // a list of the dereferenced matching entities from the cache based on the given fragment.
   readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
-    filter: Partial<Record<keyof FragmentType, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);
+    filter?: FragmentWhereFilter<FragmentType>;
   }): FragmentType[] {
     const { fragment, filter, ...restOptions } = options;
     const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
@@ -473,7 +473,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // list of the matching references.
   readReferenceWhere<T>(options: {
     __typename: string,
-    filter: Partial<Record<keyof T, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);
+    filter?: FragmentWhereFilter<T>;
   }) {
     const { __typename, filter } = options;
     const collectionEntityName = collectionEntityIdForType(__typename);
@@ -481,6 +481,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
     if (!entityReferences) {
       return [];
+    }
+
+    if (!filter) {
+      return entityReferences;
     }
 
     return entityReferences.filter(ref => {

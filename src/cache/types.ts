@@ -1,4 +1,4 @@
-import { Cache, InMemoryCacheConfig } from "@apollo/client/core";
+import { Cache, InMemoryCacheConfig, Reference } from "@apollo/client/core";
 import { InvalidationPolicies, PolicyActionMeta } from "../policies/types";
 import { EntityTypeMap } from "../entity-store";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
@@ -19,3 +19,5 @@ export interface CacheResultProcessorConfig {
   invalidationPolicyManager: InvalidationPolicyManager;
   cache: InvalidationPolicyCache;
 }
+
+export type FragmentWhereFilter<T> = Partial<Record<keyof T, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);

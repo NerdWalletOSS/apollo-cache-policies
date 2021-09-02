@@ -259,6 +259,25 @@ describe("Cache", () => {
           expect(matchingEntities).toEqual([employee]);
         });
       });
+
+      describe('with no filter', () => {
+        test('should return all entities of the given type', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+          });
+
+          expect(matchingEntities).toEqual([employee, employee2]);
+        });
+      });
     });
   });
 

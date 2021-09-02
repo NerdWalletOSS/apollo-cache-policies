@@ -1,5 +1,5 @@
 import { DocumentNode } from 'graphql';
-import { Reference } from "@apollo/client/core";
+import { FragmentWhereFilter } from '../cache/types';
 
 export type WatchFragmentOptions = {
   fragment: DocumentNode,
@@ -8,5 +8,5 @@ export type WatchFragmentOptions = {
 
 export type WatchFragmentWhereOptions<FragmentType> = {
   fragment: DocumentNode;
-  filter: Partial<Record<keyof FragmentType, any>> | ((__ref: Reference) => boolean);
+  filter?: FragmentWhereFilter<FragmentType>;
 }
