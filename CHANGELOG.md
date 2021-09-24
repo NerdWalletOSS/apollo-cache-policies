@@ -1,3 +1,7 @@
+1.3.0 (Dan Reynolds)
+
+- Adds experimental normalized collections
+
 1.2.1 (Dan Reynolds)
 
 - Publish publicly. Sorry OSS friends!
