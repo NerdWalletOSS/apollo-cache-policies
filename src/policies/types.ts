@@ -1,6 +1,7 @@
-import { FieldNode } from 'graphql';
-import { Cache, Reference, StoreObject, StoreValue } from "@apollo/client/core";
 import EntityTypeMap from "../entity-store/EntityTypeMap";
+import { FieldNode } from 'graphql';
+import { Cache, Reference, StoreObject, StoreValue } from '@apollo/client';
+
 export interface FieldSpecifier {
   typename?: string;
   fieldName: string;

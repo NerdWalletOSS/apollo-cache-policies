@@ -1,5 +1,6 @@
 import _ from "lodash";
 import {
+  gql,
   InMemoryCache,
   Cache,
   NormalizedCacheObject,
@@ -10,9 +11,11 @@ import {
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
-import { InvalidationPolicyCacheConfig } from "./types";
+import { FragmentWhereFilter, InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
+import { FragmentDefinitionNode } from 'graphql';
+import { cacheExtensionsCollectionTypename, collectionEntityIdForType } from './utils';
 
 /**
  * Extension of Apollo in-memory cache which adds support for cache policies.
@@ -23,20 +26,25 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected cacheResultProcessor: CacheResultProcessor;
   protected entityStoreRoot: any;
   protected isBroadcasting: boolean;
+  protected enableCollections: boolean;
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
-    const { invalidationPolicies = {}, ...inMemoryCacheConfig } = config;
+    const { invalidationPolicies = {}, enableCollections = false, ...inMemoryCacheConfig } = config;
     super(inMemoryCacheConfig);
 
     // @ts-ignore
     this.entityStoreRoot = this.data;
+    this.enableCollections = enableCollections;
     this.isBroadcasting = false;
     this.entityTypeMap = new EntityTypeMap();
+
     new EntityStoreWatcher({
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
+      updateCollectionField: this.updateCollectionField.bind(this),
     });
+
     this.invalidationPolicyManager = new InvalidationPolicyManager({
       policies: invalidationPolicies,
       entityTypeMap: this.entityTypeMap,
@@ -219,6 +227,51 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
+  protected updateCollectionField(typename: string, dataId: string) {
+    // Since colletion support is still experimental, only record entities in collections if enabled
+    if (!this.enableCollections) {
+      return;
+    }
+
+    const collectionEntityId = collectionEntityIdForType(typename);
+    const collectionFieldExists = !!this.readField<Record<string, any[]>>('id', makeReference(collectionEntityId));
+
+    // If the collection field for the type does not exist in the cache, then initialize it as
+    // an empty array.
+    if (!collectionFieldExists) {
+      this.writeFragment({
+        id: collectionEntityId,
+        fragment: gql`
+          fragment InitializeCollectionEntity on CacheExtensionsCollectionEntity {
+            data
+            id
+          }
+        `,
+        data: {
+          __typename: cacheExtensionsCollectionTypename,
+          id: typename,
+          data: [],
+        },
+      });
+    }
+
+    // If the entity does not already exist in the cache, add it to the collection field policy for its type
+    if (!this.entityTypeMap.readEntityById(dataId)) {
+      this.modify({
+        broadcast: false,
+        id: collectionEntityId,
+        fields: {
+          data: (existing) => {
+            return [
+              ...existing,
+              makeReference(dataId),
+            ]
+          }
+        }
+      });
+    }
+  }
+
   // Returns all expired entities whose cache time exceeds their type's timeToLive or as a fallback
   // the global timeToLive if specified. Evicts the expired entities by default, with an option to only report
   // them.
@@ -389,5 +442,65 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return extractedCache;
+  }
+
+  // Supports reading a collection of entities by type from the cache and filtering them by the given fields. Returns
+  // a list of the dereferenced matching entities from the cache based on the given fragment.
+  readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
+    filter?: FragmentWhereFilter<FragmentType>;
+  }): FragmentType[] {
+    const { fragment, filter, ...restOptions } = options;
+    const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
+    const __typename = fragmentDefinition.typeCondition.name.value;
+
+    const matchingRefs = this.readReferenceWhere(
+      {
+        __typename,
+        filter
+      }
+    );
+
+    const matchingFragments = matchingRefs.map(ref => this.readFragment({
+      ...restOptions,
+      fragment,
+      id: ref.__ref,
+    }));
+
+    return _.compact(matchingFragments);
+  }
+
+  // Supports reading a collection of references by type from the cache and filtering them by the given fields. Returns a
+  // list of the matching references.
+  readReferenceWhere<T>(options: {
+    __typename: string,
+    filter?: FragmentWhereFilter<T>;
+  }) {
+    const { __typename, filter } = options;
+    const collectionEntityName = collectionEntityIdForType(__typename);
+    const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityName));
+
+    if (!entityReferences) {
+      return [];
+    }
+
+    if (!filter) {
+      return entityReferences;
+    }
+
+    return entityReferences.filter(ref => {
+      if (_.isFunction(filter)) {
+        return filter(ref, this.readField.bind(this));
+      }
+
+      const entityFilterResults = Object.keys(filter).map(filterField => {
+        // @ts-ignore
+        const filterValue = filter[filterField];
+        const entityValueForFilter = this.readField(filterField, ref);
+
+        return filterValue === entityValueForFilter;
+      });
+
+      return _.every(entityFilterResults, Boolean);
+    });
   }
 }

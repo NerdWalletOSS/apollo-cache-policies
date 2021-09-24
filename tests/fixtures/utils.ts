@@ -4,9 +4,9 @@ interface toRefContext {
   [key: string]: any;
 }
 
-type FixtureGenerator = (data?: object) => Fixture;
+type FixtureGenerator<T = any> = (data?: object) => Fixture<T>;
 
-export interface Fixture {
+export type Fixture<T> = T & {
   [key: string]: any;
   __typename: string;
   toRef: () => string;
@@ -18,16 +18,16 @@ function toRef(this: toRefContext) {
 
 const fixtures: { [key: string]: () => FixtureGenerator } = {};
 
-export const createFixture = (
+export const createFixture = <T>(
   typename: string,
   generator: (index: number) => object
-) => {
+): FixtureGenerator<T> => {
   fixtures[typename] = (): FixtureGenerator => {
     let count = 0;
 
     return (data?: object) => {
       count += 1;
-      const fixtureObject = _.assign(generator(count), data) as Fixture;
+      const fixtureObject = _.assign(generator(count), data) as Fixture<T>;
       fixtureObject.__typename = typename;
       fixtureObject.toRef = toRef;
       Object.defineProperty(fixtureObject, "toRef", {
@@ -41,5 +41,7 @@ export const createFixture = (
     };
   };
 
-  return fixtures[typename]();
+  const fixture = fixtures[typename] as () => FixtureGenerator<T>;
+
+  return fixture();
 };

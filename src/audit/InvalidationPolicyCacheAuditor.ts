@@ -18,6 +18,7 @@ export default class InvalidationPolicyCacheAuditor extends InvalidationPolicyCa
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
+      updateCollectionField: this.updateCollectionField.bind(this),
     });
     this.invalidationPolicyManager = new InvalidationPolicyManagerAuditor({
       auditLog: this.auditLog,

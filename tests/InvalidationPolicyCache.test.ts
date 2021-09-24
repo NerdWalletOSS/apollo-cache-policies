@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { gql } from "@apollo/client/core";
 import { InvalidationPolicyCache } from "../src";
-import Employee from "./fixtures/employee";
+import Employee, { EmployeeType } from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
 import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 
@@ -177,6 +177,110 @@ describe("Cache", () => {
       data: { success: false },
     },
   };
+
+  describe('with collections enabled', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache({
+        enableCollections: true,
+      });
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    test('should record refs under the correct collection entity by type', () => {
+      expect(cache.extract(true, false)).toEqual({
+        "CacheExtensionsCollectionEntity:Employee": {
+          __typename: 'CacheExtensionsCollectionEntity',
+          id: 'Employee',
+          data: [
+            { __ref: employee.toRef() }, { __ref: employee2.toRef() }
+          ],
+        },
+        [employee.toRef()]: employee,
+        [employee2.toRef()]: employee2,
+        ROOT_QUERY: {
+          __typename: "Query",
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+          },
+        },
+        __META: {
+          extraRootIds: [
+            'CacheExtensionsCollectionEntity:Employee'
+          ]
+        }
+      });
+    });
+
+    describe('readFragmentWhere', () => {
+      describe('with an object filter', () => {
+        test('should return matching entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            filter: {
+              employee_name: employee.employee_name,
+              employee_salary: employee.employee_salary,
+            },
+          });
+
+          expect(matchingEntities).toEqual([employee]);
+        });
+      });
+
+      describe('with a function filter', () => {
+        test('should return matching entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            filter: (ref, readField) => readField('employee_name', ref) === employee.employee_name,
+          });
+
+          expect(matchingEntities).toEqual([employee]);
+        });
+      });
+
+      describe('with no filter', () => {
+        test('should return all entities of the given type', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+          });
+
+          expect(matchingEntities).toEqual([employee, employee2]);
+        });
+      });
+    });
+  });
+
 
   describe("with an Evict-on-Write cache policy", () => {
     beforeEach(() => {
