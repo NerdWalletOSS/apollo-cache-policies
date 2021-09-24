@@ -26,7 +26,7 @@ npm install @nerdwallet/apollo-cache-policies
 
   ## Summary
 
-  Type-based TTLs are useful when you want to specify requirements on how long an instance of a specific type should live in the cache before it becomes stale and unusable. When an entity is attempted to be read from the cache, it will be lazily evicted if it has been in the cache longer than it's TTL duration (specified in milliseconds) and will trigger any queries watching that data to rerun in order to fetch new data.
+Type-based TTLs are useful when you want to specify requirements on how long an instance of a specific type should live in the cache before it becomes stale and unusable. When an entity is attempted to be read from the cache, it will be lazily evicted if it has been in the cache longer than it's TTL duration (specified in milliseconds) and will trigger any queries watching that data to rerun in order to fetch new data.
 
   ## Specification
 
@@ -115,7 +115,7 @@ npm install @nerdwallet/apollo-cache-policies
 
   ## Summary
 
-  Invalidation policies codify relationships between different types in the cache. Since the default `InMemoryCache` from Apollo is a key-value store, it does not maintain relationships between different cache entities. Invalidation policies introduce event-based (onWrite, onEvict) policies between parent/child type entities.
+  Invalidation policies codify relationships between different types in the cache. Since the default `InMemoryCache` from Apollo is a key-value store, it does not maintain relationships between different cache entities. Invalidation policies introduce event-based (onWrite, onEvict) policies between parent/child type entities. Read more about the background for invalidation policies in [our blog post](https://danreynolds.ca/tech/2021/02/05/Apollo-Invalidation-Policies/).
 
   ## Specification
 
@@ -209,8 +209,7 @@ npm install @nerdwallet/apollo-cache-policies
   ```
   ## Invalidation Policies Cache API
 
-  The extended policies are by default triggered for on read, write or eviction of entities in the cache by type. If you want to enable or disable particular support for particular events in your application,
-  this can be done with the extended cache APIs for policy events.
+  The extended policies are by default triggered for on read, write or eviction of entities in the cache by type. If you want to enable or disable particular support for particular events in your application, this can be done with the extended cache APIs for policy events.
 
   | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
   | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
@@ -249,7 +248,7 @@ npm install @nerdwallet/apollo-cache-policies
 
   ## Normalized Collections
 
-  Normalized collections introduce ways of accessing and filtering all entities in the cache of a given type. They are useful for scenarios where clients may want to access all entities in the cache of a particular type matching a set of filters like a list of all products to show or all the messages of a conversation. To read more about the motivation for this feature, check out [this blog post](https://danreynolds.ca/tech/2021/09/23/Apollo-Normalized-Collections/).
+  Normalized collections introduce ways of accessing and filtering all entities in the cache of a given type. They are useful for scenarios where clients may want to access all entities in the cache of a particular type matching a set of filters like a list of all products to show or all the messages of a conversation. To read more about the motivation for this feature, check out [our blog post](https://danreynolds.ca/tech/2021/09/23/Apollo-Normalized-Collections/).
 
   To use normalized collections, enable it in the cache with the collections flag below:
 
