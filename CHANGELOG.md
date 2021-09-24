@@ -2,6 +2,10 @@
 
 - Adds experimental normalized collections
 
+1.2.2 (Dan Reynolds)
+
+- Expose args field on policy action meta objects
+
 1.2.1 (Dan Reynolds)
 
 - Publish publicly. Sorry OSS friends!

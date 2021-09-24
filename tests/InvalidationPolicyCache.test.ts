@@ -856,6 +856,7 @@ describe("Cache", () => {
                     __size: 1,
                     entries: {
                       employees: {
+                        args: null,
                         cacheTime: 0,
                         variables: {},
                       },
@@ -936,6 +937,7 @@ describe("Cache", () => {
                       'employees({"name":"Tester McTest"})': {
                         cacheTime: 0,
                         variables: { name: "Tester McTest" },
+                        args: { name: "Tester McTest" }
                       },
                     },
                   },
@@ -981,6 +983,9 @@ describe("Cache", () => {
                         variables: {
                           name: "Tester McTest",
                           unsupportedField: true,
+                        },
+                        args: {
+                          name: "Tester McTest",
                         },
                       },
                     },
