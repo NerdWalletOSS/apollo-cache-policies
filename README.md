@@ -327,7 +327,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
         fields: {
           readBankingTeam: {
             read(_existingBankingTeam, { cache }) {
-              return cache.readReferenceWhere(
+              return cache.readReferenceWhere<Employee>(
                 {
                   __typename: 'Employee',
                   filter: {
