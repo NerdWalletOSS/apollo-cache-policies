@@ -2048,42 +2048,6 @@ describe("Cache", () => {
                 dateNowSpy.mockRestore();
               });
             });
-
-            describe("that is read while there is an outstanding optimistic mutation", () => {
-              test("should evict the query field from the cache", () => {
-                let queryResult: any;
-                cache = new InvalidationPolicyCache({
-                  invalidationPolicies: {
-                    types: {
-                      EmployeesResponse: {
-                        timeToLive,
-                      },
-                    },
-                  },
-                });
-                let dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
-                cache.writeQuery({
-                  query: employeesQuery,
-                  data: employeesResponse,
-                });
-                cache.recordOptimisticTransaction((proxy) => {
-                  dateNowSpy.mockRestore();
-                  dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
-                  queryResult = proxy.readQuery({
-                    query: employeesQuery,
-                  });
-                  dateNowSpy.mockRestore();
-                }, "read optimistic query");
-                expect(queryResult).toEqual({});
-                expect(cache.extract(true, false)).toEqual({
-                  [employee.toRef()]: employee,
-                  [employee2.toRef()]: employee2,
-                  ROOT_QUERY: {
-                    __typename: "Query",
-                  },
-                });
-              });
-            });
           });
 
           describe("that has been re-written since expiring", () => {

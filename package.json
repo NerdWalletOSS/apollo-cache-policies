@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/NerdWalletOSS/apollo-cache-policies#readme",
   "peerDependencies": {
-    "@apollo/client": "^3.3.0",
+    "@apollo/client": "^3.4.15",
     "react": "^16.8.0"
   },
   "dependencies": {
@@ -40,7 +40,7 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "@apollo/client": "^3.3.19",
+    "@apollo/client": "^3.4.15",
     "@types/jest": "^25.2.3",
     "@types/react": "^17.0.19",
     "jest": "^25.5.4",
