@@ -246,7 +246,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   <br>
 
-  ## Normalized Collections
+  ## Summary
 
   Normalized collections introduce ways of accessing and filtering all entities in the cache of a given type. They are useful for scenarios where clients may want to access all entities in the cache of a particular type matching a set of filters like a list of all products to show or all the messages of a conversation. To read more about the motivation for this feature, check out [our blog post](https://danreynolds.ca/tech/2021/09/23/Apollo-Normalized-Collections/).
 
