@@ -1,3 +1,7 @@
+1.4.0 (Dan Reynolds)
+
+- Support Apollo 3.4 `init` API to reset the entity type map and watcher.
+
 1.3.0 (Dan Reynolds)
 
 - Adds experimental normalized collections

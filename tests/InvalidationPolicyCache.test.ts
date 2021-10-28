@@ -3013,4 +3013,118 @@ describe("Cache", () => {
       });
     });
   });
+
+  describe('#init', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache();
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    test('should reset the entity store watcher and entity type map along with the entity store', () => {
+      const expectedEntityStore = {
+        [employee.toRef()]: employee,
+        [employee2.toRef()]: employee2,
+        ROOT_QUERY: {
+          __typename: "Query",
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+          },
+        },
+      };
+
+      const expectedEntityTypeMap = {
+        "entitiesById": {
+          [employee.toRef()]: {
+            "dataId": employee.toRef(),
+            "typename": "Employee",
+            "cacheTime": expect.any(Number),
+          },
+          [employee2.toRef()]: {
+            "dataId": employee2.toRef(),
+            "typename": "Employee",
+            "cacheTime": expect.any(Number)
+          },
+          "ROOT_QUERY.employees": {
+            "dataId": "ROOT_QUERY",
+            "typename": "EmployeesResponse",
+            "fieldName": "employees",
+            "storeFieldNames": {
+              "__size": 1,
+              "entries": {
+                "employees": {
+                  "cacheTime": expect.any(Number)
+                }
+              }
+            }
+          }
+        },
+        "entitiesByType": {
+          "Employee": {
+            [employee.toRef()]: {
+              "dataId": employee.toRef(),
+              "typename": "Employee",
+              "cacheTime": expect.any(Number)
+            },
+            [employee2.toRef()]: {
+              "dataId": employee2.toRef(),
+              "typename": "Employee",
+              "cacheTime": expect.any(Number)
+            }
+          },
+          "EmployeesResponse": {
+            "ROOT_QUERY.employees": {
+              "dataId": "ROOT_QUERY",
+              "typename": "EmployeesResponse",
+              "fieldName": "employees",
+              "storeFieldNames": {
+                "__size": 1,
+                "entries": {
+                  "employees": {
+                    "cacheTime": expect.any(Number)
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      expect(cache.extract(true, false)).toEqual(expectedEntityStore);
+
+      // @ts-ignore testing private API
+      expect(cache.entityTypeMap.extract()).toEqual(
+        expectedEntityTypeMap
+      );
+
+      // @ts-ignore testing private API
+      cache.init();
+
+      // The entity store and entity type map should now be cleared
+
+      expect(cache.extract(true, false)).toEqual({});
+
+      // @ts-ignore testing private API
+      expect(cache.entityTypeMap.extract()).toEqual({
+        entitiesByType: {},
+        entitiesById: {},
+      });
+
+      // After writing again, the entity type map should have been synced
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+
+      expect(cache.extract(true, false)).toEqual(expectedEntityStore);
+
+      // @ts-ignore testing private API
+      expect(cache.entityTypeMap.extract()).toEqual(
+        expectedEntityTypeMap
+      );
+    });
+  });
 });

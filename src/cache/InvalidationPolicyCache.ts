@@ -20,8 +20,13 @@ import { cacheExtensionsCollectionTypename, collectionEntityIdForType } from './
 /**
  * Extension of Apollo in-memory cache which adds support for cache policies.
  */
+
+// @ts-ignore: Private API overloads
 export default class InvalidationPolicyCache extends InMemoryCache {
+  // @ts-ignore: Initialize in parent constructor
   protected entityTypeMap: EntityTypeMap;
+  // @ts-ignore: Initialize in parent constructor
+  protected entityStoreWatcher: EntityStoreWatcher;
   protected invalidationPolicyManager: InvalidationPolicyManager;
   protected cacheResultProcessor: CacheResultProcessor;
   protected entityStoreRoot: any;
@@ -32,22 +37,14 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     const { invalidationPolicies = {}, enableCollections = false, ...inMemoryCacheConfig } = config;
     super(inMemoryCacheConfig);
 
-    // @ts-ignore
-    this.entityStoreRoot = this.data;
     this.enableCollections = enableCollections;
     this.isBroadcasting = false;
-    this.entityTypeMap = new EntityTypeMap();
 
-    new EntityStoreWatcher({
-      entityStore: this.entityStoreRoot,
-      entityTypeMap: this.entityTypeMap,
-      policies: this.policies,
-      updateCollectionField: this.updateCollectionField.bind(this),
-    });
+    const { entityTypeMap } = this;
 
     this.invalidationPolicyManager = new InvalidationPolicyManager({
       policies: invalidationPolicies,
-      entityTypeMap: this.entityTypeMap,
+      entityTypeMap: entityTypeMap,
       cacheOperations: {
         evict: (...args) => this.evict(...args),
         modify: (...args) => this.modify(...args),
@@ -56,8 +53,29 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     });
     this.cacheResultProcessor = new CacheResultProcessor({
       invalidationPolicyManager: this.invalidationPolicyManager,
+      // @ts-ignore This field is assigned in the parent constructor
       entityTypeMap: this.entityTypeMap,
       cache: this,
+    });
+  }
+
+  // @ts-ignore private API
+  private init() {
+    // @ts-ignore private API
+    super.init();
+
+    // After init is called, the entity store has been reset so we must clear
+    // the cache policies library's corresponding entity type map and set up a new
+    // entity store watcher.
+
+    // @ts-ignore Data is a private API
+    this.entityStoreRoot = this.data;
+    this.entityTypeMap = new EntityTypeMap();
+    this.entityStoreWatcher = new EntityStoreWatcher({
+      entityStore: this.entityStoreRoot,
+      entityTypeMap: this.entityTypeMap,
+      policies: this.policies,
+      updateCollectionField: this.updateCollectionField.bind(this),
     });
   }
 
