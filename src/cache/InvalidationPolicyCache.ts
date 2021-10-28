@@ -202,6 +202,22 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return writeResult;
   }
 
+  // Evicts all entities of the given type matching the filter criteria. Returns a list of evicted entities
+  // by reference.
+  evictWhere<EntityType>(filters: { __typename: string, filter?: FragmentWhereFilter<EntityType> }) {
+    const { __typename, filter } = filters;
+
+    const references = this.readReferenceWhere({
+      __typename,
+      filter,
+    });
+
+    references.forEach((ref) => this.evict({ id: ref.__ref, broadcast: false }));
+    this.broadcastWatches();
+
+    return references;
+  }
+
   evict(options: Cache.EvictOptions): boolean {
     const { fieldName, args } = options;
     let { id } = options;
