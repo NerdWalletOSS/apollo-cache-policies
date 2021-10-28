@@ -1,3 +1,7 @@
+1.5.0 (Dan Reynolds)
+
+- Add `evictWhere` API for evicting entities by a filter
+
 1.4.0 (Dan Reynolds)
 
 - Support Apollo 3.4 `init` API to reset the entity type map and watcher.

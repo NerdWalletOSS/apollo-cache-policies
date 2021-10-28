@@ -3127,4 +3127,52 @@ describe("Cache", () => {
       );
     });
   });
+
+  describe('#evictWhere', () => {
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache({
+        enableCollections: true,
+      });
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    test('should evict matching entities', () => {
+      cache.evictWhere({
+        __typename: 'Employee',
+        filter: {
+          id: employee.id,
+        }
+      });
+
+      expect(cache.extract(true, false)).toEqual({
+        "CacheExtensionsCollectionEntity:Employee": {
+          id: "Employee",
+          __typename: "CacheExtensionsCollectionEntity",
+          data: [
+            { __ref: employee.toRef() },
+            { __ref: employee2.toRef() },
+          ]
+        },
+        [employee2.toRef()]: employee2,
+        "ROOT_QUERY": {
+          "__typename": "Query",
+          "employees": {
+            "__typename": "EmployeesResponse",
+            "data": [
+              { __ref: employee.toRef() },
+              { __ref: employee2.toRef() },
+            ]
+          }
+        },
+        "__META": {
+          "extraRootIds": [
+            "CacheExtensionsCollectionEntity:Employee"
+          ]
+        }
+      });
+    });
+  });
 });
