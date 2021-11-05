@@ -1,9 +1,10 @@
 import {
   ApolloClient,
   ApolloClientOptions,
+  DocumentNode,
   ObservableQuery,
-  OperationVariables,
 } from '@apollo/client/core';
+import { uuid } from 'uuidv4';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
 import { buildWatchFragmentQuery, buildWatchFragmentWhereQuery } from './utils';
 import { InvalidationPolicyCache } from '../cache';
@@ -21,26 +22,67 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
     this.policies = this.cache.policies;
   }
 
-  watchFragment<T = any, TVariables = OperationVariables>(
-    options: WatchFragmentOptions,
-  ): ObservableQuery<T, TVariables> {
-    return this.watchQuery({
+  // A proxy to the watchQuery API used by the watchFragment APIs to
+  // extract the data result from the watchQuery subscription's artificially
+  // created field name.
+  private proxyWatchQuery(query: DocumentNode, fieldName: string): ObservableQuery {
+    const obsQuery = this.watchQuery({
       fetchPolicy: 'cache-only',
-      query: buildWatchFragmentQuery({
-        ...options,
-        policies: this.policies,
-      }),
+      query: query,
     });
+
+    const subscribe = obsQuery.subscribe;
+
+    obsQuery.subscribe = (observer) => {
+      if (typeof observer != 'object') {
+        observer = {
+          next: observer,
+          error: arguments[1],
+          complete: arguments[2],
+        };
+      }
+
+      if (!observer.next) {
+        return subscribe(observer);
+      }
+
+      const observerNext = observer.next;
+
+      observer.next = (value: Record<string, any>) => {
+        observerNext(value?.[fieldName]);
+      }
+
+      return subscribe(observer);
+    }
+
+    return obsQuery;
+  }
+
+  watchFragment(
+    options: WatchFragmentOptions,
+  ): ObservableQuery {
+    const fieldName = uuid();
+    const query = buildWatchFragmentQuery({
+      ...options,
+      fieldName,
+      policies: this.policies,
+    });
+
+    return this.proxyWatchQuery(query, fieldName);
   }
 
   watchFragmentWhere<FragmentType>(options: WatchFragmentWhereOptions<FragmentType>) {
-    return this.watchQuery({
-      fetchPolicy: 'cache-only',
-      query: buildWatchFragmentWhereQuery({
-        ...options,
-        cache: this.cache as unknown as InvalidationPolicyCache,
-        policies: this.policies,
-      }),
+    const fieldName = uuid();
+    const query = buildWatchFragmentWhereQuery({
+      ...options,
+      fieldName,
+      cache: this.cache as unknown as InvalidationPolicyCache,
+      policies: this.policies,
     });
+
+    return this.proxyWatchQuery(
+      query,
+      fieldName,
+    );
   }
 }
