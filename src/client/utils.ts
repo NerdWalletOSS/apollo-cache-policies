@@ -46,26 +46,26 @@ function _generateQueryFromFragment({
 // and dynamically adding a type policy that returns the entity.
 export function buildWatchFragmentQuery(
   options: WatchFragmentOptions & {
+    fieldName: string;
     policies: Policies,
   }
 ): DocumentNode {
-  const { fragment, id, policies } = options;
+  const { fragment, id, policies, fieldName } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
-  const fragmentName = fragmentDefinition.name.value;
 
   const query = _generateQueryFromFragment({
     fragmentDefinition: fragmentDefinition,
-    fieldName: fragmentName,
+    fieldName,
   });
 
   // @ts-ignore The getFieldPolicy is private but we need it here to determine
   // if the dynamic type policy we generate for the corresponding fragment has
   // already been added
-  if (!policies.getFieldPolicy('Query', fragmentName)) {
+  if (!policies.getFieldPolicy('Query', fieldName)) {
     policies.addTypePolicies({
       Query: {
         fields: {
-          [fragmentName]: {
+          [fieldName]: {
             read(_existing) {
               return makeReference(id);
             }
@@ -81,27 +81,27 @@ export function buildWatchFragmentQuery(
 // Returns a query that can be used to watch a filtered list of normalized cache entities by converting the fragment to a query
 // and dynamically adding a type policy that returns the list of matching entities.
 export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmentWhereOptions<FragmentType> & {
-  cache: InvalidationPolicyCache,
-  policies: Policies,
+  cache: InvalidationPolicyCache;
+  policies: Policies;
+  fieldName: string;
 }): DocumentNode {
-  const { fragment, filter, policies, cache } = options;
+  const { fragment, filter, policies, cache, fieldName, } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
-  const fragmentName = fragmentDefinition.name.value;
   const __typename = fragmentDefinition.typeCondition.name.value;
 
   const query = _generateQueryFromFragment({
     fragmentDefinition,
-    fieldName: fragmentName,
+    fieldName,
   });
 
   // @ts-ignore The getFieldPolicy is private but we need it here to determine
   // if the dynamic type policy we generate for the corresponding fragment has
   // already been added
-  if (!policies.getFieldPolicy('Query', fragmentName)) {
+  if (!policies.getFieldPolicy('Query', fieldName)) {
     policies.addTypePolicies({
       Query: {
         fields: {
-          [fragmentName]: {
+          [fieldName]: {
             read(_existing) {
               return cache.readReferenceWhere({
                 __typename,
