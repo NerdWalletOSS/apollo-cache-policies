@@ -1,10 +1,10 @@
 import { useApolloClient } from "@apollo/client";
 import { useEffect, useRef } from "react"
 import { InvalidationPolicyCache } from "../cache";
-import { generateFieldName } from "../helpers";
+import { generateFragmentFieldName } from "../helpers";
 
 export const useFragmentTypePolicyFieldName = (): string => {
-  const { current: fieldName } = useRef(generateFieldName());
+  const { current: fieldName } = useRef(generateFragmentFieldName());
   const client = useApolloClient();
 
   useEffect(() =>

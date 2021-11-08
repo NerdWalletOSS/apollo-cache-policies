@@ -6,7 +6,7 @@ import { buildWatchFragmentWhereQuery } from '../client/utils';
 import { FragmentWhereFilter } from '../cache/types';
 import { useOnce } from './utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
-import { useQueryForFragment } from './useQueryForFragment';
+import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
 export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, filter?: FragmentWhereFilter<FragmentType>) {
   const context = useContext(getApolloContext());
@@ -22,6 +22,6 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
     policies: cache.policies,
   }));
 
-  return useQueryForFragment<FragmentType[]>(query, fieldName);
+  return useGetQueryDataByFieldName<FragmentType[]>(query, fieldName);
 }
 

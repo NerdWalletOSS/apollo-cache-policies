@@ -5,7 +5,7 @@ import Employee, { EmployeeType } from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
 import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 
-describe("Cache", () => {
+describe("InvalidationPolicyCache", () => {
   let cache: InvalidationPolicyCache;
 
   const [employee, employee2, employee3] = _.times(3, () => Employee());

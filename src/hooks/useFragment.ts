@@ -5,7 +5,7 @@ import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { DocumentNode } from 'graphql';
 import { buildWatchFragmentQuery } from '../client/utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
-import { useQueryForFragment } from './useQueryForFragment';
+import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
 interface UseFragmentOptions {
   id: string;
@@ -17,12 +17,12 @@ export default function useFragment<FragmentType>(fragment: DocumentNode, option
   const cache = client?.cache as unknown as InvalidationPolicyCache;
   const fieldName = useFragmentTypePolicyFieldName();
 
-  const query = useOnce(() => buildWatchFragmentQuery({
+  const queryForFragment = useOnce(() => buildWatchFragmentQuery({
     fragment,
     fieldName,
     id: options.id,
     policies: cache.policies,
   }));
 
-  return useQueryForFragment<FragmentType | null>(query, fieldName);
+  return useGetQueryDataByFieldName<FragmentType | null>(queryForFragment, fieldName);
 }
