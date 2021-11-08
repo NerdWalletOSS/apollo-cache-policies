@@ -171,11 +171,9 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
           },
           EmployeeMessage: {
             // Perform a side-effect whenever an employee message is evicted
-            onEvict: {
-              __default: (_cacheOperations, { parent: { id } }) => {
-                console.log(`Employee message ${id} was evicted`);
-              },
-            },
+            onEvict: (_cacheOperations, { parent: { id } }) => {
+              console.log(`Employee message ${id} was evicted`);
+            }
           },
           CreateEmployeeResponse: {
             // Add an entity to a cached query when the parent type is written
