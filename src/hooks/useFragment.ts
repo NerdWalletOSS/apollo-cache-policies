@@ -11,7 +11,7 @@ interface UseFragmentOptions {
   id: string;
 }
 
-export default function useFragment(fragment: DocumentNode, options: UseFragmentOptions) {
+export default function useFragment<FragmentType>(fragment: DocumentNode, options: UseFragmentOptions) {
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
@@ -24,5 +24,5 @@ export default function useFragment(fragment: DocumentNode, options: UseFragment
     policies: cache.policies,
   }));
 
-  return useQueryForFragment(query, fieldName);
+  return useQueryForFragment<FragmentType | null>(query, fieldName);
 }

@@ -4,11 +4,11 @@ import {
   DocumentNode,
   ObservableQuery,
 } from '@apollo/client/core';
-import { uuid } from 'uuidv4';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
 import { buildWatchFragmentQuery, buildWatchFragmentWhereQuery } from './utils';
 import { InvalidationPolicyCache } from '../cache';
 import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
+import { generateFieldName } from '../helpers';
 
 // An extension of the Apollo client that add support for watching updates to entities
 // and collections of entities based on the provided filters.
@@ -61,7 +61,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
   watchFragment(
     options: WatchFragmentOptions,
   ): ObservableQuery {
-    const fieldName = uuid();
+    const fieldName = generateFieldName();
     const query = buildWatchFragmentQuery({
       ...options,
       fieldName,
@@ -72,7 +72,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
   }
 
   watchFragmentWhere<FragmentType>(options: WatchFragmentWhereOptions<FragmentType>) {
-    const fieldName = uuid();
+    const fieldName = generateFieldName();
     const query = buildWatchFragmentWhereQuery({
       ...options,
       fieldName,

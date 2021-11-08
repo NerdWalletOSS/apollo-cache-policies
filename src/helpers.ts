@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { v4 } from "uuid";
 
 export function isQuery(dataId: string) {
   return dataId === "ROOT_QUERY" || dataId === "ROOT_MUTATION";
@@ -31,4 +32,11 @@ export var TypeOrFieldNameRegExp = /^[_a-z][_0-9a-z]*/i;
 export function fieldNameFromStoreName(storeFieldName: string) {
   var match = storeFieldName.match(TypeOrFieldNameRegExp);
   return match ? match[0] : storeFieldName;
+}
+
+// When generating an arbitrary field name for a field on the ROOT_QUERY in the cache, we use uuid prefixed with
+// a leading prefix in order to prevent matching the `fieldNameFromStoreFieldName` regex.
+// https://github.com/apollographql/apollo-client/blob/d9a1039d36801d450a79cb56870f0a351044254b/src/cache/inmemory/helpers.ts#L80
+export function generateFieldName() {
+  return `-fragment-${v4()}`;
 }

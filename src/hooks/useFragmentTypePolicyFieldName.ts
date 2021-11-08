@@ -1,16 +1,17 @@
 import { useApolloClient } from "@apollo/client";
-import { uuid } from 'uuidv4';
 import { useEffect, useRef } from "react"
 import { InvalidationPolicyCache } from "../cache";
+import { generateFieldName } from "../helpers";
 
 export const useFragmentTypePolicyFieldName = (): string => {
-  const { current: fieldName } = useRef(uuid());
+  const { current: fieldName } = useRef(generateFieldName());
+  const client = useApolloClient();
 
-  useEffect(() => {
-    const client = useApolloClient();
+  useEffect(() =>
     // @ts-ignore Type policies is a private API
-    delete (client.cache as InvalidationPolicyCache).policies.typePolicies[fieldName];
-  }, []);
+    () => delete (client.cache as InvalidationPolicyCache).policies.typePolicies.Query.fields[fieldName],
+    [],
+  );
 
   return fieldName;
 }

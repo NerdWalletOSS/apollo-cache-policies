@@ -22,6 +22,6 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
     policies: cache.policies,
   }));
 
-  return useQueryForFragment(query, fieldName);
+  return useQueryForFragment<FragmentType[]>(query, fieldName);
 }
 
