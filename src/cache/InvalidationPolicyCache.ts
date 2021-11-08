@@ -64,7 +64,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // @ts-ignore private API
     super.init();
 
-    // After init is called, the entity store has been reset so we must clear
+    // After init is called, the entity store has been reset so we must also reset
     // the cache policies library's corresponding entity type map, watcher and
     // cache result processor
 

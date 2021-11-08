@@ -2653,7 +2653,7 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
-  describe('with a default cache policy', () => {
+  describe('with an object default cache policy', () => {
     let sideEffect: string;
 
     beforeEach(() => {
@@ -2683,7 +2683,37 @@ describe("InvalidationPolicyCache", () => {
       });
       expect(sideEffect).toEqual('employees field written to the cache');
     });
-  })
+  });
+
+  describe('with a function default cache policy', () => {
+    let sideEffect: string;
+
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          types: {
+            EmployeesResponse: {
+              onWrite: (_cacheOperations, { parent: { storeFieldName } }) => {
+                sideEffect = `${storeFieldName} field written to the cache`;
+              }
+            },
+          },
+        },
+      });
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    test("should run the default policy action on parent write", () => {
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+      expect(sideEffect).toEqual('employees field written to the cache');
+    });
+  });
 
   describe("#expire", () => {
     let dateNowSpy: any;

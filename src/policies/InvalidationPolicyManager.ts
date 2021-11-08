@@ -8,10 +8,12 @@ import {
   PolicyActionCacheOperations,
   PolicyActionMeta,
   PolicyActionStorage,
+  PolicyAction,
 } from "./types";
 import { makeEntityId } from "../helpers";
 import { makeReference } from "@apollo/client/core";
 import { RenewalPolicy } from "./types";
+import { DefaultPolicyAction } from "..";
 
 /**
  * Executes cache policies for types when they are modified, evicted or read from the cache.
@@ -102,7 +104,16 @@ export default class InvalidationPolicyManager {
       return;
     }
 
-    const { __default: defaultPolicyAction, ...restTypePolicyTypeNames } = typePolicyForEvent;
+    let defaultPolicyAction: DefaultPolicyAction | undefined;
+    let restTypePolicyTypeNames: Record<string, PolicyAction> = {} as Record<string, PolicyAction>;
+
+    if (typeof typePolicyForEvent === 'object') {
+      let { __default: _defaultPolicyAction, ..._restTypePolicyTypeNames } = typePolicyForEvent;
+      defaultPolicyAction = _defaultPolicyAction;
+      restTypePolicyTypeNames = _restTypePolicyTypeNames;
+    } else {
+      defaultPolicyAction = typePolicyForEvent;
+    }
 
     if (defaultPolicyAction) {
       defaultPolicyAction(mutedCacheOperations, {
@@ -113,7 +124,7 @@ export default class InvalidationPolicyManager {
 
     Object.keys(restTypePolicyTypeNames).forEach((typePolicyTypeName: string) => {
       const typeMapEntities = entityTypeMap.readEntitiesByType(typePolicyTypeName) ?? {};
-      const policyAction = typePolicyForEvent[typePolicyTypeName];
+      const policyAction = (typePolicyForEvent as Record<string, PolicyAction>)[typePolicyTypeName];
 
       Object.values(typeMapEntities).forEach((typeMapEntity) => {
         const { dataId, fieldName, storeFieldNames } = typeMapEntity;

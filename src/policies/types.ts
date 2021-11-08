@@ -69,11 +69,9 @@ export type DefaultPolicyAction = (
 ) => void;
 
 export type InvalidationPolicy = {
-  [lifecycleEvent in InvalidationPolicyLifecycleEvent]?: {
-    [typeName: string]: PolicyAction;
-  } & {
+  [lifecycleEvent in InvalidationPolicyLifecycleEvent]?: Record<string, PolicyAction> & {
     __default?: DefaultPolicyAction;
-  };
+  } | DefaultPolicyAction;
 } & {
   timeToLive?: number;
   renewalPolicy?: RenewalPolicy;
