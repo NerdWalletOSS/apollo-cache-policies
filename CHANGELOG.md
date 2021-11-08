@@ -1,3 +1,8 @@
+2.0.0 (Dan Reynolds)
+
+* [Breaking] Updates to useFragment/useFragmentWhere APIs. Changes how it works internally to base fragment field policy names off dynamic UUIDs instead of the name of the fragment. Now Returns the data directly on the result as opposed to nested within the field name.
+* Adds support for a default function syntax for invalidation policy events.
+
 1.5.0 (Dan Reynolds)
 
 - Add `evictWhere` API for evicting entities by a filter
