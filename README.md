@@ -92,17 +92,6 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   * **WriteOnly** - After first write, the entity in the cache will renew its TTL on write
   * **None** - After first write, the entity in the cache will never renew its TTL on reads or writes.
 
-  | Policy Event   | Description                                                                                | Required |
-  | ---------------| -------------------------------------------------------------------------------------------|----------|
-  | `onWrite`      | On writing parent entity into cache, perform action for each type under the parent         | ❌       |
-  | `onEvict`      | On evicting parent entity from cache, perform policy action for each type under the parent | ❌       |
-
-  | Policy Action Cache Operation | Description                        |
-  | ------------------------------| -----------------------------------|
-  | `evict`                       | `evict` API from Apollo cache      |
-  | `modify`                      | `modify` API from Apollo cache     |
-  | `readField`                   | `readField` API from Apollo cache  |
-
 </details>
 
 <details>
@@ -207,6 +196,17 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   ## Invalidation Policies Cache API
 
   The extended policies are by default triggered for on read, write or eviction of entities in the cache by type. If you want to enable or disable particular support for particular events in your application, this can be done with the extended cache APIs for policy events.
+  
+  | Policy Event   | Description                                                                                | Required |
+  | ---------------| -------------------------------------------------------------------------------------------|----------|
+  | `onWrite`      | On writing parent entity into cache, perform action for each type under the parent         | false    |
+  | `onEvict`      | On evicting parent entity from cache, perform policy action for each type under the parent | false    |
+
+  | Policy Action Cache Operation | Description                        |
+  | ------------------------------| -----------------------------------|
+  | `evict`                       | `evict` API from Apollo cache      |
+  | `modify`                      | `modify` API from Apollo cache     |
+  | `readField`                   | `readField` API from Apollo cache  |
 
   | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
   | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
