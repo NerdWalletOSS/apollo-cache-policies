@@ -49,6 +49,8 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
 
       const observerNext = observer.next;
 
+      // The observer maps the value emitted from the observable to the data at the
+      // given field name.
       observer.next = (value: Record<string, any>) => {
         observerNext(value?.data?.[fieldName]);
       }
