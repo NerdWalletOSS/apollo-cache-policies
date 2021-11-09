@@ -2,8 +2,6 @@
 
 # Apollo Cache Policies
 
-> Update: This library is now called Apollo Cache Policies and available at `@nerdwallet/apollo-cache-policies`.
-
 An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides extensions to the Apollo cache including:
 
 * Type-based `time-to-live` (TTL) support.
@@ -74,15 +72,16 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   | Config          | Description                                                                                | Required | Default   |
   | ----------------| -------------------------------------------------------------------------------------------|----------|-----------|
-  | `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | false    | None      |
-  | `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | false    | WriteOnly |
+  | `timeToLive`    | The global time to live in milliseconds for all types in the cache                         | ❌       | None      |
+  | `renewalPolicy` | The policy for renewing an entity's time to live in the cache                              | ❌       | WriteOnly |
 
   ## Extended Cache APIs
 
   | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
   | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
-  | `expire`                 | Evicts all expired entities from the cache based on their type's or the global timeToLive | String[] - List of expired entity IDs evicted from the cache | N/A                          |
-  | `expiredEntities`        | Returns all expired entities still present in the cache                                   | String[] - List of expired entities in the cache             | N/A                          |
+  | `expire`                 | Evicts all expired entities from the cache based on their type's or the global timeToLive | String[] - List of expired entity IDs evicted from the cache | ❌                           |
+  | `expiredEntities`        | Returns all expired entities still present in the cache                                   | String[] - List of expired entities in the cache             | ❌                           |
+  | `evictWhere`             | Evicts all entities matching the given filter from the cache                              | String[] - List of evicted entities from the cache           | `{ __typename: string, filter?: FragmentWhereFilter<EntityType> }` |
 
   ### Renewal Policies
 
@@ -160,11 +159,9 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
           },
           EmployeeMessage: {
             // Perform a side-effect whenever an employee message is evicted
-            onEvict: {
-              __default: (_cacheOperations, { parent: { id } }) => {
-                console.log(`Employee message ${id} was evicted`);
-              },
-            },
+            onEvict: (_cacheOperations, { parent: { id } }) => {
+              console.log(`Employee message ${id} was evicted`);
+            }
           },
           CreateEmployeeResponse: {
             // Add an entity to a cached query when the parent type is written
@@ -213,7 +210,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   | Extended cache API       | Description                                                                               | Return Type                                                  | Arguments                    |
   | -------------------------| ------------------------------------------------------------------------------------------|--------------------------------------------------------------|------------------------------|
-  | `activePolicyEvents`     | Returns all active policy events (Read, Write, Evict)                                     | InvalidationPolicyEvent[] - List of active policy events     | N/A                          |
+  | `activePolicyEvents`     | Returns all active policy events (Read, Write, Evict)                                     | InvalidationPolicyEvent[] - List of active policy events     | ❌                           |
   | `activatePolicyEvents`   | Activates the provided policy events, defaults to all                                     | void                                                         | ...InvalidationPolicyEvent[] |
   | `deactivatePolicyEvents` | Dectivates the provided policy events, defaults to all                                    | void                                                         | ...InvalidationPolicyEvent[] |
 

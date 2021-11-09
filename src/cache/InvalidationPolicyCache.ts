@@ -64,9 +64,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // @ts-ignore private API
     super.init();
 
-    // After init is called, the entity store has been reset so we must clear
-    // the cache policies library's corresponding entity type map and set up a new
-    // entity store watcher.
+    // After init is called, the entity store has been reset so we must also reset
+    // the cache policies library's corresponding entity type map, watcher and
+    // cache result processor
 
     // @ts-ignore Data is a private API
     this.entityStoreRoot = this.data;
@@ -76,6 +76,12 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
       updateCollectionField: this.updateCollectionField.bind(this),
+    });
+    this.cacheResultProcessor = new CacheResultProcessor({
+      invalidationPolicyManager: this.invalidationPolicyManager,
+      // @ts-ignore This field is assigned in the parent constructor
+      entityTypeMap: this.entityTypeMap,
+      cache: this,
     });
   }
 

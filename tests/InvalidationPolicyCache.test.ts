@@ -5,7 +5,7 @@ import Employee, { EmployeeType } from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
 import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
 
-describe("Cache", () => {
+describe("InvalidationPolicyCache", () => {
   let cache: InvalidationPolicyCache;
 
   const [employee, employee2, employee3] = _.times(3, () => Employee());
@@ -2653,7 +2653,7 @@ describe("Cache", () => {
     });
   });
 
-  describe('with a default cache policy', () => {
+  describe('with an object default cache policy', () => {
     let sideEffect: string;
 
     beforeEach(() => {
@@ -2683,7 +2683,37 @@ describe("Cache", () => {
       });
       expect(sideEffect).toEqual('employees field written to the cache');
     });
-  })
+  });
+
+  describe('with a function default cache policy', () => {
+    let sideEffect: string;
+
+    beforeEach(() => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          types: {
+            EmployeesResponse: {
+              onWrite: (_cacheOperations, { parent: { storeFieldName } }) => {
+                sideEffect = `${storeFieldName} field written to the cache`;
+              }
+            },
+          },
+        },
+      });
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+    });
+
+    test("should run the default policy action on parent write", () => {
+      cache.writeQuery({
+        query: employeesQuery,
+        data: employeesResponse,
+      });
+      expect(sideEffect).toEqual('employees field written to the cache');
+    });
+  });
 
   describe("#expire", () => {
     let dateNowSpy: any;
@@ -3139,39 +3169,77 @@ describe("Cache", () => {
       });
     });
 
-    test('should evict matching entities', () => {
-      cache.evictWhere({
-        __typename: 'Employee',
-        filter: {
-          id: employee.id,
-        }
-      });
+    describe('with an object filter', () => {
+      test('should evict matching entities', () => {
+        cache.evictWhere({
+          __typename: 'Employee',
+          filter: {
+            id: employee.id,
+          }
+        });
 
-      expect(cache.extract(true, false)).toEqual({
-        "CacheExtensionsCollectionEntity:Employee": {
-          id: "Employee",
-          __typename: "CacheExtensionsCollectionEntity",
-          data: [
-            { __ref: employee.toRef() },
-            { __ref: employee2.toRef() },
-          ]
-        },
-        [employee2.toRef()]: employee2,
-        "ROOT_QUERY": {
-          "__typename": "Query",
-          "employees": {
-            "__typename": "EmployeesResponse",
-            "data": [
+        expect(cache.extract(true, false)).toEqual({
+          "CacheExtensionsCollectionEntity:Employee": {
+            id: "Employee",
+            __typename: "CacheExtensionsCollectionEntity",
+            data: [
               { __ref: employee.toRef() },
               { __ref: employee2.toRef() },
             ]
+          },
+          [employee2.toRef()]: employee2,
+          "ROOT_QUERY": {
+            "__typename": "Query",
+            "employees": {
+              "__typename": "EmployeesResponse",
+              "data": [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() },
+              ]
+            }
+          },
+          "__META": {
+            "extraRootIds": [
+              "CacheExtensionsCollectionEntity:Employee"
+            ]
           }
-        },
-        "__META": {
-          "extraRootIds": [
-            "CacheExtensionsCollectionEntity:Employee"
-          ]
-        }
+        });
+      });
+    });
+
+    describe('with a function filter', () => {
+      test('should evict matching entities', () => {
+        cache.evictWhere({
+          __typename: 'Employee',
+          filter: (ref, readField) => readField('id', ref) === employee.id,
+        });
+
+        expect(cache.extract(true, false)).toEqual({
+          "CacheExtensionsCollectionEntity:Employee": {
+            id: "Employee",
+            __typename: "CacheExtensionsCollectionEntity",
+            data: [
+              { __ref: employee.toRef() },
+              { __ref: employee2.toRef() },
+            ]
+          },
+          [employee2.toRef()]: employee2,
+          "ROOT_QUERY": {
+            "__typename": "Query",
+            "employees": {
+              "__typename": "EmployeesResponse",
+              "data": [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() },
+              ]
+            }
+          },
+          "__META": {
+            "extraRootIds": [
+              "CacheExtensionsCollectionEntity:Employee"
+            ]
+          }
+        });
       });
     });
   });
