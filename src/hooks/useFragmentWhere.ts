@@ -8,6 +8,7 @@ import { useOnce } from './utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
+// A hook for subscribing to a fragment for entities in the Apollo cache matching a given filter from a React component.
 export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, filter?: FragmentWhereFilter<FragmentType>) {
   const context = useContext(getApolloContext());
   const client = context.client;

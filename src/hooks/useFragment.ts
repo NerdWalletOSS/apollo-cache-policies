@@ -11,6 +11,7 @@ interface UseFragmentOptions {
   id: string;
 }
 
+// A hook for subscribing to a fragment in the Apollo cache from a React component.
 export default function useFragment<FragmentType>(fragment: DocumentNode, options: UseFragmentOptions) {
   const context = useContext(getApolloContext());
   const client = context.client;

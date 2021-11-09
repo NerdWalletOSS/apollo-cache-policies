@@ -22,10 +22,9 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
     this.policies = this.cache.policies;
   }
 
-  // A proxy to the watchQuery API used by the watch fragment APIs to
-  // extract the data result from the watchQuery subscription's dynamically
-  // created field name.
-  private proxyWatchQuery(query: DocumentNode, fieldName: string): ObservableQuery {
+  // Watches the data in the cache similarly to watchQuery and additionally extracts the given fieldName from the watch query
+  // subscription and returns a subscription that emits that field data.
+  private watchQueryForField(query: DocumentNode, fieldName: string): ObservableQuery {
     const obsQuery = this.watchQuery({
       fetchPolicy: 'cache-only',
       query: query,
@@ -60,6 +59,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
     return obsQuery;
   }
 
+  // Watches the data in the cache similarly to watchQuery for a given fragment.
   watchFragment(
     options: WatchFragmentOptions,
   ): ObservableQuery {
@@ -70,9 +70,11 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
       policies: this.policies,
     });
 
-    return this.proxyWatchQuery(query, fieldName);
+    return this.watchQueryForField(query, fieldName);
   }
 
+  // Watches the data in the cache similarly to watchQuery for all entities int he cache
+  // matching the given filter.
   watchFragmentWhere<FragmentType>(options: WatchFragmentWhereOptions<FragmentType>) {
     const fieldName = generateFragmentFieldName();
     const query = buildWatchFragmentWhereQuery({
@@ -82,7 +84,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
       policies: this.policies,
     });
 
-    return this.proxyWatchQuery(
+    return this.watchQueryForField(
       query,
       fieldName,
     );
