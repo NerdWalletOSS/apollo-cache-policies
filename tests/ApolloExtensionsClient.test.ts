@@ -64,7 +64,11 @@ describe('ApolloExtensionsClient', () => {
             id: employee.id,
             employee_name: employee.employee_name,
           });
+          // @ts-ignore Type policies is private
+          expect(Object.keys(cache.policies.typePolicies.Query.fields).length).toEqual(1);
           subscription.unsubscribe();
+          // @ts-ignore Type policies is private
+          expect(Object.keys(cache.policies.typePolicies.Query.fields).length).toEqual(0);
           done();
         });
       });

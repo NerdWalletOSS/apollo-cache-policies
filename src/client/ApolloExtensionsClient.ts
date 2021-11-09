@@ -32,6 +32,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
 
     const subscribe = obsQuery.subscribe.bind(obsQuery);
 
+    // TODO: Setup an unsubscribe handler that removes the field from the type policies list after.
     obsQuery.subscribe = (observer) => {
       // This check is modeled after the Zen Observable observer check:
       // https://github.com/zenparsing/zen-observable/blob/master/src/Observable.js#L211
@@ -43,19 +44,27 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
         };
       }
 
-      if (!observer.next) {
-        return subscribe(observer);
-      }
-
       const observerNext = observer.next;
 
       // The observer maps the value emitted from the observable to the data at the
       // given field name.
       observer.next = (value: Record<string, any>) => {
-        observerNext(value?.data?.[fieldName]);
+        if (observerNext) {
+          observerNext(value?.data?.[fieldName]);
+        }
       }
 
-      return subscribe(observer);
+      const subscription = subscribe(observer);
+      const unsubscribe = subscription.unsubscribe.bind(subscription);
+
+      subscription.unsubscribe = () => {
+        // @ts-ignore typePolicies is private. Delete the field name from the type policies
+        // after the subscription has been cleaned up.
+        delete this.cache.policies.typePolicies.Query.fields[fieldName];
+        unsubscribe();
+      }
+
+      return subscription;
     }
 
     return obsQuery;
