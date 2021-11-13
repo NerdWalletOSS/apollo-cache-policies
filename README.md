@@ -340,6 +340,6 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   });
   ```
 
-  In this example, we use the `readReferenceWhere` API to construct a type policy that returns all entities of the `Employee` type in the cache with a field `team` matching the value `Banking`. Any number of fields can be used as filters and queries for this type policy will automatically update whenever an employee is created or mutated.
+  In this example, we use the `readReferenceWhere` API to construct a type policy that returns all entities of the `Employee` type in the cache with a field `team` matching the value `Banking`. Any number of fields can be used as filters and queries for this type policy will automatically update whenever an employee entity is added, created removed from the cache.
 
 </details>
