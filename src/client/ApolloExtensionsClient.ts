@@ -32,7 +32,6 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
 
     const subscribe = obsQuery.subscribe.bind(obsQuery);
 
-    // TODO: Setup an unsubscribe handler that removes the field from the type policies list after.
     obsQuery.subscribe = (observer) => {
       // This check is modeled after the Zen Observable observer check:
       // https://github.com/zenparsing/zen-observable/blob/master/src/Observable.js#L211
