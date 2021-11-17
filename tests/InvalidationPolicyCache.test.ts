@@ -1580,6 +1580,60 @@ describe("InvalidationPolicyCache", () => {
           },
         });
       });
+
+      test('should evict an expired entity with custom Query keyArgs', () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            types: {
+              EmployeesResponse: {
+                timeToLive: 100,
+              }
+            }
+          },
+          typePolicies: {
+            Query: {
+              fields: {
+                employees: {
+                  keyArgs: false,
+                },
+              }
+            }
+          }
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesWithVariablesQuery,
+          data: employeesResponse,
+          variables: {
+            name: "Tester McTest",
+          },
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+          },
+        });
+        const queryResult = cache.readQuery({
+          query: employeesWithVariablesQuery,
+        });
+        expect(queryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          ROOT_QUERY: {
+            __typename: "Query",
+          },
+        });
+      });
     });
 
     describe("with only a type specific timeToLive policy", () => {
