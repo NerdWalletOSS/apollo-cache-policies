@@ -155,12 +155,20 @@ export class CacheResultProcessor {
           )?.typename;
 
           if (typename) {
-            const storeFieldName = cache.policies.getStoreFieldName({
+            const storeFieldNameForEntity = cache.policies.getStoreFieldName({
               typename,
               fieldName,
               field,
               variables,
             });
+            const queryTypename = cache.policies.rootTypenamesById[dataId];
+            const storeFieldNameForQuery = cache.policies.getStoreFieldName({
+              typename: queryTypename,
+              fieldName,
+              field,
+              variables,
+            });
+
             const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
               typename
             );
@@ -168,16 +176,24 @@ export class CacheResultProcessor {
               renewalPolicy === RenewalPolicy.AccessAndWrite ||
               renewalPolicy === RenewalPolicy.AccessOnly
             ) {
-              entityTypeMap.renewEntity(dataId, storeFieldName);
+              entityTypeMap.renewEntity(dataId, storeFieldNameForEntity);
+              entityTypeMap.renewEntity(dataId, storeFieldNameForQuery);
             }
-            const evicted = invalidationPolicyManager.runReadPolicy({
+
+            const evictedByStoreFieldNameForEntity = invalidationPolicyManager.runReadPolicy({
               typename,
               dataId,
               fieldName,
-              storeFieldName
+              storeFieldName: storeFieldNameForEntity,
+            });
+            const evictedByStoreFieldNameForQuery = invalidationPolicyManager.runReadPolicy({
+              typename,
+              dataId,
+              fieldName,
+              storeFieldName: storeFieldNameForQuery,
             });
 
-            if (evicted) {
+            if (evictedByStoreFieldNameForEntity || evictedByStoreFieldNameForQuery) {
               delete (result as Record<string, any>)[fieldName];
               return false;
             }

@@ -1,3 +1,7 @@
+2.0.1 (Dan Reynolds)
+
+* Fix issue with custom Query type keyArgs preventing TTLs from evicting entities
+
 2.0.0 (Dan Reynolds)
 
 * [Breaking] Updates to useFragment/useFragmentWhere APIs. Changes how it works internally to base fragment field policy names off dynamic UUIDs instead of the name of the fragment. Now Returns the data directly on the result as opposed to nested within the field name.
