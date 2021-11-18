@@ -1,3 +1,7 @@
+2.0.2 (Dan Reynolds)
+
+* Fix a bug with evicting expired fields with a field alias
+
 2.0.1 (Dan Reynolds)
 
 * Fix issue with custom Query type keyArgs preventing TTLs from evicting entities

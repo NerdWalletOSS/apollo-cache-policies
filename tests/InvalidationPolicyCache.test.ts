@@ -86,6 +86,27 @@ describe("InvalidationPolicyCache", () => {
     }
   `;
 
+  const employeesAndBossesWithVariablesQuery = gql`
+    query {
+      employees(name: $employeeName) {
+        data {
+          id
+          employee_name
+          employee_salary
+          employee_age
+        }
+      }
+      bosses: employees(name: $bossName) {
+        data {
+          id
+          employee_name
+          employee_salary
+          employee_age
+        }
+      }
+    }
+  `;
+
   const createEmployeeMutation = gql`
     query {
       createEmployee {
@@ -126,6 +147,17 @@ describe("InvalidationPolicyCache", () => {
     employees: {
       __typename: "EmployeesResponse",
       data: [employee, employee2],
+    },
+  };
+
+  const employeesAndBossesResponse = {
+    employees: {
+      __typename: "EmployeesResponse",
+      data: [employee, employee2],
+    },
+    bosses: {
+      __typename: "EmployeesResponse",
+      data: [employee3],
     },
   };
 
@@ -1629,6 +1661,47 @@ describe("InvalidationPolicyCache", () => {
         expect(cache.extract(true, false)).toEqual({
           [employee.toRef()]: employee,
           [employee2.toRef()]: employee2,
+          ROOT_QUERY: {
+            __typename: "Query",
+          },
+        });
+      });
+
+      test('should evict an expired entity with a field alias', () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            types: {
+              EmployeesResponse: {
+                timeToLive: 100,
+              }
+            }
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndBossesWithVariablesQuery,
+          data: employeesAndBossesResponse,
+          variables: {
+            employeeName: "Tester McTest",
+            bossName: "Tester McBoss"
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        const queryResult = cache.readQuery({
+          query: employeesAndBossesWithVariablesQuery,
+          variables: {
+            employeeName: "Tester McTest",
+            bossName: "Tester McBoss"
+          },
+        });
+        expect(queryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employee3.toRef()]: employee3,
           ROOT_QUERY: {
             __typename: "Query",
           },

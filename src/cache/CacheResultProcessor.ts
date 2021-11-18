@@ -147,7 +147,11 @@ export class CacheResultProcessor {
         const aggregateResultComplete = this.getFieldsForQuery(options).reduce<
           boolean
         >((acc, field) => {
-          const fieldName = resultKeyNameFromField(field);
+          const fieldName = field.name.value;
+          // While the field name is used as the key in the cache, the result object
+          // will have it keyed by an alias name if provided so we keep track of the 
+          // result key name in case it needs to be removed from the response due to an evicted TTL
+          const resultKeyName = resultKeyNameFromField(field);
           const subResultStatus = this.processReadSubResult(result, fieldName);
 
           const typename = entityTypeMap.readEntityById(
@@ -194,7 +198,7 @@ export class CacheResultProcessor {
             });
 
             if (evictedByStoreFieldNameForEntity || evictedByStoreFieldNameForQuery) {
-              delete (result as Record<string, any>)[fieldName];
+              delete (result as Record<string, any>)[resultKeyName];
               return false;
             }
           }
@@ -264,7 +268,7 @@ export class CacheResultProcessor {
 
     if (dataId && isQuery(dataId) && _.isPlainObject(result)) {
       this.getFieldsForQuery(options).forEach((field) => {
-        const fieldName = resultKeyNameFromField(field);
+        const fieldName = field.name.value;
         const typename = entityTypeMap.readEntityById(
           makeEntityId(dataId, fieldName)
         )?.typename;
