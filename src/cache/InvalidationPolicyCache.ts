@@ -301,11 +301,11 @@ export default class InvalidationPolicyCache extends InMemoryCache {
         broadcast: false,
         id: collectionEntityId,
         fields: {
-          data: (existing) => {
+          data: (existing, { canRead }) => {
             return [
-              ...existing,
+              ...existing.filter((ref: Reference) => canRead(ref)),
               makeReference(dataId),
-            ]
+            ];
           }
         }
       });

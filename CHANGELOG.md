@@ -1,3 +1,7 @@
+2.0.3 (Dan Reynolds)
+
+* Filter out dangling references from collection entities
+
 2.0.2 (Dan Reynolds)
 
 * Fix a bug with evicting expired fields with a field alias
