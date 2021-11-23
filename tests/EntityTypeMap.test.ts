@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { EntityTypeMap } from "../src/entity-store";
 
 describe("EntityTypeMap", () => {

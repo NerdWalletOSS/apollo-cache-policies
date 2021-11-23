@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { set } from "lodash-es";
 import { makeEntityId, isQuery, fieldNameFromStoreName } from "../helpers";
 import {
   EntitiesByType,
@@ -153,7 +153,7 @@ export default class EntityTypeMap {
         };
       }
 
-      _.set(this.entitiesByType, [typename, entityId], newEntity);
+      set(this.entitiesByType, [typename, entityId], newEntity);
       this.entitiesById[entityId] = newEntity;
     }
   }
