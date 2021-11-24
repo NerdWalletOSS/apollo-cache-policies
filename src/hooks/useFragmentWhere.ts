@@ -5,15 +5,21 @@ import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { buildWatchFragmentWhereQuery } from '../client/utils';
 import { FragmentWhereFilter } from '../cache/types';
 import { useOnce } from './utils';
+import { useQueryDataByFieldName } from './useGetQueryDataByFieldName';
+import { FragmentHookOptions } from './types';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
-import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
+
+interface UseFragmentWhereOptions<FragmentType> extends FragmentHookOptions {
+  filter?: FragmentWhereFilter<FragmentType>;
+}
 
 // A hook for subscribing to a fragment for entities in the Apollo cache matching a given filter from a React component.
-export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, filter?: FragmentWhereFilter<FragmentType>) {
+export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, options: UseFragmentWhereOptions<FragmentType>) {
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
   const fieldName = useFragmentTypePolicyFieldName();
+  const { filter, ...queryOptions } = options;
 
   const query = useOnce(() => buildWatchFragmentWhereQuery({
     filter,
@@ -23,6 +29,10 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
     policies: cache.policies,
   }));
 
-  return useGetQueryDataByFieldName<FragmentType[]>(query, fieldName);
+  return useQueryDataByFieldName<FragmentType[]>({
+    query,
+    fieldName,
+    options: queryOptions,
+  });
 }
 
