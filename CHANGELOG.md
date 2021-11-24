@@ -1,3 +1,8 @@
+
+2.1.0 (Dan Reynolds)
+
+Expose query options in fragment hooks
+
 2.0.3 (Dan Reynolds)
 
 * Filter out dangling references from collection entities
