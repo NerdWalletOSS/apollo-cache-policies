@@ -1,5 +1,5 @@
+import { times } from "lodash-es";
 import { ApolloLink, gql, NormalizedCacheObject } from "@apollo/client";
-import _ from "lodash";
 import { ApolloExtensionsClient } from "../src";
 import { InvalidationPolicyCache } from "../src/cache";
 import Employee, { EmployeeType } from "./fixtures/employee";
@@ -17,7 +17,8 @@ const employeesQuery = gql`
   }
 `;
 
-const [employee, employee2] = _.times(3, () => Employee());
+// @ts-ignore
+const [employee, employee2] = times(3, () => Employee());
 
 const employeesResponse = {
   employees: {

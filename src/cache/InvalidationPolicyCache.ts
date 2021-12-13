@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   gql,
   InMemoryCache,
@@ -8,6 +7,7 @@ import {
   StoreObject,
   makeReference,
 } from "@apollo/client/core";
+import { compact, every, pick, isFunction } from "lodash-es";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
@@ -475,7 +475,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     if (withInvalidation) {
       // The entitiesById are sufficient alone for reconstructing the type map, so to
       // minimize payload size only inject the entitiesById object into the extracted cache
-      extractedCache.invalidation = _.pick(
+      extractedCache.invalidation = pick(
         this.entityTypeMap.extract(),
         "entitiesById"
       );
@@ -506,7 +506,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       id: ref.__ref,
     }));
 
-    return _.compact(matchingFragments);
+    return compact(matchingFragments);
   }
 
   // Supports reading a collection of references by type from the cache and filtering them by the given fields. Returns a
@@ -528,7 +528,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     }
 
     return entityReferences.filter(ref => {
-      if (_.isFunction(filter)) {
+      if (isFunction(filter)) {
         return filter(ref, this.readField.bind(this));
       }
 
@@ -540,7 +540,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
         return filterValue === entityValueForFilter;
       });
 
-      return _.every(entityFilterResults, Boolean);
+      return every(entityFilterResults, Boolean);
     });
   }
 }

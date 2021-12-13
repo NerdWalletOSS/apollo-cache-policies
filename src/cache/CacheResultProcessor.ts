@@ -1,6 +1,6 @@
-import _ from "lodash";
 import { FieldNode, SelectionNode } from "graphql";
 import { Cache, makeReference } from "@apollo/client/core";
+import { isUndefined, isPlainObject, isArray } from 'lodash-es';
 import {
   argumentsObjectFromField,
   createFragmentMap,
@@ -61,11 +61,11 @@ export class CacheResultProcessor {
   ): ReadResultStatus {
     const { cache, invalidationPolicyManager, entityTypeMap } = this.config;
 
-    const result = _.isUndefined(fieldNameOrIndex)
+    const result = isUndefined(fieldNameOrIndex)
       ? parentResult
       : parentResult[fieldNameOrIndex];
 
-    if (_.isPlainObject(result)) {
+    if (isPlainObject(result)) {
       const { __typename } = result;
 
       const aggregateResultComplete = Object.keys(result).reduce(
@@ -93,7 +93,7 @@ export class CacheResultProcessor {
           });
 
           if (evicted) {
-            if (_.isPlainObject(parentResult) && fieldNameOrIndex) {
+            if (isPlainObject(parentResult) && fieldNameOrIndex) {
               delete parentResult[fieldNameOrIndex];
             }
             return ReadResultStatus.Evicted;
@@ -104,7 +104,7 @@ export class CacheResultProcessor {
       return aggregateResultComplete
         ? ReadResultStatus.Complete
         : ReadResultStatus.Incomplete;
-    } else if (_.isArray(result)) {
+    } else if (isArray(result)) {
       let aggregateSubResultStatus = ReadResultStatus.Complete as ReadResultStatus;
 
       const subResultStatuses = result.map((_subResult, index) => {
@@ -140,7 +140,7 @@ export class CacheResultProcessor {
     const { cache, entityTypeMap, invalidationPolicyManager } = this.config;
     const { rootId: dataId = "ROOT_QUERY" } = options;
 
-    if (_.isPlainObject(result)) {
+    if (isPlainObject(result)) {
       if (isQuery(dataId)) {
         const { variables } = options;
 
@@ -222,7 +222,7 @@ export class CacheResultProcessor {
 
   private processWriteSubResult(result: any) {
     const { cache, invalidationPolicyManager, entityTypeMap } = this.config;
-    if (_.isPlainObject(result)) {
+    if (isPlainObject(result)) {
       const { __typename } = result;
 
       Object.keys(result).forEach((resultField) =>
@@ -251,7 +251,7 @@ export class CacheResultProcessor {
           });
         }
       }
-    } else if (_.isArray(result)) {
+    } else if (isArray(result)) {
       result.forEach((resultListItem) =>
         this.processWriteSubResult(resultListItem)
       );
@@ -262,11 +262,11 @@ export class CacheResultProcessor {
     const { dataId, variables, result } = options;
     const { entityTypeMap, cache, invalidationPolicyManager } = this.config;
 
-    if (_.isPlainObject(result)) {
+    if (isPlainObject(result)) {
       this.processWriteSubResult(result);
     }
 
-    if (dataId && isQuery(dataId) && _.isPlainObject(result)) {
+    if (dataId && isQuery(dataId) && isPlainObject(result)) {
       this.getFieldsForQuery(options).forEach((field) => {
         const fieldName = field.name.value;
         const typename = entityTypeMap.readEntityById(

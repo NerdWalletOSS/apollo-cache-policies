@@ -1,3 +1,7 @@
+2.1.0 (Dan Reynolds)
+
+* Switch from using lodash to lodash-es to reduce bundle size
+
 2.0.3 (Dan Reynolds)
 
 * Filter out dangling references from collection entities

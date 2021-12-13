@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { assign } from 'lodash-es';
 
 interface toRefContext {
   [key: string]: any;
@@ -27,7 +27,7 @@ export const createFixture = <T>(
 
     return (data?: object) => {
       count += 1;
-      const fixtureObject = _.assign(generator(count), data) as Fixture<T>;
+      const fixtureObject = assign(generator(count), data) as Fixture<T>;
       fixtureObject.__typename = typename;
       fixtureObject.toRef = toRef;
       Object.defineProperty(fixtureObject, "toRef", {
