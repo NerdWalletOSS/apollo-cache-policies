@@ -6,14 +6,17 @@ import { makeReference } from '@apollo/client/core';
 
 function _generateQueryFromFragment({
   fieldName,
-  fragmentDefinition,
+  watchDefinition,
+  definitions,
 }: {
   fieldName: string;
-  fragmentDefinition: FragmentDefinitionNode;
+  definitions: FragmentDefinitionNode[];
+  watchDefinition: FragmentDefinitionNode;
 }): DocumentNode {
   return {
     kind: 'Document',
     definitions: [
+      ...definitions,
       {
         directives: [],
         variableDefinitions: [],
@@ -33,13 +36,27 @@ function _generateQueryFromFragment({
                   name: { kind: "Name", value: "client" },
                 },
               ],
-              selectionSet: fragmentDefinition.selectionSet,
+              selectionSet: watchDefinition.selectionSet,
             },
           ]
         },
       }
     ],
   };
+}
+
+function getWatchDefinition(definitions: FragmentDefinitionNode[], fragmentName?: string): FragmentDefinitionNode {
+  if (!fragmentName) {
+    return definitions[0];
+  }
+
+  const fragmentDefinitionByName = definitions.find((def) => def.name.value === fragmentName);
+
+  if (!fragmentDefinitionByName) {
+    throw `No fragment with name: ${fragmentName}`;
+  }
+
+  return fragmentDefinitionByName;
 }
 
 // Returns a query that can be used to watch a normalized cache entity by converting the fragment to a query
@@ -50,11 +67,13 @@ export function buildWatchFragmentQuery(
     policies: Policies,
   }
 ): DocumentNode {
-  const { fragment, id, policies, fieldName } = options;
-  const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
+  const { fragment, id, policies, fieldName, fragmentName } = options;
+  const definitions = fragment.definitions as FragmentDefinitionNode[];
+  const watchDefinition = getWatchDefinition(definitions, fragmentName);
 
   const query = _generateQueryFromFragment({
-    fragmentDefinition: fragmentDefinition,
+    definitions,
+    watchDefinition,
     fieldName,
   });
 
@@ -85,12 +104,14 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
   policies: Policies;
   fieldName: string;
 }): DocumentNode {
-  const { fragment, filter, policies, cache, fieldName, } = options;
-  const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
-  const __typename = fragmentDefinition.typeCondition.name.value;
+  const { fragment, filter, policies, cache, fieldName, fragmentName } = options;
+  const definitions = fragment.definitions as FragmentDefinitionNode[];
+  const watchDefinition = getWatchDefinition(definitions, fragmentName);
+  const __typename = watchDefinition.typeCondition.name.value;
 
   const query = _generateQueryFromFragment({
-    fragmentDefinition,
+    definitions,
+    watchDefinition,
     fieldName,
   });
 
