@@ -1,3 +1,8 @@
+
+2.1.1 (Dan Reynolds)
+
+Expose `fragmentName` option for `useFragment` and `useFragmentWhere`.
+
 2.1.0 (Dan Reynolds)
 
 * Switch from using lodash to lodash-es to reduce bundle size

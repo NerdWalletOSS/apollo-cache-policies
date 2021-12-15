@@ -4,10 +4,11 @@ import { useOnce } from './utils';
 import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { DocumentNode } from 'graphql';
 import { buildWatchFragmentQuery } from '../client/utils';
+import { FragmentHookOptions } from './types';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
-import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
+import { useQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
-interface UseFragmentOptions {
+interface UseFragmentOptions extends FragmentHookOptions {
   id: string;
 }
 
@@ -17,13 +18,18 @@ export default function useFragment<FragmentType>(fragment: DocumentNode, option
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
   const fieldName = useFragmentTypePolicyFieldName();
+  const { id, ...queryOptions } = options;
 
-  const queryForFragment = useOnce(() => buildWatchFragmentQuery({
+  const query = useOnce(() => buildWatchFragmentQuery({
+    id,
     fragment,
     fieldName,
-    id: options.id,
     policies: cache.policies,
   }));
 
-  return useGetQueryDataByFieldName<FragmentType | null>(queryForFragment, fieldName);
+  return useQueryDataByFieldName<FragmentType | null>({
+    fieldName,
+    query: query,
+    options: queryOptions,
+  });
 }
