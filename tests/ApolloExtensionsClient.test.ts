@@ -1,5 +1,5 @@
+import { times } from "lodash-es";
 import { ApolloLink, gql, NormalizedCacheObject } from "@apollo/client";
-import _ from "lodash";
 import { ApolloExtensionsClient } from "../src";
 import { InvalidationPolicyCache } from "../src/cache";
 import Employee, { EmployeeType } from "./fixtures/employee";
@@ -17,7 +17,8 @@ const employeesQuery = gql`
   }
 `;
 
-const [employee, employee2] = _.times(3, () => Employee());
+// @ts-ignore
+const [employee, employee2] = times(3, () => Employee());
 
 const employeesResponse = {
   employees: {
@@ -294,6 +295,37 @@ describe('ApolloExtensionsClient', () => {
               },
             });
           }
+        });
+      });
+    });
+
+    describe('with multiple fragments', () => {
+      test('should query for the matching fragment name', (done) => {
+        const observable = client.watchFragmentWhere<EmployeeType>({
+          fragment: gql`
+            fragment OtherFragment on Employee {
+              employee_name
+            }
+
+            fragment EmployeeFragment on Employee {
+              id
+              ...OtherFragment
+            }
+          `,
+          fragmentName: 'EmployeeFragment',
+          filter: {
+            employee_name: employee.employee_name,
+          },
+        });
+
+        const subscription = observable.subscribe((val) => {
+          expect(val).toEqual([{
+            __typename: 'Employee',
+            id: employee.id,
+            employee_name: employee.employee_name,
+          }]);
+          subscription.unsubscribe();
+          done();
         });
       });
     });

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { isFunction } from 'lodash';
+import { isFunction } from 'lodash-es';
 
 export function useOnce<T>(value: T | (() => T)): T {
   const valueRef = useRef<T>();

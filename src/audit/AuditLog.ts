@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { filter as _filter } from "lodash-es";
 
 interface AuditLogEntry {
   time: number;
@@ -23,7 +23,7 @@ export default class AuditLog {
   }
 
   getLog(filter: AuditLogEntry) {
-    return _.filter(this._log, filter);
+    return _filter(this._log, filter);
   }
 
   printLog(filter: AuditLogEntry) {

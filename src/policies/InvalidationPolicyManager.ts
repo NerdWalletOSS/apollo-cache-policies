@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { isNumber } from 'lodash-es';
 import {
   InvalidationPolicy,
   InvalidationPolicyEventActivation,
@@ -222,7 +222,7 @@ export default class InvalidationPolicyManager {
       this.getPolicy(typename)?.timeToLive || policies.timeToLive;
 
     if (
-      _.isNumber(entityCacheTime) &&
+      isNumber(entityCacheTime) &&
       timeToLive &&
       Date.now() > entityCacheTime + timeToLive
     ) {

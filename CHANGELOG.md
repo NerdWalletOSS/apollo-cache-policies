@@ -1,7 +1,11 @@
 
+2.1.1 (Dan Reynolds)
+
+Expose `fragmentName` option for `useFragment` and `useFragmentWhere`.
+
 2.1.0 (Dan Reynolds)
 
-Expose query options in fragment hooks
+* Switch from using lodash to lodash-es to reduce bundle size
 
 2.0.3 (Dan Reynolds)
 
