@@ -32,14 +32,14 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
 
     const subscribe = obsQuery.subscribe.bind(obsQuery);
 
-    obsQuery.subscribe = (observer) => {
+    obsQuery.subscribe = (observer, ...rest) => {
       // This check is modeled after the Zen Observable observer check:
       // https://github.com/zenparsing/zen-observable/blob/master/src/Observable.js#L211
-      if (typeof observer != 'object') {
+      if (typeof observer !== 'object') {
         observer = {
           next: observer,
-          error: arguments[1],
-          complete: arguments[2],
+          error: rest[0] as (error: any) => void,
+          complete: rest[1] as () => void,
         };
       }
 
