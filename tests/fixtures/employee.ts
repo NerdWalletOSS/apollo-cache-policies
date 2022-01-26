@@ -1,4 +1,4 @@
-import { random } from "lodash-es";
+import random from "lodash/random";
 import { v4 } from "uuid";
 import { createFixture } from "./utils";
 

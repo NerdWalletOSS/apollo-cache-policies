@@ -1,4 +1,4 @@
-import { times } from "lodash-es";
+import times from "lodash/times";
 import { ApolloLink, gql, NormalizedCacheObject } from "@apollo/client";
 import { ApolloExtensionsClient } from "../src";
 import { InvalidationPolicyCache } from "../src/cache";
