@@ -1,6 +1,6 @@
 {
   "name": "@nerdwallet/apollo-cache-policies",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "An extension to the InMemoryCache from Apollo that adds additional cache policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
