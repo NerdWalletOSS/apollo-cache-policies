@@ -1,4 +1,4 @@
-import { set } from "lodash-es";
+import set from "lodash/set";
 import { makeEntityId, isQuery, fieldNameFromStoreName } from "../helpers";
 import {
   EntitiesByType,

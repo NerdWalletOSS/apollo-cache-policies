@@ -1,6 +1,7 @@
 import { FieldNode, SelectionNode } from "graphql";
 import { Cache, makeReference } from "@apollo/client/core";
-import { isUndefined, isPlainObject, isArray } from 'lodash-es';
+import isPlainObject from "lodash/isPlainObject";
+import isArray from "lodash/isArray";
 import {
   argumentsObjectFromField,
   createFragmentMap,
@@ -61,7 +62,7 @@ export class CacheResultProcessor {
   ): ReadResultStatus {
     const { cache, invalidationPolicyManager, entityTypeMap } = this.config;
 
-    const result = isUndefined(fieldNameOrIndex)
+    const result = fieldNameOrIndex == undefined
       ? parentResult
       : parentResult[fieldNameOrIndex];
 

@@ -7,7 +7,10 @@ import {
   StoreObject,
   makeReference,
 } from "@apollo/client/core";
-import { compact, every, pick, isFunction } from "lodash-es";
+import compact from "lodash/compact";
+import every from "lodash/every";
+import pick from "lodash/pick";
+import isFunction from "lodash/isFunction";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";

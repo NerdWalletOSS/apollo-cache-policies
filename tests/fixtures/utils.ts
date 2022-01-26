@@ -1,4 +1,4 @@
-import { assign } from 'lodash-es';
+import assign from "lodash/assign";
 
 interface toRefContext {
   [key: string]: any;

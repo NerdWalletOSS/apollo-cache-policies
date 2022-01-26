@@ -1,3 +1,7 @@
+2.2.0 (Dan Reynolds)
+
+* Revert lodash-es change and use module imports instead
+
 2.1.0 (Dan Reynolds)
 
 * Switch from using lodash to lodash-es to reduce bundle size

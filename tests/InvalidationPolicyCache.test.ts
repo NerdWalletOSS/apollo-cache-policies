@@ -1,4 +1,5 @@
-import { times, omit } from "lodash-es";
+import times from "lodash/times";
+import omit from "lodash/omit";
 import { gql } from "@apollo/client/core";
 import { InvalidationPolicyCache } from "../src";
 import Employee, { EmployeeType } from "./fixtures/employee";

@@ -1,6 +1,6 @@
 {
   "name": "@nerdwallet/apollo-cache-policies",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "An extension to the InMemoryCache from Apollo that adds additional cache policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,7 @@
     "@types/graphql": "^14.5.0",
     "@types/uuid": "^7.0.4",
     "graphql": "^15.5.0",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.21",
     "typescript": "^4.3.2",
     "uuid": "^7.0.3",
     "uuidv4": "^6.2.12"

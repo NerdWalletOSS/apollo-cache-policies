@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash-es';
+import isNumber from "lodash/isNumber";
 import {
   InvalidationPolicy,
   InvalidationPolicyEventActivation,

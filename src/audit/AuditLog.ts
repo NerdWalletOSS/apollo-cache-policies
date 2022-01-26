@@ -1,4 +1,4 @@
-import { filter as _filter } from "lodash-es";
+import _filter from 'lodash/filter';
 
 interface AuditLogEntry {
   time: number;

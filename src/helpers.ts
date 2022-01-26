@@ -1,4 +1,6 @@
-import { cloneDeep, compact, isPlainObject } from "lodash-es";
+import cloneDeep from "lodash/cloneDeep";
+import compact from "lodash/compact";
+import isPlainObject from "lodash/isPlainObject";
 import { v4 } from "uuid";
 
 export function isQuery(dataId: string) {
