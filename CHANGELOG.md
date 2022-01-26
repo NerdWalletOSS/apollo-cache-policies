@@ -1,3 +1,7 @@
+2.3.0 (Dan Reynolds)
+
+* Update TSConfig
+
 2.2.0 (Dan Reynolds)
 
 * Revert lodash-es change and use module imports instead
