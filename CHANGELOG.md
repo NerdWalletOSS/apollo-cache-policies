@@ -1,3 +1,7 @@
+2.4.0 (Dan Reynolds)
+
+Reinitialize all invalidation policy objects after cache init()
+
 2.3.0 (Dan Reynolds)
 
 * Update TSConfig

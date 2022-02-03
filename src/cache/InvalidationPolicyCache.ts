@@ -16,7 +16,7 @@ import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
 import { FragmentWhereFilter, InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
-import { InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
+import { InvalidationPolicies, InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
 import { cacheExtensionsCollectionTypename, collectionEntityIdForType } from './utils';
 
@@ -30,24 +30,43 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected entityTypeMap: EntityTypeMap;
   // @ts-ignore: Initialize in parent constructor
   protected entityStoreWatcher: EntityStoreWatcher;
-  protected invalidationPolicyManager: InvalidationPolicyManager;
-  protected cacheResultProcessor: CacheResultProcessor;
+  protected invalidationPolicyManager!: InvalidationPolicyManager;
+  protected cacheResultProcessor!: CacheResultProcessor;
   protected entityStoreRoot: any;
   protected isBroadcasting: boolean;
+  protected invalidationPolicies: InvalidationPolicies;
   protected enableCollections: boolean;
+  protected isInitialized: boolean;
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
     const { invalidationPolicies = {}, enableCollections = false, ...inMemoryCacheConfig } = config;
     super(inMemoryCacheConfig);
 
     this.enableCollections = enableCollections;
+    this.invalidationPolicies = invalidationPolicies;
     this.isBroadcasting = false;
+    this.isInitialized = true;
 
-    const { entityTypeMap } = this;
+    // Once the InMemoryCache has called `init()` in the super constructor, we initialize
+    // the InvalidationPolicyCache objects.
+    this.reinitialize();
+  }
 
+  // Whenever the InMemoryCache reinitializes the entityStore by calling `init()` again,
+  // we must also reinitialize all of the InvalidationPolicyCache objects.
+  private reinitialize() {
+    // @ts-ignore Data is a private API
+    this.entityStoreRoot = this.data;
+    this.entityTypeMap = new EntityTypeMap();
+    this.entityStoreWatcher = new EntityStoreWatcher({
+      entityStore: this.entityStoreRoot,
+      entityTypeMap: this.entityTypeMap,
+      policies: this.policies,
+      updateCollectionField: this.updateCollectionField.bind(this),
+    });
     this.invalidationPolicyManager = new InvalidationPolicyManager({
-      policies: invalidationPolicies,
-      entityTypeMap: entityTypeMap,
+      policies: this.invalidationPolicies,
+      entityTypeMap: this.entityTypeMap,
       cacheOperations: {
         evict: (...args) => this.evict(...args),
         modify: (...args) => this.modify(...args),
@@ -67,25 +86,11 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     // @ts-ignore private API
     super.init();
 
-    // After init is called, the entity store has been reset so we must also reset
-    // the cache policies library's corresponding entity type map, watcher and
-    // cache result processor
-
-    // @ts-ignore Data is a private API
-    this.entityStoreRoot = this.data;
-    this.entityTypeMap = new EntityTypeMap();
-    this.entityStoreWatcher = new EntityStoreWatcher({
-      entityStore: this.entityStoreRoot,
-      entityTypeMap: this.entityTypeMap,
-      policies: this.policies,
-      updateCollectionField: this.updateCollectionField.bind(this),
-    });
-    this.cacheResultProcessor = new CacheResultProcessor({
-      invalidationPolicyManager: this.invalidationPolicyManager,
-      // @ts-ignore This field is assigned in the parent constructor
-      entityTypeMap: this.entityTypeMap,
-      cache: this,
-    });
+    // After init is called, the entity store has been reset so we must
+    // reinitialize all invalidation policy objects.
+    if (this.isInitialized) {
+      this.reinitialize();
+    }
   }
 
   protected readField<T>(
