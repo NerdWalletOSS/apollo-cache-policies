@@ -4,11 +4,13 @@ import { NormalizedCacheObjectWithInvalidation } from "./types";
 import { makeEntityId, isQuery } from "../helpers";
 import { Policies } from '@apollo/client/cache/inmemory/policies';
 import { cacheExtensionsCollectionTypename } from '../cache/utils';
+import { ReactiveVarsCache } from "../cache/ReactiveVarsCache";
 
 interface EntityStoreWatcherConfig {
   entityStore: any;
   entityTypeMap: EntityTypeMap;
   policies: Policies;
+  reactiveVarsCache: ReactiveVarsCache;
   updateCollectionField: (typename: string, dataId: string) => void;
 }
 
@@ -117,7 +119,7 @@ export default class EntityStoreWatcher {
 
   private replace = (data: NormalizedCacheObjectWithInvalidation | null) => {
     const {
-      config: { entityStore, entityTypeMap },
+      config: { entityStore, entityTypeMap, reactiveVarsCache, },
       storeFunctions: { replace },
     } = this;
 
@@ -125,6 +127,9 @@ export default class EntityStoreWatcher {
 
     if (!data || !invalidation) {
       replace.call(entityStore, data);
+      // After the EntityStore has been replaced, the ReactiveVarsCache should be reset to update
+      // reactive vars with the new cached values.
+      reactiveVarsCache.reset();
       return;
     }
 
@@ -136,6 +141,7 @@ export default class EntityStoreWatcher {
     // so instead we pause the store watcher until the entity store data has been replaced.
     this.pause();
     replace.call(entityStore, data);
+    reactiveVarsCache.reset();
     this.watch();
   };
 

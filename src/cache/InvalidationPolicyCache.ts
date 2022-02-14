@@ -19,6 +19,7 @@ import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicies, InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
 import { cacheExtensionsCollectionTypename, collectionEntityIdForType } from './utils';
+import { initReactiveVarsCache, ReactiveVarsCache } from "./ReactiveVarsCache";
 
 /**
  * Extension of Apollo in-memory cache which adds support for cache policies.
@@ -34,6 +35,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected cacheResultProcessor!: CacheResultProcessor;
   protected entityStoreRoot: any;
   protected isBroadcasting: boolean;
+  protected reactiveVarsCache!: ReactiveVarsCache;
   protected invalidationPolicies: InvalidationPolicies;
   protected enableCollections: boolean;
   protected isInitialized: boolean;
@@ -46,6 +48,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     this.invalidationPolicies = invalidationPolicies;
     this.isBroadcasting = false;
     this.isInitialized = true;
+    this.reactiveVarsCache = initReactiveVarsCache(this);
 
     // Once the InMemoryCache has called `init()` in the super constructor, we initialize
     // the InvalidationPolicyCache objects.
@@ -62,6 +65,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       entityStore: this.entityStoreRoot,
       entityTypeMap: this.entityTypeMap,
       policies: this.policies,
+      reactiveVarsCache: this.reactiveVarsCache,
       updateCollectionField: this.updateCollectionField.bind(this),
     });
     this.invalidationPolicyManager = new InvalidationPolicyManager({
@@ -79,6 +83,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       entityTypeMap: this.entityTypeMap,
       cache: this,
     });
+    this.reactiveVarsCache.reset();
   }
 
   // @ts-ignore private API
