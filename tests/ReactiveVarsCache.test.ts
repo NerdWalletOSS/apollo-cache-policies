@@ -48,9 +48,7 @@ describe('ReactiveVarsCache', () => {
 
   test('should be initialized with the existing cached value', () => {
     rv(true);
-
     const rv2 = makeCachedVar('test', false);
-
     expect(rv2()).toEqual(true);
   });
 
