@@ -2,7 +2,7 @@ import { ReactiveVar } from "@apollo/client";
 import { cachedReactiveVarTypename, makeCachedVar } from "../src/cache/ReactiveVarsCache";
 import InvalidationPolicyCache from "../src/cache/InvalidationPolicyCache";
 
-describe('CachedReactiveVars', () => {
+describe('ReactiveVarsCache', () => {
   let cache: InvalidationPolicyCache;
   let rv: ReactiveVar<any>;
 
