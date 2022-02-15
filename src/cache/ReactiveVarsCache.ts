@@ -40,7 +40,7 @@ export class ReactiveVarsCache {
 
   private watchReactiveVar<T>(id: string, rv: ReactiveVar<T>) {
     rv.onNextChange((value) => {
-      rvCache.writeCachedVar(id, value)
+      this.writeCachedVar(id, value)
       // Reactive variables support an `onNextChange` API that allows listeners
       // to subscribe to the next value change. This only applies to a single change,
       // so to subscribe to every change, a new listener must be added after processing
@@ -69,7 +69,7 @@ export class ReactiveVarsCache {
   }
 
   readCachedVar<T>(id: string): T | null {
-    const entityId = rvCache.cache.identify({
+    const entityId = this.cache.identify({
       __typename: cachedReactiveVarTypename,
       id,
     });
