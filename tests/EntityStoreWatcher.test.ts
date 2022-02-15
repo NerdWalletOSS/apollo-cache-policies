@@ -3,12 +3,15 @@ import { InMemoryCache, StoreObject } from "@apollo/client/core";
 import { EntityStoreWatcher, EntityTypeMap } from "../src/entity-store";
 import { Policies } from "@apollo/client/cache/inmemory/policies";
 import { EntityStore } from "@apollo/client/cache/inmemory/entityStore";
+import { ReactiveVarsCache } from "../src/cache/ReactiveVarsCache";
+import { InvalidationPolicyCache } from "../src";
 
 describe("#EntityStoreWatcher", () => {
   let entityStoreWatcher: EntityStoreWatcher;
   let entityTypeMap: EntityTypeMap;
   let entityStore: EntityStore;
   let policies: Policies;
+  let reactiveVarsCache: ReactiveVarsCache;
   let dateNowSpy: any;
 
   beforeEach(() => {
@@ -18,10 +21,14 @@ describe("#EntityStoreWatcher", () => {
     entityStore = new EntityStore.Root({
       policies,
     });
+    reactiveVarsCache = new ReactiveVarsCache({
+      cache: new InvalidationPolicyCache(),
+    });
     entityStoreWatcher = new EntityStoreWatcher({
       policies,
       entityTypeMap,
       entityStore,
+      reactiveVarsCache,
       updateCollectionField: () => { }
     });
   });
@@ -47,6 +54,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
+        reactiveVarsCache,
         updateCollectionField: () => { }
       });
       const mergeArgs: [string, StoreObject] = [
@@ -106,6 +114,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
+        reactiveVarsCache,
         updateCollectionField: () => { }
       });
       entityStore.delete("ROOT_QUERY", "employees", undefined);
@@ -154,6 +163,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
+        reactiveVarsCache,
         updateCollectionField: () => { }
       });
       entityStore.clear();
@@ -178,6 +188,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
+        reactiveVarsCache,
         updateCollectionField: () => { }
       });
     });
@@ -231,6 +242,7 @@ describe("#EntityStoreWatcher", () => {
         policies,
         entityTypeMap,
         entityStore,
+        reactiveVarsCache,
         updateCollectionField: () => { }
       });
       const entityStoreWatcherMergeSpy = jest
