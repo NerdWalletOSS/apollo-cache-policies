@@ -285,8 +285,17 @@ export class CacheResultProcessor {
           const fieldArgs = argumentsObjectFromField(field, variables);
           const fieldVariables = variables ?? (fieldArgs !== null ? {} : undefined);
 
+          const queryTypename = cache.policies.rootTypenamesById[dataId];
+          const storeFieldNameForQuery = cache.policies.getStoreFieldName({
+            typename: queryTypename,
+            fieldName,
+            field,
+            variables,
+          });
+
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
           entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables, fieldArgs);
+          entityTypeMap.write(typename, dataId, storeFieldNameForQuery, fieldVariables, fieldArgs);
 
           const renewalPolicy = invalidationPolicyManager.getRenewalPolicyForType(
             typename
@@ -296,6 +305,7 @@ export class CacheResultProcessor {
             renewalPolicy === RenewalPolicy.AccessAndWrite
           ) {
             entityTypeMap.renewEntity(dataId, storeFieldName);
+            entityTypeMap.renewEntity(dataId, storeFieldNameForQuery);
           }
 
           invalidationPolicyManager.runWritePolicy(typename, {

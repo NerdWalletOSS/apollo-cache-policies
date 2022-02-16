@@ -1,3 +1,7 @@
+2.4.1 (Dan Reynolds)
+
+Verifies that TTL eviction works correctly for relay style pagination.
+
 2.4.0 (Dan Reynolds)
 
 Reinitialize all invalidation policy objects after cache init()
