@@ -5,6 +5,7 @@ import { InvalidationPolicyCache } from "../src";
 import Employee, { EmployeeType } from "./fixtures/employee";
 import EmployeeMessage from "./fixtures/employeeMessage";
 import { InvalidationPolicyEvent, RenewalPolicy } from "../src/policies/types";
+import { relayStylePagination } from "./relayPagination";
 
 describe("InvalidationPolicyCache", () => {
   let cache: InvalidationPolicyCache;
@@ -77,6 +78,19 @@ describe("InvalidationPolicyCache", () => {
   const employeesWithVariablesQuery = gql`
     query {
       employees(name: $name) {
+        data {
+          id
+          employee_name
+          employee_salary
+          employee_age
+        }
+      }
+    }
+  `;
+
+  const employeesWithRelayStylePaginationQuery = gql`
+    query {
+      employees(first: 3, after: $after) {
         data {
           id
           employee_name
@@ -2773,6 +2787,97 @@ describe("InvalidationPolicyCache", () => {
         });
         expect(queryResult).toEqual({});
         expect(cache.extract(true, false)).toEqual({
+          ROOT_QUERY: {
+            __typename: "Query",
+          },
+        });
+      });
+    });
+
+    describe('with a relay-style pagination type policy', () => {
+      test("should evict an expired entity", () => {
+        cache = new InvalidationPolicyCache({
+          typePolicies: {
+            Query: {
+              fields: {
+                employees: relayStylePagination(["after"]),
+              }
+            },
+          },
+          invalidationPolicies: {
+            types: {
+              EmployeesResponse: {
+                timeToLive: 100,
+              }
+            }
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesWithRelayStylePaginationQuery,
+          data: employeesResponse,
+        });
+        cache.writeQuery({
+          query: employeesWithRelayStylePaginationQuery,
+          data: employeesResponse,
+          variables: {
+            after: employee.id,
+          }
+        });
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            "employees:{}": {
+              __typename: 'EmployeesResponse',
+              data: [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() }
+              ],
+              edges: [],
+              pageInfo: {
+                endCursor: "",
+                hasNextPage: true,
+                hasPreviousPage: false,
+                startCursor: "",
+              }
+            },
+            [`employees:{\"after\":\"${employee.id}\"}`]: {
+              __typename: 'EmployeesResponse',
+              data: [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() }
+              ],
+              edges: [],
+              pageInfo: {
+                endCursor: "",
+                hasNextPage: true,
+                hasPreviousPage: false,
+                startCursor: "",
+              }
+            }
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        const queryResult = cache.readQuery({
+          query: employeesWithRelayStylePaginationQuery,
+        });
+        const afterQueryResult = cache.readQuery({
+          query: employeesWithRelayStylePaginationQuery,
+          variables: {
+            after: employee.id,
+          }
+        });
+        expect(queryResult).toEqual({});
+        expect(afterQueryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
           ROOT_QUERY: {
             __typename: "Query",
           },
