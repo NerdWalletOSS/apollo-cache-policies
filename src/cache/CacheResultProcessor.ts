@@ -293,7 +293,6 @@ export class CacheResultProcessor {
             variables,
           });
 
-
           // Write a query to the entity type map at `write` in addition to `merge` time so that we can keep track of its variables.
           entityTypeMap.write(typename, dataId, storeFieldName, fieldVariables, fieldArgs);
           entityTypeMap.write(typename, dataId, storeFieldNameForQuery, fieldVariables, fieldArgs);
@@ -316,6 +315,7 @@ export class CacheResultProcessor {
               storeFieldName,
               ref: makeReference(dataId),
               variables: fieldVariables,
+              args: fieldArgs,
             },
           });
         }
