@@ -53,6 +53,10 @@ export class ReactiveVarsCache {
     const cachedValue = this.readCachedVar<T>(id);
     const rv = makeVar<T>(cachedValue ?? defaultValue);
 
+    if (this.registeredVars[id]) {
+      console.warn(`Duplicate cached reactive variable with ID ${id} detected. Multiple cached reactive variables should not share the same ID.`);
+    }
+
     this.registeredVars[id] = {
       rv,
       defaultValue,
