@@ -2,7 +2,7 @@ import { ReactiveVar } from "@apollo/client";
 import { cachedReactiveVarTypename, makeCachedVar } from "../src/cache/ReactiveVarsCache";
 import InvalidationPolicyCache from "../src/cache/InvalidationPolicyCache";
 
-describe('CachedReactiveVars', () => {
+describe('ReactiveVarsCache', () => {
   let cache: InvalidationPolicyCache;
   let rv: ReactiveVar<any>;
 
@@ -48,9 +48,7 @@ describe('CachedReactiveVars', () => {
 
   test('should be initialized with the existing cached value', () => {
     rv(true);
-
     const rv2 = makeCachedVar('test', false);
-
     expect(rv2()).toEqual(true);
   });
 
