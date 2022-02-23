@@ -1,3 +1,7 @@
+2.5.0 (Dan Reynolds)
+
+Introduces cached reactive variables.
+
 2.4.1 (Dan Reynolds)
 
 Verifies that TTL eviction works correctly for relay style pagination.
