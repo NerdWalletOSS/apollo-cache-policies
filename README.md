@@ -6,7 +6,8 @@ An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing
 
 * Type-based `time-to-live` (TTL) support.
 * Invalidation policies that codify relationships between types in the cache when entities are written or evicted.
-* Normalized collections for accessing and filtering all entities of a particular type
+* Normalized collections for accessing and filtering all entities of a particular type.
+* Cached reactive variables to simplify persistent state management.
 
 ## Installation
 
@@ -342,4 +343,30 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   In this example, we use the `readReferenceWhere` API to construct a type policy that returns all entities of the `Employee` type in the cache with a field `team` matching the value `Banking`. Any number of fields can be used as filters and queries for this type policy will automatically update whenever an employee entity is added, created removed from the cache.
 
+</details>
+
+<details>
+  <summary>
+    Cached Reactive Variables
+  </summary>
+
+  <br>
+
+  ## Summary
+
+  Reactive variables are a powerful and lightweight API for managing local state with Apollo. In cases where client state should be persisted across sessions, it would be helpful to be able to persist Reactive Variables as well.
+
+  Cached reactive variables work the same as reactive variables, with the additional effect of watching and peristing their current value to the cache. Applications still need to set up their own cache persistence using tools like [Apollo Cache Persist](https://github.com/apollographql/apollo-cache-persist). Once cache persistence is in place, cached reactive variables will be rehydrated on new sessions with a runtime value from the cache.
+  ## Example Usage
+
+  The only difference in the API when working with cached reactive variables is that a unique ID must be specified for caching. They can then be initialized with a default value, read and written to using the same APIs
+  as other reactive variables.
+
+  ```javascript
+  import { makeCachedVar } from '@nerdwallet/apollo-cache-policies';
+
+  const rv = makeCachedVar('identifier', false);
+  rv(true);
+  console.log(rv()); // true
+  ```
 </details>
