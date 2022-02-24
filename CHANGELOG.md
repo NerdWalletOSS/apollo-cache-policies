@@ -1,3 +1,7 @@
+2.6.0 (Dan Reynolds)
+
+Revert TSConfig update back to commonJS for the time being.
+
 2.5.0 (Dan Reynolds)
 
 Introduces cached reactive variables.
