@@ -354,9 +354,9 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   ## Summary
 
-  Reactive variables are a powerful and lightweight API for managing local state with Apollo. In cases where client state should be persisted across sessions, it would be helpful to be able to persist Reactive Variables as well.
+  Reactive variables are a powerful and lightweight API for managing local state with Apollo. In cases where client state should be persisted across sessions, it would be helpful to be able to persist reactive variables as well.
 
-  Cached reactive variables work the same as reactive variables, with the additional effect of watching and peristing their current value to the cache. Applications still need to set up their own cache persistence using tools like [Apollo Cache Persist](https://github.com/apollographql/apollo-cache-persist). Once cache persistence is in place, cached reactive variables will be rehydrated on new sessions with a runtime value from the cache.
+  Cached reactive variables work the same as regular ones, with the additional function of persisting their current value to the cache. Applications still need to set up their own cache persistence using tools like [Apollo Cache Persist](https://github.com/apollographql/apollo-cache-persist). Once cache persistence is in place, cached reactive variables will be rehydrated on new sessions with a runtime value from the cache.
   ## Example Usage
 
   The only difference in the API when working with cached reactive variables is that a unique ID must be specified for caching. They can then be initialized with a default value, read and written to using the same APIs
