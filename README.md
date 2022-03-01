@@ -56,7 +56,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
     typePolicies: {...},
     invalidationPolicies: {
       timeToLive: 3600 * 1000; // 1hr TTL on all types in the cache
-      renewalPolicy: RenewalPolicy;
+      renewalPolicy: RenewalPolicy.WriteOnly;
       types: {
         Employee: {
           timeToLive: 3600 * 1000 * 24 // 24hr TTL specifically for the Employee type in the cache
