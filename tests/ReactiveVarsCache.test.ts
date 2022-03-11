@@ -52,6 +52,39 @@ describe('ReactiveVarsCache', () => {
     expect(rv2()).toEqual(true);
   });
 
+  test('should persist null values to the cache', () => {
+    makeCachedVar('test-null', null);
+    expect(cache.extract(true, false)).toEqual({
+      "CachedReactiveVar:test": {
+        __typename: cachedReactiveVarTypename,
+        id: 'test',
+        value: false,
+      },
+      "CachedReactiveVar:test-null": {
+        __typename: cachedReactiveVarTypename,
+        id: 'test-null',
+        value: null,
+      },
+      __META: {
+        extraRootIds: ['CachedReactiveVar:test', 'CachedReactiveVar:test-null']
+      }
+    });
+  });
+
+  test('should not persist undefined values to the cache', () => {
+    makeCachedVar('test-undefined', undefined);
+    expect(cache.extract(true, false)).toEqual({
+      "CachedReactiveVar:test": {
+        __typename: cachedReactiveVarTypename,
+        id: 'test',
+        value: false,
+      },
+      __META: {
+        extraRootIds: ['CachedReactiveVar:test']
+      }
+    });
+  });
+
   describe('on restore', () => {
     test('should update reactive reactive vars to their updated cache values', () => {
       expect(rv()).toEqual(false);

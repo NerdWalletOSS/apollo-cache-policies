@@ -86,18 +86,20 @@ export class ReactiveVarsCache {
   }
 
   writeCachedVar<T>(id: string, value: T) {
-    this.cache.writeFragment({
-      id: rvCache.cache.identify({
-        __typename: cachedReactiveVarTypename,
-        id,
-      }),
-      fragment: cachedReactiveVarFragment,
-      data: {
-        __typename: cachedReactiveVarTypename,
-        id,
-        value,
-      }
-    });
+    if (value !== undefined) {
+      this.cache.writeFragment({
+        id: rvCache.cache.identify({
+          __typename: cachedReactiveVarTypename,
+          id,
+        }),
+        fragment: cachedReactiveVarFragment,
+        data: {
+          __typename: cachedReactiveVarTypename,
+          id,
+          value,
+        }
+      });
+    }
   }
 
   // Notifies all reactive variables that the cache has changed
