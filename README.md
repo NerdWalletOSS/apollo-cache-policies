@@ -2,7 +2,7 @@
 
 # Apollo Cache Policies
 
-An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that provides extensions to the Apollo cache including:
+An extension of the [Apollo 3.0 cache](https://blog.apollographql.com/previewing-the-apollo-client-3-cache-565fadd6a01e) that introduces additional features including:
 
 * Type-based `time-to-live` (TTL) support.
 * Invalidation policies that codify relationships between types in the cache when entities are written or evicted.
