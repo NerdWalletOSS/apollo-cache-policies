@@ -3130,6 +3130,160 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
+  describe('readEntity', () => {
+    let dateNowSpy: any;
+
+    it('should return null when no entity', () => {
+      cache = new InvalidationPolicyCache({});
+
+      const entity = cache.readEntity(employee.toRef())
+      expect(entity).toEqual(null);
+    })
+
+    it('should return entity when it exists', () => {
+      cache = new InvalidationPolicyCache({});
+
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+
+      const entity = cache.readEntity(employee.toRef())
+      expect(entity).toEqual({
+        cacheTime: 0,
+        dataId: employee.toRef(),
+        typename: employee.__typename,
+      });
+    })
+  })
+
+  describe('readEntityExpired', () => {
+    let dateNowSpy: any;
+
+    it('should return false when not expired', () => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          timeToLive: 100,
+        },
+      });
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(50);
+
+      const result = cache.readEntityExpired(employee.toRef())
+      expect(result).toEqual(false);
+    })
+
+    it('should return true when expired', () => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          timeToLive: 100,
+        },
+      });
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(200);
+
+      const result = cache.readEntityExpired(employee.toRef())
+      expect(result).toEqual(true);
+    })
+  })
+
+  describe('readEntityExpirationTime', () => {
+    let dateNowSpy: any;
+
+    it('should return null when entity missing', () => {
+      cache = new InvalidationPolicyCache({});
+
+      const expiration = cache.readEntityExpirationTime(employee.toRef())
+      expect(expiration).toEqual(null);
+    })
+
+    it('should return null when type policy missing', () => {
+      cache = new InvalidationPolicyCache({});
+
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+
+      const expiration = cache.readEntityExpirationTime(employee.toRef())
+      expect(expiration).toEqual(null);
+    })
+
+    it('should return expiration when specific type time to live', () => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          types: {
+            Employee: {
+              timeToLive: 500,
+            }
+          }
+        },
+      });
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+
+      const expiration = cache.readEntityExpirationTime(employee.toRef())
+      expect(expiration).toEqual(500);
+    })
+
+    it('should return expiration when global type time to live', () => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          timeToLive: 100,
+        },
+      });
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+
+      const expiration = cache.readEntityExpirationTime(employee.toRef())
+      expect(expiration).toEqual(100);
+    })
+
+    it('should return expiration when global and specific type time to live', () => {
+      cache = new InvalidationPolicyCache({
+        invalidationPolicies: {
+          timeToLive: 100,
+          types: {
+            Employee: {
+              timeToLive: 500,
+            }
+          }
+        },
+      });
+      dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+      cache.writeQuery({
+        query: employeesAndMessagesQuery,
+        data: employeesAndMessagesResponse,
+      });
+      dateNowSpy.mockRestore();
+
+      const expiration = cache.readEntityExpirationTime(employee.toRef())
+      expect(expiration).toEqual(500);
+    })
+  })
+
   describe('#activatePolicies', () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache();
