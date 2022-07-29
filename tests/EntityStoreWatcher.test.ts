@@ -243,23 +243,27 @@ describe("#EntityStoreWatcher", () => {
         entityTypeMap,
         entityStore,
         reactiveVarsCache,
-        updateCollectionField: () => { }
+        updateCollectionField: () => {},
       });
       const entityStoreWatcherMergeSpy = jest
         // @ts-ignore
         .spyOn(entityStoreWatcher, "merge")
+        // @ts-ignore
         .mockImplementation();
       const entityStoreWatcherDeleteSpy = jest
         // @ts-ignore
         .spyOn(entityStoreWatcher, "delete")
+        // @ts-ignore
         .mockImplementation();
       const entityStoreWatcherClearSpy = jest
         // @ts-ignore
         .spyOn(entityStoreWatcher, "clear")
+        // @ts-ignore
         .mockImplementation();
       const entityStoreWatcherReplaceSpy = jest
         // @ts-ignore
         .spyOn(entityStoreWatcher, "replace")
+        // @ts-ignore
         .mockImplementation();
 
       // @ts-ignore
