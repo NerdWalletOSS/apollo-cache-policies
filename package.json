@@ -1,6 +1,6 @@
 {
   "name": "@nerdwallet/apollo-cache-policies",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "An extension to the InMemoryCache from Apollo that adds additional cache policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,24 +31,23 @@
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@types/graphql": "^14.5.0",
-    "@types/uuid": "^7.0.4",
     "graphql": "^15.5.0",
     "lodash": "^4.17.21",
-    "typescript": "^4.3.2",
-    "uuid": "^7.0.3",
-    "uuidv4": "^6.2.12"
+    "uuid": "^7.0.3"
   },
   "devDependencies": {
     "@apollo/client": "^3.4.16",
+    "@types/graphql": "^14.5.0",
     "@types/jest": "^28.1.6",
     "@types/lodash-es": "^4.17.5",
     "@types/react": "^17.0.19",
+    "@types/uuid": "^7.0.4",
     "jest": "^28.1.3",
     "jest-extended": "^0.11.5",
     "prettier": "2.0.5",
     "react": "^17.0.2",
     "subscriptions-transport-ws": "^0.9.18",
-    "ts-jest": "^28.0.7"
+    "ts-jest": "^28.0.7",
+    "typescript": "^4.3.2"
   }
 }

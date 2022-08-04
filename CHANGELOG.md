@@ -1,3 +1,7 @@
+2.7.0 (Dan Reynolds)
+
+Dependency changes.
+
 2.6.0 (Dan Reynolds)
 
 Revert TSConfig update back to commonJS for the time being.
