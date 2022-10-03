@@ -2,7 +2,8 @@ import { DocumentNode, FragmentDefinitionNode } from 'graphql';
 import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
 import { InvalidationPolicyCache } from '../cache';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
-import { makeReference } from '@apollo/client/core';
+import { makeReference, ReactiveVar } from '@apollo/client/core';
+import { FragmentWhereFilter } from '../cache/types';
 
 function _generateQueryFromFragment({
   fieldName,
@@ -83,9 +84,10 @@ export function buildWatchFragmentQuery(
 export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmentWhereOptions<FragmentType> & {
   cache: InvalidationPolicyCache;
   policies: Policies;
+  filterVar: ReactiveVar<FragmentWhereFilter<FragmentType> | undefined>;
   fieldName: string;
 }): DocumentNode {
-  const { fragment, filter, policies, cache, fieldName, } = options;
+  const { fragment, filterVar, policies, cache, fieldName, } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
   const __typename = fragmentDefinition.typeCondition.name.value;
 
@@ -105,7 +107,7 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
             read(_existing) {
               return cache.readReferenceWhere({
                 __typename,
-                filter,
+                filter: filterVar(),
               });
             }
           }
