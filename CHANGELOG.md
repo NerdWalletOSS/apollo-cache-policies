@@ -1,6 +1,7 @@
 2.8.0 (Dan Reynolds)
 
-Add support for reactive filter changes in `useFragmentWhere`.
+* Add support for reactive filter changes in `useFragmentWhere`.
+* Adds `writeFragmentWhere` API.
 
 2.7.0 (Dan Reynolds)
 
