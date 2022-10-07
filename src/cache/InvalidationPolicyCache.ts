@@ -556,4 +556,26 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       return every(entityFilterResults, Boolean);
     });
   }
+
+  writeFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
+    filter?: FragmentWhereFilter<FragmentType>;
+    update: (entity: FragmentType) => FragmentType;
+  }) {
+    const { update, ...readOptions } = options;
+
+    const entities = this.readFragmentWhere(readOptions);
+    const updatedEntities = entities.map(update);
+
+    updatedEntities.forEach((entity) => {
+      this.writeFragment({
+        // @ts-ignore This
+        id: this.identify(entity),
+        fragment: options.fragment,
+        data: entity,
+        broadcast: false,
+      });
+    });
+
+    this.broadcastWatches();
+  }
 }
