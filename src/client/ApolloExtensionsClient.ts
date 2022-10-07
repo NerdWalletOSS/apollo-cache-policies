@@ -2,6 +2,7 @@ import {
   ApolloClient,
   ApolloClientOptions,
   DocumentNode,
+  makeVar,
   ObservableQuery,
 } from '@apollo/client/core';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
@@ -72,7 +73,7 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
   // Watches the data in the cache similarly to watchQuery for a given fragment.
   watchFragment(
     options: WatchFragmentOptions,
-  ): ObservableQuery {
+  ) {
     const fieldName = generateFragmentFieldName();
     const query = buildWatchFragmentQuery({
       ...options,
@@ -87,9 +88,12 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
   // matching the given filter.
   watchFragmentWhere<FragmentType>(options: WatchFragmentWhereOptions<FragmentType>) {
     const fieldName = generateFragmentFieldName();
+    const filterVar = makeVar(options.filter);
+
     const query = buildWatchFragmentWhereQuery({
       ...options,
       fieldName,
+      filterVar,
       cache: this.cache as unknown as InvalidationPolicyCache,
       policies: this.policies,
     });
