@@ -328,9 +328,8 @@ describe("InvalidationPolicyCache", () => {
     });
 
     describe('writeFragmentWhere', () => {
-      describe('with an object filter', () => {
-        test('should write matching entities', () => {
-          const employeeFragment = gql`
+      test('should write matching entities', () => {
+        const employeeFragment = gql`
             fragment employee on Employee {
               id
               employee_name
@@ -339,45 +338,44 @@ describe("InvalidationPolicyCache", () => {
             }
           `;
 
-          cache.writeFragmentWhere<EmployeeType>({
-            fragment: employeeFragment,
-            filter: {
-              employee_name: employee.employee_name,
-              employee_salary: employee.employee_salary,
-            },
-            update: (employee) => ({
-              ...employee,
-              employee_name: `${employee.employee_name} updated`,
-            }),
-          });
+        cache.writeFragmentWhere<EmployeeType>({
+          fragment: employeeFragment,
+          filter: {
+            employee_name: employee.employee_name,
+            employee_salary: employee.employee_salary,
+          },
+          update: (employee) => ({
+            ...employee,
+            employee_name: `${employee.employee_name} updated`,
+          }),
+        });
 
-          expect(cache.extract(true, false)).toEqual({
-            "CacheExtensionsCollectionEntity:Employee": {
-              __typename: 'CacheExtensionsCollectionEntity',
-              id: 'Employee',
-              data: [
-                { __ref: employee.toRef() }, { __ref: employee2.toRef() }
-              ],
+        expect(cache.extract(true, false)).toEqual({
+          "CacheExtensionsCollectionEntity:Employee": {
+            __typename: 'CacheExtensionsCollectionEntity',
+            id: 'Employee',
+            data: [
+              { __ref: employee.toRef() }, { __ref: employee2.toRef() }
+            ],
+          },
+          [employee.toRef()]: {
+            ...employee,
+            employee_name: `${employee.employee_name} updated`,
+          },
+          [employee2.toRef()]: employee2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
             },
-            [employee.toRef()]: {
-              ...employee,
-              employee_name: `${employee.employee_name} updated`,
-            },
-            [employee2.toRef()]: employee2,
-            ROOT_QUERY: {
-              __typename: "Query",
-              employees: {
-                __typename: "EmployeesResponse",
-                data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
-              },
-            },
-            __META: {
-              extraRootIds: [
-                'CacheExtensionsCollectionEntity:Employee',
-                employee.toRef(),
-              ]
-            }
-          });
+          },
+          __META: {
+            extraRootIds: [
+              'CacheExtensionsCollectionEntity:Employee',
+              employee.toRef(),
+            ]
+          }
         });
       });
     });
