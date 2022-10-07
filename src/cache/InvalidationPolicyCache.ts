@@ -563,15 +563,12 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   }) {
     const { update, ...readOptions } = options;
 
-    const entities = this.readFragmentWhere(readOptions);
-    const updatedEntities = entities.map(update);
-
-    updatedEntities.forEach((entity) => {
+    this.readFragmentWhere(readOptions).forEach((entity) => {
       this.writeFragment({
         // @ts-ignore This
         id: this.identify(entity),
         fragment: options.fragment,
-        data: entity,
+        data: update(entity),
         broadcast: false,
       });
     });
