@@ -1,3 +1,7 @@
+2.9.0 (Dan Reynolds)
+
+Bump compatibility to @apollo/client 3.7.
+
 2.8.0 (Dan Reynolds)
 
 Add support for reactive filter changes in `useFragmentWhere`.
