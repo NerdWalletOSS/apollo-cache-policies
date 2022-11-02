@@ -1,6 +1,6 @@
 {
   "name": "@nerdwallet/apollo-cache-policies",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "An extension to the InMemoryCache from Apollo that adds additional cache policies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/NerdWalletOSS/apollo-cache-policies#readme",
   "peerDependencies": {
-    "@apollo/client": "^3.4.16",
+    "@apollo/client": "^3.7.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
@@ -36,7 +36,7 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "@apollo/client": "^3.4.16",
+    "@apollo/client": "^3.7.0",
     "@types/graphql": "^14.5.0",
     "@types/jest": "^28.1.6",
     "@types/lodash-es": "^4.17.5",
