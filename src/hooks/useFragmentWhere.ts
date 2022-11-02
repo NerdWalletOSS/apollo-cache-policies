@@ -1,5 +1,5 @@
 import { getApolloContext } from '@apollo/client';
-import { useContext, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { DocumentNode } from 'graphql';
 import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { buildWatchFragmentWhereQuery } from '../client/utils';
@@ -8,7 +8,7 @@ import { useOnce } from './utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 import { makeVar } from '@apollo/client';
-import { useDeepMemo } from '@apollo/client/react/hooks/utils/useDeepMemo';
+import { equal } from '@wry/equality';
 
 // A hook for subscribing to a fragment for entities in the Apollo cache matching a given filter from a React component.
 export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, filter?: FragmentWhereFilter<FragmentType>) {
@@ -19,7 +19,11 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
   const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
   const filterVar = filterVarRef.current;
 
-  useDeepMemo(() => filterVar(filter), filter);
+  useEffect(() => {
+    if (!equal(filter, filterVar())) {
+      filterVar(filter);
+    }
+  }, [filter]);
 
   const query = useOnce(() => buildWatchFragmentWhereQuery({
     filter,
