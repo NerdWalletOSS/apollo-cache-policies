@@ -1,3 +1,7 @@
+2.9.1 (Dan Reynolds)
+
+Add function equality check to `useFragmentWhere` API.
+
 2.9.0 (Dan Reynolds)
 
 Bump compatibility to @apollo/client 3.7.

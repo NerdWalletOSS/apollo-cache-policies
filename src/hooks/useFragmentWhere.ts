@@ -20,7 +20,7 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
   const filterVar = filterVarRef.current;
 
   useEffect(() => {
-    if (!equal(filter, filterVar())) {
+    if (typeof filter === 'function' && filter !== filterVar() || !equal(filter, filterVar())) {
       filterVar(filter);
     }
   }, [filter]);
