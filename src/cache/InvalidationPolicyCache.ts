@@ -138,7 +138,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return this.data === this.entityStoreRoot;
   }
 
-  modify(options: Cache.ModifyOptions) {
+  modify<Entity extends Record<string, any> = Record<string, any>>(options: Cache.ModifyOptions<Entity>) {
     const modifyResult = super.modify(options);
 
     if (

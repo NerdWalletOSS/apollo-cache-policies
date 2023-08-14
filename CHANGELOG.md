@@ -1,3 +1,7 @@
+2.10.0 (Dan Reynolds)
+
+Bump Apollo version and ensure compatibility.
+
 2.9.1 (Dan Reynolds)
 
 Add function equality check to `useFragmentWhere` API.
