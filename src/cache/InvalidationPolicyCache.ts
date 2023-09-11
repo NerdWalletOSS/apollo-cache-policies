@@ -39,6 +39,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   protected invalidationPolicies: InvalidationPolicies;
   protected enableCollections: boolean;
   protected isInitialized: boolean;
+  protected pendingCollectionUpdates: Record<string, Record<string, Reference>> = {};
 
   constructor(config: InvalidationPolicyCacheConfig = {}) {
     const { invalidationPolicies = {}, enableCollections = false, ...inMemoryCacheConfig } = config;
@@ -129,6 +130,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     this.isBroadcasting = true;
     super.broadcastWatches();
     this.isBroadcasting = false;
+  }
+
+  private get _hasPendingCollectionUpdates() {
+    return Object.keys(this.pendingCollectionUpdates).length > 0;
   }
 
   // Determines whether the cache's data reference is set to the root store. If not, then there is an ongoing optimistic transaction
@@ -280,6 +285,37 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     return super.evict(options);
   }
 
+  private _updatePendingCollection(collectionEntityId: string) {
+    const updatedReferences = this.pendingCollectionUpdates[collectionEntityId];
+
+    if (!updatedReferences) {
+      return;
+    }
+
+    this.modify({
+      broadcast: false,
+      id: collectionEntityId,
+      fields: {
+        data: (existing, { canRead }) => {
+          return [
+            ...existing,
+            ...Object.values(updatedReferences),
+          ].filter(canRead);
+        }
+      }
+    });
+
+    delete this.pendingCollectionUpdates[collectionEntityId];
+  }
+
+  private _updatePendingCollections() {
+    Object.keys(this.pendingCollectionUpdates).forEach((collectionEntityId) => {
+      this._updatePendingCollection(collectionEntityId);
+    });
+
+    this.broadcastWatches();
+  }
+
   protected updateCollectionField(typename: string, dataId: string) {
     // Since colletion support is still experimental, only record entities in collections if enabled
     if (!this.enableCollections) {
@@ -310,18 +346,19 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
     // If the entity does not already exist in the cache, add it to the collection field policy for its type
     if (!this.entityTypeMap.readEntityById(dataId)) {
-      this.modify({
-        broadcast: false,
-        id: collectionEntityId,
-        fields: {
-          data: (existing, { canRead }) => {
-            return [
-              ...existing.filter((ref: Reference) => canRead(ref)),
-              makeReference(dataId),
-            ];
-          }
-        }
-      });
+      if (!this._hasPendingCollectionUpdates) {
+        // Collection updates are scheduled on a separate tick so that they can be aggregated across the current tick and minimize the number
+        // of collection modifications.
+        process.nextTick(() => this._updatePendingCollections());
+      }
+
+      if(!this.pendingCollectionUpdates[collectionEntityId]) {
+        this.pendingCollectionUpdates[collectionEntityId] = {};
+      }
+
+      if (!this.pendingCollectionUpdates[collectionEntityId][dataId]) {
+        this.pendingCollectionUpdates[collectionEntityId][dataId] = makeReference(dataId);
+      }
     }
   }
 
@@ -483,6 +520,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   }
 
   extract(optimistic = false, withInvalidation = true): NormalizedCacheObject {
+    if (this._hasPendingCollectionUpdates) {
+      this._updatePendingCollections();
+    }
+
     const extractedCache = super.extract(optimistic);
 
     if (withInvalidation) {
@@ -529,8 +570,14 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     filter?: FragmentWhereFilter<T>;
   }) {
     const { __typename, filter } = options;
-    const collectionEntityName = collectionEntityIdForType(__typename);
-    const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityName));
+    const collectionEntityId = collectionEntityIdForType(__typename);
+
+    // If a stale collection is accessed while it has a pending update, then eagerly update it before the read.
+    if (this.pendingCollectionUpdates[collectionEntityId]) {
+      this._updatePendingCollection(collectionEntityId);
+    }
+
+    const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityId));
 
     if (!entityReferences) {
       return [];
