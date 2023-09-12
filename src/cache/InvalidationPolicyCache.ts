@@ -309,6 +309,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   }
 
   private _updatePendingCollections() {
+    if (!this._hasPendingCollectionUpdates) {
+      return;
+    }
+
     Object.keys(this.pendingCollectionUpdates).forEach((collectionEntityId) => {
       this._updatePendingCollection(collectionEntityId);
     });

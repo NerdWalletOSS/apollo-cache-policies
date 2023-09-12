@@ -1,3 +1,7 @@
+2.11.0 (Dan Reynolds)
+
+Improve collection update performance.
+
 2.10.0 (Dan Reynolds)
 
 Bump Apollo version and ensure compatibility.
