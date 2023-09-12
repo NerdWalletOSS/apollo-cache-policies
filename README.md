@@ -51,18 +51,18 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
   ```javascript
   import { InvalidationPolicyCache, RenewalPolicy } from '@nerdwallet/apollo-cache-policies';
-
+  
   const cache = new InvalidationPolicyCache({
     typePolicies: {...},
     invalidationPolicies: {
-      timeToLive: 3600 * 1000; // 1hr TTL on all types in the cache
-      renewalPolicy: RenewalPolicy.WriteOnly;
+      timeToLive: 3600 * 1000, // 1hr TTL on all types in the cache
+      renewalPolicy: RenewalPolicy.WriteOnly,
       types: {
         Employee: {
           timeToLive: 3600 * 1000 * 24 // 24hr TTL specifically for the Employee type in the cache
         },
         EmployeeMessage: {
-          renewalPolicy: RenewalPolicy.AccessAndWrite // The TTL for employee messages is renewed when the a message is read or written in the cache
+          renewalPolicy: RenewalPolicy.AccessAndWrite // The TTL for employee messages is renewed when the message is read or written in the cache
         }
       }
     }
