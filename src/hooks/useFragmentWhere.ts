@@ -11,7 +11,11 @@ import { makeVar } from '@apollo/client';
 import { equal } from '@wry/equality';
 
 // A hook for subscribing to a fragment for entities in the Apollo cache matching a given filter from a React component.
-export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, filter?: FragmentWhereFilter<FragmentType>) {
+export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, options?: {
+  filter?: FragmentWhereFilter<FragmentType>;
+  returnPartialData?: boolean;
+}) {
+  const filter = options?.filter;
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
@@ -34,6 +38,6 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, f
     policies: cache.policies,
   }));
 
-  return useGetQueryDataByFieldName<FragmentType[]>(query, fieldName);
+  return useGetQueryDataByFieldName<FragmentType[]>(query, fieldName, options);
 }
 

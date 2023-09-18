@@ -1,3 +1,7 @@
+3.0.0 (Dan Reynolds)
+
+Breaking changes to useFragment/useFragmentWhere API.
+
 2.11.0 (Dan Reynolds)
 
 Improve collection update performance.

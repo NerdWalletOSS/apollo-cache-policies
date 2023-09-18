@@ -288,7 +288,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
       }
     `,
     {
-      team: 'Banking',
+      filter: { team: 'Banking' }
     }
   )
   ```

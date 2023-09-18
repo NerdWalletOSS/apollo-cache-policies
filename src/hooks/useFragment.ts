@@ -9,6 +9,7 @@ import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
 interface UseFragmentOptions {
   id: string;
+  returnPartialData?: boolean;
 }
 
 // A hook for subscribing to a fragment in the Apollo cache from a React component.
@@ -25,5 +26,5 @@ export default function useFragment<FragmentType>(fragment: DocumentNode, option
     policies: cache.policies,
   }));
 
-  return useGetQueryDataByFieldName<FragmentType | null>(queryForFragment, fieldName);
+  return useGetQueryDataByFieldName<FragmentType | null>(queryForFragment, fieldName, options);
 }
