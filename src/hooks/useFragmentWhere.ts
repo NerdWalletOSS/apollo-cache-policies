@@ -22,6 +22,7 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
   const fieldName = useFragmentTypePolicyFieldName();
   const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
   const filterVar = filterVarRef.current;
+  const emptyValue = useRef<FragmentType[]>([]);
 
   useEffect(() => {
     if (typeof filter === 'function' && filter !== filterVar() || !equal(filter, filterVar())) {
@@ -38,6 +39,11 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
     policies: cache.policies,
   }));
 
-  return useGetQueryDataByFieldName<FragmentType[]>(query, fieldName, options);
+  const result = useGetQueryDataByFieldName<FragmentType[]>(query, fieldName, options);
+
+  return {
+    ...result,
+    data: result.data ?? emptyValue.current,
+  }
 }
 

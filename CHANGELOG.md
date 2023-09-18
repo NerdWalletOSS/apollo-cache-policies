@@ -1,3 +1,7 @@
+3.0.1 (Dan Reynolds)
+
+Fragment typing fix.
+
 3.0.0 (Dan Reynolds)
 
 Breaking changes to useFragment/useFragmentWhere API.
