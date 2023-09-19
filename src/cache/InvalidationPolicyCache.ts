@@ -353,7 +353,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       if (!this._hasPendingCollectionUpdates) {
         // Collection updates are scheduled on a separate tick so that they can be aggregated across the current tick and minimize the number
         // of collection modifications.
-        process.nextTick(() => this._updatePendingCollections());
+        setTimeout(() => this._updatePendingCollections(), 0);
       }
 
       if(!this.pendingCollectionUpdates[collectionEntityId]) {

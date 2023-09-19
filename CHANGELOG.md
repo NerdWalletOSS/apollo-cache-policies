@@ -1,3 +1,7 @@
+3.0.2 (Dan Reynolds)
+
+Switch to setTimeout instead of process.nextTick for aggregating collection updates.
+
 3.0.1 (Dan Reynolds)
 
 Fragment typing fix.
