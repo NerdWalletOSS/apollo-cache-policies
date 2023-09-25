@@ -97,6 +97,140 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
 
 <details>
   <summary>
+    Normalized Collections
+  </summary>
+
+  <br>
+
+  ## Summary
+
+  Normalized collections introduce ways of accessing and filtering all entities in the cache of a given type. They are useful for scenarios where clients may want to access all entities in the cache of a particular type matching a set of filters like a list of all products to show or all the messages of a conversation. To read more about the motivation for this feature, check out [our blog post](https://danreynolds.ca/tech/2021/09/23/Apollo-Normalized-Collections/).
+
+  To use normalized collections, enable it in the cache with the collections flag below:
+
+  ```javascript
+  import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
+
+  const cache = new InvalidationPolicyCache({
+    enableCollections: true,
+    typePolicies: {...},
+    invalidationPolicies: {...}
+  });
+  ```
+
+  ## Specification
+
+  Normalized collections introduce 4 new APIs:
+
+  1. `useFragmentWhere`: A new React hook for filtering a collection of entities by type
+  2. `cache.readReferenceWhere`: A cache API that returns a list of references in the cache for a particular type and filter
+  3. `cache.readFragmentWhere`: The collection filter equivalent of the existing cache.readFragment API
+  4. `cache.watchFragmentWhere`: The collection filter equivalent of the existing cache.watchFragment API
+
+  ## useFragmentWhere
+
+  The `useFragmentWhere` API allows us to query for a filtered collection of entities by type. It takes two arguments, a GraphQL fragment for the fields to read from the type and an object of all the fields to filter by.
+
+  ### Example Usage
+
+  Now our client can filter all entites of a particular type in the cache like `Employee` in one operation without having to write any type policies.
+
+  ```js
+  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
+
+  const { data } = useFragmentWhere(
+    gql`
+      fragment EmployeesByTeam on Employee {
+        id
+        name
+      }
+    `,
+    {
+      filter: { team: 'Banking' }
+    }
+  )
+  ```
+
+  If we just want to retrieve all entities in the cache for a particular type, we can omit the filter altogether:
+
+  ```js
+  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
+
+  const { data } = useFragmentWhere(
+    gql`
+      fragment AllEmployees on Employee {
+        id
+        name
+      }
+    `
+  )
+  ```
+
+  The `useFragmentWhere` API will automatically update the component just like `useQuery` when the employees that match the filter change, including when a new employee that matches the filter criteria is added to the cache.
+
+  > Note: `useFragmentWhere` subscribes to data changes based on the fragment name you provide, so to return different data from different calls to the API you will want to use different fragment names.
+
+  ## Cache.readReferenceWhere
+
+  Normalized collections can be accessed in type policies using the new `cache.readReferenceWhere` API. `readReferenceWhere` will return a list of references for a given type and filter.
+
+  ### Example Usage
+
+  ```js
+  const cache = new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          readBankingTeam: {
+            read(_existingBankingTeam, { cache }) {
+              return cache.readReferenceWhere<Employee>(
+                {
+                  __typename: 'Employee',
+                  filter: {
+                    team: 'Banking',
+                  },
+                }
+              );
+            }
+          },
+        },
+      },
+    },
+  });
+  ```
+
+  In this example, we use the `readReferenceWhere` API to construct a type policy that returns all entities of the `Employee` type in the cache with a field `team` matching the value `Banking`. Any number of fields can be used as filters and queries for this type policy will automatically update whenever an employee entity is added, created removed from the cache.
+
+</details>
+
+<details>
+  <summary>
+    Cached Reactive Variables
+  </summary>
+
+  <br>
+
+  ## Summary
+
+  Reactive variables are a powerful and lightweight API for managing local state with Apollo. In cases where client state should be persisted across sessions, it would be helpful to be able to persist reactive variables as well.
+
+  Cached reactive variables work the same as regular ones, with the additional function of writing their current value to the cache. Applications still need to set up their own cache persistence using tools like [Apollo Cache Persist](https://github.com/apollographql/apollo-cache-persist). Once cache persistence is in place, cached reactive variables will be rehydrated on new sessions with a runtime value from the cache.
+  ## Example Usage
+
+  The only difference in the API when working with cached reactive variables is that a unique ID must be specified for caching. They can then be initialized with a default value, read and written to using the same APIs
+  as other reactive variables.
+
+  ```javascript
+  import { makeCachedVar } from '@nerdwallet/apollo-cache-policies';
+
+  const rv = makeCachedVar('identifier', false);
+  rv(true);
+  console.log(rv()); // true
+  ```
+</details>
+
+<details>
+  <summary>
     Invalidation Policies
   </summary>
 
@@ -235,138 +369,4 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   | `storage`                    | An object for storing unique entity metadata across policy action invocations | Object              | `{}`                                                                        |
   | `parent`                     | The parent entity that triggered the PolicyEvent                              | PolicyActionEntity  | `{ id: 'ROOT_QUERY', fieldName: 'deleteEmployees', storeFieldName: 'deleteEmployees({}), ref: { __ref: 'ROOT_QUERY' }, variables: {} }'` |
 
-</details>
-
-<details>
-  <summary>
-    Normalized Collections
-  </summary>
-
-  <br>
-
-  ## Summary
-
-  Normalized collections introduce ways of accessing and filtering all entities in the cache of a given type. They are useful for scenarios where clients may want to access all entities in the cache of a particular type matching a set of filters like a list of all products to show or all the messages of a conversation. To read more about the motivation for this feature, check out [our blog post](https://danreynolds.ca/tech/2021/09/23/Apollo-Normalized-Collections/).
-
-  To use normalized collections, enable it in the cache with the collections flag below:
-
-  ```javascript
-  import { InvalidationPolicyCache } from '@nerdwallet/apollo-cache-policies';
-
-  const cache = new InvalidationPolicyCache({
-    enableCollections: true,
-    typePolicies: {...},
-    invalidationPolicies: {...}
-  });
-  ```
-
-  ## Specification
-
-  Normalized collections introduce 4 new APIs:
-
-  1. `useFragmentWhere`: A new React hook for filtering a collection of entities by type
-  2. `cache.readReferenceWhere`: A cache API that returns a list of references in the cache for a particular type and filter
-  3. `cache.readFragmentWhere`: The collection filter equivalent of the existing cache.readFragment API
-  4. `cache.watchFragmentWhere`: The collection filter equivalent of the existing cache.watchFragment API
-
-  ## useFragmentWhere
-
-  The `useFragmentWhere` API allows us to query for a filtered collection of entities by type. It takes two arguments, a GraphQL fragment for the fields to read from the type and an object of all the fields to filter by.
-
-  ### Example Usage
-
-  Now our client can filter all entites of a particular type in the cache like `Employee` in one operation without having to write any type policies.
-
-  ```js
-  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
-
-  const { data } = useFragmentWhere(
-    gql`
-      fragment EmployeesByTeam on Employee {
-        id
-        name
-      }
-    `,
-    {
-      filter: { team: 'Banking' }
-    }
-  )
-  ```
-
-  If we just want to retrieve all entities in the cache for a particular type, we can omit the filter altogether:
-
-  ```js
-  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
-
-  const { data } = useFragmentWhere(
-    gql`
-      fragment AllEmployees on Employee {
-        id
-        name
-      }
-    `
-  )
-  ```
-
-  The `useFragmentWhere` API will automatically update the component just like `useQuery` when the employees that match the filter change, including when a new employee that matches the filter criteria is added to the cache.
-
-  > Note: `useFragmentWhere` subscribes to data changes based on the fragment name you provide, so to return different data from different calls to the API you will want to use different fragment names.
-
-  ## Cache.readReferenceWhere
-
-  Normalized collections can be accessed in type policies using the new `cache.readReferenceWhere` API. `readReferenceWhere` will return a list of references for a given type and filter.
-
-  ### Example Usage
-
-  ```js
-  const cache = new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          readBankingTeam: {
-            read(_existingBankingTeam, { cache }) {
-              return cache.readReferenceWhere<Employee>(
-                {
-                  __typename: 'Employee',
-                  filter: {
-                    team: 'Banking',
-                  },
-                }
-              );
-            }
-          },
-        },
-      },
-    },
-  });
-  ```
-
-  In this example, we use the `readReferenceWhere` API to construct a type policy that returns all entities of the `Employee` type in the cache with a field `team` matching the value `Banking`. Any number of fields can be used as filters and queries for this type policy will automatically update whenever an employee entity is added, created removed from the cache.
-
-</details>
-
-<details>
-  <summary>
-    Cached Reactive Variables
-  </summary>
-
-  <br>
-
-  ## Summary
-
-  Reactive variables are a powerful and lightweight API for managing local state with Apollo. In cases where client state should be persisted across sessions, it would be helpful to be able to persist reactive variables as well.
-
-  Cached reactive variables work the same as regular ones, with the additional function of writing their current value to the cache. Applications still need to set up their own cache persistence using tools like [Apollo Cache Persist](https://github.com/apollographql/apollo-cache-persist). Once cache persistence is in place, cached reactive variables will be rehydrated on new sessions with a runtime value from the cache.
-  ## Example Usage
-
-  The only difference in the API when working with cached reactive variables is that a unique ID must be specified for caching. They can then be initialized with a default value, read and written to using the same APIs
-  as other reactive variables.
-
-  ```javascript
-  import { makeCachedVar } from '@nerdwallet/apollo-cache-policies';
-
-  const rv = makeCachedVar('identifier', false);
-  rv(true);
-  console.log(rv()); // true
-  ```
 </details>
