@@ -11,6 +11,7 @@ import compact from "lodash/compact";
 import every from "lodash/every";
 import pick from "lodash/pick";
 import isFunction from "lodash/isFunction";
+import isNumber from "lodash/isNumber";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
@@ -419,6 +420,38 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // Returns all expired entities still present in the cache.
   expiredEntities() {
     return this._expire(true);
+  }
+
+  readEntity(id: string) {
+    return this.entityTypeMap.readEntityById(id);
+  }
+
+  readEntityExpired(id: string) {
+    const entity = this._expire(true).find(
+      (expiredEntityId) => expiredEntityId === id
+    );
+
+    return Boolean(entity);
+  }
+
+  readEntityExpirationTime(id: string) {
+    const entity = this.entityTypeMap.readEntityById(id);
+
+    if (!entity) {
+      return null;
+    }
+
+    const { cacheTime, typename } = entity;
+
+    const timeToLive =
+      this.invalidationPolicies?.types?.[typename]?.timeToLive ||
+      this.invalidationPolicies?.timeToLive
+
+    if (!isNumber(cacheTime) || !isNumber(timeToLive)) {
+      return null;
+    }
+
+    return cacheTime + timeToLive;
   }
 
   // Activates the provided policy events (on read, on write, on evict) or by default all policy events.
