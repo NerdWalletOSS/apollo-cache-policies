@@ -10,6 +10,8 @@ import {
 import compact from "lodash/compact";
 import every from "lodash/every";
 import pick from "lodash/pick";
+import take from "lodash/take";
+import isNil from "lodash/isNil";
 import isFunction from "lodash/isFunction";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
@@ -546,15 +548,17 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   // a list of the dereferenced matching entities from the cache based on the given fragment.
   readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
     filter?: FragmentWhereFilter<FragmentType>;
+    limit?: number;
   }): FragmentType[] {
-    const { fragment, filter, ...restOptions } = options;
+    const { fragment, filter, limit, ...restOptions } = options;
     const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
     const __typename = fragmentDefinition.typeCondition.name.value;
 
     const matchingRefs = this.readReferenceWhere(
       {
         __typename,
-        filter
+        filter,
+        limit,
       }
     );
 
@@ -572,8 +576,10 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   readReferenceWhere<T>(options: {
     __typename: string,
     filter?: FragmentWhereFilter<T>;
+    limit?: number;
   }) {
-    const { __typename, filter } = options;
+    const { __typename, filter, limit } = options;
+
     const collectionEntityId = collectionEntityIdForType(__typename);
 
     // If a stale collection is accessed while it has a pending update, then eagerly update it before the read.
@@ -591,7 +597,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       return entityReferences;
     }
 
-    return entityReferences.filter(ref => {
+    const filteredReferences = entityReferences.filter(ref => {
       if (isFunction(filter)) {
         return filter(ref, this.readField.bind(this));
       }
@@ -606,6 +612,12 @@ export default class InvalidationPolicyCache extends InMemoryCache {
 
       return every(entityFilterResults, Boolean);
     });
+
+    if (!isNil(limit)) {
+      return take(filteredReferences, limit);
+    }
+
+    return filteredReferences;
   }
 
   writeFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {

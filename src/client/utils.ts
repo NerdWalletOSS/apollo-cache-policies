@@ -85,9 +85,10 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
   cache: InvalidationPolicyCache;
   policies: Policies;
   filterVar: ReactiveVar<FragmentWhereFilter<FragmentType> | undefined>;
+  limitVar: ReactiveVar<number | undefined>;
   fieldName: string;
 }): DocumentNode {
-  const { fragment, filterVar, policies, cache, fieldName, } = options;
+  const { fragment, filterVar, limitVar, policies, cache, fieldName, } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
   const __typename = fragmentDefinition.typeCondition.name.value;
 
@@ -108,6 +109,7 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
               return cache.readReferenceWhere({
                 __typename,
                 filter: filterVar(),
+                limit: limitVar(),
               });
             }
           }
