@@ -300,15 +300,22 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       fields: {
         data: (existing, { canRead }) => {
           const existingReferences = existing as Reference[];
+          let hasDuplicateRef = false;
 
           const existingReferencesById = existingReferences.reduce((acc, ref) => {
-            acc[ref.__ref] = ref;
+            const { __ref } = ref;
+
+            if (!hasDuplicateRef && acc[__ref]) {
+              hasDuplicateRef = true;
+            }
+            acc[__ref] = ref;
+
             return acc;
           }, {} as Record<string, Reference>);
 
           const newReferences = Object.values(updatedReferences).filter((ref) => !existingReferencesById[ref.__ref] && canRead(ref));
 
-          if (newReferences.length === 0) {
+          if (!hasDuplicateRef && newReferences.length === 0) {
             return existing;
           }
 
