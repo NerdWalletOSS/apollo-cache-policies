@@ -1,3 +1,7 @@
+3.1.0 (Dan Reynolds)
+
+Add support for a `limit` field to `fragmentWhere` APIs.
+
 3.0.2 (Dan Reynolds)
 
 Switch to setTimeout instead of process.nextTick for aggregating collection updates.
