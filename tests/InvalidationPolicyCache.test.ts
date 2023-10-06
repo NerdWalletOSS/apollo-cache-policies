@@ -325,6 +325,49 @@ describe("InvalidationPolicyCache", () => {
           expect(matchingEntities).toEqual([employee, employee2]);
         });
       });
+
+      describe('with a limit', () => {
+        test('should return the limited list of entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            limit: 1,
+          });
+
+          expect(matchingEntities).toEqual([employee]);
+        });
+      });
+
+      describe('with an object orderBy', () => {
+        test('should return the ordered list of entities', () => {
+          const employeeFragment = gql`
+            fragment employee on Employee {
+              id
+              employee_name
+              employee_age
+              employee_salary
+            }
+          `;
+
+          const matchingEntities = cache.readFragmentWhere<EmployeeType>({
+            fragment: employeeFragment,
+            orderBy: {
+              field: 'employee_name',
+              descending: true,
+            }
+          });
+
+          expect(matchingEntities).toEqual([employee2, employee]);
+        });
+      });
     });
 
     describe('writeFragmentWhere', () => {
