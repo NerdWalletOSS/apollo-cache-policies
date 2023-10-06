@@ -14,13 +14,17 @@ import { equal } from '@wry/equality';
 export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, options?: {
   filter?: FragmentWhereFilter<FragmentType>;
   returnPartialData?: boolean;
+  limit?: number;
 }) {
   const filter = options?.filter;
+  const limit = options?.limit;
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
   const fieldName = useFragmentTypePolicyFieldName();
   const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
+  const limitVarRef = useRef(makeVar<number | undefined>(limit));
+  const limitVar = limitVarRef.current;
   const filterVar = filterVarRef.current;
   const emptyValue = useRef<FragmentType[]>([]);
 
@@ -30,9 +34,16 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
     }
   }, [filter]);
 
+  useEffect(() => {
+    if (limit !== limitVar()) {
+      limitVar(limit);
+    }
+  }, [limit]);
+
   const query = useOnce(() => buildWatchFragmentWhereQuery({
     filter,
     filterVar,
+    limitVar,
     fragment,
     fieldName,
     cache,

@@ -9,4 +9,5 @@ export type WatchFragmentOptions = {
 export type WatchFragmentWhereOptions<FragmentType> = {
   fragment: DocumentNode;
   filter?: FragmentWhereFilter<FragmentType>;
+  limit?: number;
 }

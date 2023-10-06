@@ -89,11 +89,13 @@ export default class ApolloExtensionsClient<TCacheShape> extends ApolloClient<TC
   watchFragmentWhere<FragmentType>(options: WatchFragmentWhereOptions<FragmentType>) {
     const fieldName = generateFragmentFieldName();
     const filterVar = makeVar(options.filter);
+    const limitVar = makeVar(options.limit);
 
     const query = buildWatchFragmentWhereQuery({
       ...options,
       fieldName,
       filterVar,
+      limitVar,
       cache: this.cache as unknown as InvalidationPolicyCache,
       policies: this.policies,
     });
