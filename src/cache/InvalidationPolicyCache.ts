@@ -299,10 +299,23 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       id: collectionEntityId,
       fields: {
         data: (existing, { canRead }) => {
+          const existingReferences = existing as Reference[];
+
+          const existingReferencesById = existingReferences.reduce((acc, ref) => {
+            acc[ref.__ref] = ref;
+            return acc;
+          }, {} as Record<string, Reference>);
+
+          const newReferences = Object.values(updatedReferences).filter((ref) => !existingReferencesById[ref.__ref] && canRead(ref));
+
+          if (newReferences.length === 0) {
+            return existing;
+          }
+
           return [
-            ...existing,
-            ...Object.values(updatedReferences),
-          ].filter(canRead);
+            ...Object.values(existingReferencesById),
+            ...newReferences,
+          ];
         }
       }
     });

@@ -1,3 +1,7 @@
+3.1.1 (Dan Reynolds)
+
+Fix duplicate collection references bug.
+
 3.1.0 (Dan Reynolds)
 
 Add support for a `limit` field to `fragmentWhere` APIs.
