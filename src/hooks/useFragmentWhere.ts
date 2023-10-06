@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef } from 'react';
 import { DocumentNode } from 'graphql';
 import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { buildWatchFragmentWhereQuery } from '../client/utils';
-import { FragmentWhereFilter } from '../cache/types';
+import { FragmentWhereFilter, FragmentWhereOrderBy } from '../cache/types';
 import { useOnce } from './utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
@@ -15,17 +15,24 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
   filter?: FragmentWhereFilter<FragmentType>;
   returnPartialData?: boolean;
   limit?: number;
+  orderBy?: FragmentWhereOrderBy;
 }) {
   const filter = options?.filter;
+  const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
+  const filterVar = filterVarRef.current;
+
   const limit = options?.limit;
+  const limitVarRef = useRef(makeVar<number | undefined>(limit));
+  const limitVar = limitVarRef.current;
+
+  const orderBy = options?.orderBy;
+  const orderByVarRef = useRef(makeVar<FragmentWhereOrderBy | undefined>(orderBy));
+  const orderByVar = orderByVarRef.current;
+
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
   const fieldName = useFragmentTypePolicyFieldName();
-  const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
-  const limitVarRef = useRef(makeVar<number | undefined>(limit));
-  const limitVar = limitVarRef.current;
-  const filterVar = filterVarRef.current;
   const emptyValue = useRef<FragmentType[]>([]);
 
   useEffect(() => {
@@ -40,10 +47,17 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
     }
   }, [limit]);
 
+  useEffect(() => {
+    if (typeof orderBy === 'function' && orderBy !== orderByVar() || !equal(orderBy, orderByVar())) {
+      orderByVar(orderBy);
+    }
+  }, [orderBy]);
+
   const query = useOnce(() => buildWatchFragmentWhereQuery({
     filter,
     filterVar,
     limitVar,
+    orderByVar,
     fragment,
     fieldName,
     cache,

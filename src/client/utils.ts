@@ -3,7 +3,7 @@ import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
 import { InvalidationPolicyCache } from '../cache';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
 import { makeReference, ReactiveVar } from '@apollo/client/core';
-import { FragmentWhereFilter } from '../cache/types';
+import { FragmentWhereFilter, FragmentWhereOrderBy } from '../cache/types';
 
 function _generateQueryFromFragment({
   fieldName,
@@ -86,9 +86,10 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
   policies: Policies;
   filterVar: ReactiveVar<FragmentWhereFilter<FragmentType> | undefined>;
   limitVar: ReactiveVar<number | undefined>;
+  orderByVar: ReactiveVar<FragmentWhereOrderBy | undefined>;
   fieldName: string;
 }): DocumentNode {
-  const { fragment, filterVar, limitVar, policies, cache, fieldName, } = options;
+  const { fragment, filterVar, limitVar, orderByVar, policies, cache, fieldName, } = options;
   const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
   const __typename = fragmentDefinition.typeCondition.name.value;
 
@@ -110,6 +111,7 @@ export function buildWatchFragmentWhereQuery<FragmentType>(options: WatchFragmen
                 __typename,
                 filter: filterVar(),
                 limit: limitVar(),
+                orderBy: orderByVar(),
               });
             }
           }

@@ -13,10 +13,11 @@ import pick from "lodash/pick";
 import take from "lodash/take";
 import isNil from "lodash/isNil";
 import isFunction from "lodash/isFunction";
+import _orderBy from "lodash/orderBy";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
-import { FragmentWhereFilter, InvalidationPolicyCacheConfig } from "./types";
+import { FragmentWhereFilter, FragmentWhereOrderBy, InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicies, InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
@@ -569,8 +570,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
   readFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {
     filter?: FragmentWhereFilter<FragmentType>;
     limit?: number;
+    orderBy?: FragmentWhereOrderBy;
   }): FragmentType[] {
-    const { fragment, filter, limit, ...restOptions } = options;
+    const { fragment, filter, limit, orderBy, ...restOptions } = options;
     const fragmentDefinition = fragment.definitions[0] as FragmentDefinitionNode;
     const __typename = fragmentDefinition.typeCondition.name.value;
 
@@ -579,6 +581,7 @@ export default class InvalidationPolicyCache extends InMemoryCache {
         __typename,
         filter,
         limit,
+        orderBy,
       }
     );
 
@@ -597,8 +600,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     __typename: string,
     filter?: FragmentWhereFilter<T>;
     limit?: number;
+    orderBy?: FragmentWhereOrderBy;
   }) {
-    const { __typename, filter, limit } = options;
+    const { __typename, filter, limit, orderBy } = options;
 
     const collectionEntityId = collectionEntityIdForType(__typename);
 
@@ -607,37 +611,42 @@ export default class InvalidationPolicyCache extends InMemoryCache {
       this._updatePendingCollection(collectionEntityId);
     }
 
-    const entityReferences = this.readField<Reference[]>('data', makeReference(collectionEntityId));
+    let references = this.readField<Reference[]>('data', makeReference(collectionEntityId));
 
-    if (!entityReferences) {
+    if (!references) {
       return [];
     }
 
-    if (!filter) {
-      return entityReferences;
+    const readField = this.readField.bind(this);
+
+    if (filter) {
+      references = references.filter(ref => {
+        if (isFunction(filter)) {
+          return filter(ref, readField);
+        }
+  
+        const entityFilterResults = Object.keys(filter).map(filterField => {
+          // @ts-ignore
+          const filterValue = filter[filterField];
+          const entityValueForFilter = this.readField(filterField, ref);
+  
+          return filterValue === entityValueForFilter;
+        });
+  
+        return every(entityFilterResults, Boolean);
+      });
     }
 
-    const filteredReferences = entityReferences.filter(ref => {
-      if (isFunction(filter)) {
-        return filter(ref, this.readField.bind(this));
-      }
-
-      const entityFilterResults = Object.keys(filter).map(filterField => {
-        // @ts-ignore
-        const filterValue = filter[filterField];
-        const entityValueForFilter = this.readField(filterField, ref);
-
-        return filterValue === entityValueForFilter;
-      });
-
-      return every(entityFilterResults, Boolean);
-    });
+    if (orderBy) {
+      const { field, descending } = orderBy;
+      references = _orderBy(references, (ref) => readField(field, ref), [descending ? 'desc' : 'asc']);
+    }
 
     if (!isNil(limit)) {
-      return take(filteredReferences, limit);
+      return take(references, limit);
     }
 
-    return filteredReferences;
+    return references;
   }
 
   writeFragmentWhere<FragmentType, TVariables = any>(options: Cache.ReadFragmentOptions<FragmentType, TVariables> & {

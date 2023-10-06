@@ -21,3 +21,5 @@ export interface CacheResultProcessorConfig {
 }
 
 export type FragmentWhereFilter<T> = Partial<Record<keyof T, any>> | ((__ref: Reference, readField: InvalidationPolicyCache['readField']) => boolean);
+
+export type FragmentWhereOrderBy = { field: string; descending: boolean };
