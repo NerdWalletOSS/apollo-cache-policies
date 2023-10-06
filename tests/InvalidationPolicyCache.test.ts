@@ -3491,6 +3491,76 @@ describe("InvalidationPolicyCache", () => {
           }
         });
       });
+
+      test('should de-dupe collection references', () => {
+        cache.evictWhere({
+          __typename: 'Employee',
+          filter: {
+            id: employee.id,
+          }
+        });
+
+        expect(cache.extract(true, false)).toEqual({
+          "CacheExtensionsCollectionEntity:Employee": {
+            id: "Employee",
+            __typename: "CacheExtensionsCollectionEntity",
+            data: [
+              { __ref: employee.toRef() },
+              { __ref: employee2.toRef() },
+            ]
+          },
+          [employee2.toRef()]: employee2,
+          "ROOT_QUERY": {
+            "__typename": "Query",
+            "employees": {
+              "__typename": "EmployeesResponse",
+              "data": [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() },
+              ]
+            }
+          },
+          "__META": {
+            "extraRootIds": [
+              "CacheExtensionsCollectionEntity:Employee"
+            ]
+          }
+        });
+
+        cache.writeQuery({
+          query: employeesQuery,
+          data: employeesResponse,
+        });
+  
+        expect(cache.extract(true, false)).toEqual({
+          "CacheExtensionsCollectionEntity:Employee": {
+            id: "Employee",
+            __typename: "CacheExtensionsCollectionEntity",
+            data: [
+              // Note no duplicate references as a result of write->evict->write.
+              { __ref: employee.toRef() },
+              { __ref: employee2.toRef() },
+            ]
+          },
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          "ROOT_QUERY": {
+            "__typename": "Query",
+            "employees": {
+              "__typename": "EmployeesResponse",
+              "data": [
+                { __ref: employee.toRef() },
+                { __ref: employee2.toRef() },
+              ]
+            }
+          },
+          "__META": {
+            "extraRootIds": [
+              "CacheExtensionsCollectionEntity:Employee"
+            ]
+          }
+        });
+      });
     });
 
     describe('with a function filter', () => {
