@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import isFunction from "lodash/isFunction";
 
 export function useOnce<T>(value: T | (() => T)): T {
@@ -14,3 +14,11 @@ export function useOnce<T>(value: T | (() => T)): T {
   }
   return valueRef.current as T;
 }
+
+export const usePrevious = <T>(value: T): T | null => {
+  const ref = useRef<T | null>(null);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};
