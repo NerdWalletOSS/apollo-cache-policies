@@ -1,3 +1,7 @@
+3.3.0 (Dan Reynolds)
+
+Add support for specifying the fragment name to use in the `useFragmentWhere` API.
+
 3.2.0 (Dan Reynolds)
 
 Add support for an `orderBy` field to `fragmentWhere` API.

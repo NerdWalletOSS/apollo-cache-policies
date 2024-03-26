@@ -1,10 +1,9 @@
 import { getApolloContext } from '@apollo/client';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { DocumentNode } from 'graphql';
 import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
 import { buildWatchFragmentWhereQuery } from '../client/utils';
 import { FragmentWhereFilter, FragmentWhereOrderBy } from '../cache/types';
-import { useOnce } from './utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 import { makeVar } from '@apollo/client';
@@ -16,6 +15,7 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
   returnPartialData?: boolean;
   limit?: number;
   orderBy?: FragmentWhereOrderBy;
+  fragmentName?: string;
 }) {
   const filter = options?.filter;
   const filterVarRef = useRef(makeVar<FragmentWhereFilter<FragmentType> | undefined>(filter));
@@ -32,7 +32,9 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
   const context = useContext(getApolloContext());
   const client = context.client;
   const cache = client?.cache as unknown as InvalidationPolicyCache;
-  const fieldName = useFragmentTypePolicyFieldName();
+  const fieldName = useFragmentTypePolicyFieldName({
+    fragmentName: options?.fragmentName,
+  });
   const emptyValue = useRef<FragmentType[]>([]);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
     }
   }, [orderBy]);
 
-  const query = useOnce(() => buildWatchFragmentWhereQuery({
+  const query = useMemo(() => buildWatchFragmentWhereQuery({
     filter,
     filterVar,
     limitVar,
@@ -62,7 +64,7 @@ export default function useFragmentWhere<FragmentType>(fragment: DocumentNode, o
     fieldName,
     cache,
     policies: cache.policies,
-  }));
+  }), [fieldName]);
 
   const result = useGetQueryDataByFieldName<FragmentType[]>(query, fieldName, options);
 
