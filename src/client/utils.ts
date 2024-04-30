@@ -1,4 +1,4 @@
-import { DocumentNode, FragmentDefinitionNode } from 'graphql';
+import { DocumentNode, FragmentDefinitionNode, Kind, OperationTypeNode } from 'graphql';
 import { WatchFragmentOptions, WatchFragmentWhereOptions } from './types';
 import { InvalidationPolicyCache } from '../cache';
 import { Policies } from '@apollo/client/cache/inmemory/policies';
@@ -13,25 +13,25 @@ function _generateQueryFromFragment({
   fragmentDefinition: FragmentDefinitionNode;
 }): DocumentNode {
   return {
-    kind: 'Document',
+    kind: Kind.DOCUMENT,
     definitions: [
       {
         directives: [],
         variableDefinitions: [],
-        kind: 'OperationDefinition',
-        operation: 'query',
+        kind: Kind.OPERATION_DEFINITION,
+        operation: OperationTypeNode.QUERY,
         selectionSet: {
-          kind: 'SelectionSet',
+          kind: Kind.SELECTION_SET,
           selections: [
             {
               arguments: [],
-              kind: "Field",
-              name: { kind: "Name", value: fieldName },
+              kind: Kind.FIELD,
+              name: { kind: Kind.NAME, value: fieldName },
               directives: [
                 {
                   arguments: [],
-                  kind: 'Directive',
-                  name: { kind: "Name", value: "client" },
+                  kind: Kind.DIRECTIVE,
+                  name: { kind: Kind.NAME, value: "client" },
                 },
               ],
               selectionSet: fragmentDefinition.selectionSet,
