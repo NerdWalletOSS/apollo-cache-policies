@@ -318,6 +318,27 @@ export class CacheResultProcessor {
               args: fieldArgs,
             },
           });
+        } else {
+          const fieldResult = result[fieldName];
+          const write = () => {
+            const queryTypename = cache.policies.rootTypenamesById[dataId];
+            const storeFieldNameForQuery = cache.policies.getStoreFieldName({
+              typename: queryTypename,
+              fieldName,
+              field,
+              variables,
+            });
+            const fieldArgs = argumentsObjectFromField(field, variables);
+            const fieldVariables = variables ?? (fieldArgs !== null ? {} : undefined);
+            entityTypeMap.write(queryTypename, dataId, storeFieldNameForQuery, fieldVariables, fieldArgs);
+          }
+          if (isArray(fieldResult)) {
+            if (!fieldResult.length) {
+              write();
+            }
+          } else if (!isPlainObject(fieldResult) || !fieldResult.__typename) {
+            write();
+          }
         }
       });
     } else if (dataId) {
