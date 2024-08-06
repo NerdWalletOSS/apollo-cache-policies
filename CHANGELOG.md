@@ -1,3 +1,10 @@
+3.3.2 (Dan Reynolds)
+
+Fixes bug where query responses without a typename are never evicted.
+
+Bugfix: https://github.com/NerdWalletOSS/apollo-cache-policies/issues/81
+Reporter: https://github.com/qwertypomy
+
 3.3.1 (Dan Reynolds)
 
 Bugfix for aliased queries with variables: https://github.com/NerdWalletOSS/apollo-cache-policies/issues/83
