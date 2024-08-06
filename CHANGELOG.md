@@ -1,3 +1,8 @@
+3.3.1 (Dan Reynolds)
+
+Bugfix for aliased queries with variables: https://github.com/NerdWalletOSS/apollo-cache-policies/issues/83
+Reporter: https://github.com/SavelevMatthew
+
 3.3.0 (Dan Reynolds)
 
 Add support for specifying the fragment name to use in the `useFragmentWhere` API.
