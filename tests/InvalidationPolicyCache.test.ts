@@ -122,6 +122,17 @@ describe("InvalidationPolicyCache", () => {
     }
   `;
 
+  const employeesWithAliasVariablesAndArrayResponseQuery = gql`
+    query {
+      bosses: employees(name: $bossName) {
+        id
+        employee_name
+        employee_salary
+        employee_age
+      }
+    }
+  `;
+
   const createEmployeeMutation = gql`
     query {
       createEmployee {
@@ -174,6 +185,10 @@ describe("InvalidationPolicyCache", () => {
       __typename: "EmployeesResponse",
       data: [employee3],
     },
+  };
+
+  const employeesWithAliasVariablesAndArrayResponse = {
+    bosses: [employee3],
   };
 
   const employeeMessagesResponse = {
@@ -1817,6 +1832,36 @@ describe("InvalidationPolicyCache", () => {
             __typename: "Query",
           },
         });
+      });
+      test('should return empty diff result on alias with no typename array response if ttl expired', () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesWithAliasVariablesAndArrayResponseQuery,
+          data: employeesWithAliasVariablesAndArrayResponse,
+          variables: {
+            bossName: "Tester McBoss"
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        const diff = cache.diff({
+          query: employeesWithAliasVariablesAndArrayResponseQuery,
+          variables: {
+            bossName: "Tester McBoss"
+          },
+          optimistic: true,
+        })
+        expect(diff).toHaveProperty('complete', false)
+        expect(diff).toHaveProperty('result', {
+          bosses: []
+        })
       });
     });
 
