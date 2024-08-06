@@ -80,18 +80,24 @@ export default class EntityStoreWatcher {
             // If there is a valid response, it will contain the type Query and then the nested response types for each requested field. We want
             // to record a map of the types for those fields to their field store names. If there is no incoming data it is because that cache entry for storeFieldName
             // is being deleted so do nothing
-            storeFieldName !== "__typename" &&
-            (incomingStoreObject[storeFieldName] as StoreObject)?.__typename
+            storeFieldName !== "__typename"
         )
         .forEach((storeFieldName) => {
           const entityStoreObject = incomingStoreObject[
             storeFieldName
           ] as StoreObject;
-          entityTypeMap.write(
-            entityStoreObject.__typename!,
-            dataId,
-            storeFieldName
-          );
+          const typename = entityStoreObject?.__typename;
+
+          if (typename) {
+            entityTypeMap.write(
+              typename,
+              dataId,
+              storeFieldName
+            );
+          } else {
+            const queryTypename = this.config.policies.rootTypenamesById[dataId];
+            entityTypeMap.write(queryTypename, dataId, storeFieldName);
+          }
         });
     } else {
       const typename = incomingStoreObject.__typename;

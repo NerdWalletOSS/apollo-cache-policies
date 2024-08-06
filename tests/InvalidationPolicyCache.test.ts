@@ -1915,15 +1915,10 @@ describe("InvalidationPolicyCache", () => {
           },
         });
 
-        expect(queryResult).toEqual({
-          bosses: [],
-        });
+        expect(queryResult).toEqual({});
         expect(cache.extract(true, false)).toEqual({
           ROOT_QUERY: {
             __typename: "Query",
-            // The employees field remains in the cache since it's cached value has no __typename field and is not evicted
-            // itself when read.
-            "employees({\"name\":\"Tester McBoss\"})": [{ __ref: employee3.toRef() }],
           },
         });
       });
