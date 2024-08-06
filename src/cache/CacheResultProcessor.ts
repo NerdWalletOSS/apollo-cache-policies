@@ -153,7 +153,7 @@ export class CacheResultProcessor {
           // will have it keyed by an alias name if provided so we keep track of the 
           // result key name in case it needs to be removed from the response due to an evicted TTL
           const resultKeyName = resultKeyNameFromField(field);
-          const subResultStatus = this.processReadSubResult(result, resultKeyName || fieldName);
+          const subResultStatus = this.processReadSubResult(result, resultKeyName);
 
           const typename = entityTypeMap.readEntityById(
             makeEntityId(dataId, fieldName)
