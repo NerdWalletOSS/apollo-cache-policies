@@ -122,6 +122,17 @@ describe("InvalidationPolicyCache", () => {
     }
   `;
 
+  const employeesWithAliasVariablesAndArrayResponseQuery = gql`
+    query {
+      bosses: employees(name: $bossName) {
+        id
+        employee_name
+        employee_salary
+        employee_age
+      }
+    }
+  `;
+
   const createEmployeeMutation = gql`
     query {
       createEmployee {
@@ -174,6 +185,10 @@ describe("InvalidationPolicyCache", () => {
       __typename: "EmployeesResponse",
       data: [employee3],
     },
+  };
+
+  const employeesWithAliasVariablesAndArrayResponse = {
+    bosses: [employee3],
   };
 
   const employeeMessagesResponse = {
@@ -1798,10 +1813,44 @@ describe("InvalidationPolicyCache", () => {
           },
         });
 
+        let queryResult = cache.readQuery({
+          query: employeesAndBossesWithVariablesQuery,
+          variables: {
+            employeeName: "Tester McTest",
+            bossName: "Tester McBoss"
+          },
+        });
+        expect(queryResult).toEqual({
+          employees: {
+            __typename: 'EmployeesResponse',
+            data: [employee, employee2]
+          },
+          bosses: {
+            __typename: 'EmployeesResponse',
+            data: [employee3]
+          }
+        });
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employee3.toRef()]: employee3,
+          ROOT_QUERY: {
+            __typename: "Query",
+            "employees({\"name\":\"Tester McTest\"})": {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            "employees({\"name\":\"Tester McBoss\"})": {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee3.toRef() }],
+            },
+          },
+        });
+
         dateNowSpy.mockRestore();
         dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
 
-        const queryResult = cache.readQuery({
+         queryResult = cache.readQuery({
           query: employeesAndBossesWithVariablesQuery,
           variables: {
             employeeName: "Tester McTest",
@@ -1815,6 +1864,66 @@ describe("InvalidationPolicyCache", () => {
           [employee3.toRef()]: employee3,
           ROOT_QUERY: {
             __typename: "Query",
+          },
+        });
+      });
+
+      test('should evict an expired array response entity with a field alias', () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesWithAliasVariablesAndArrayResponseQuery,
+          data: employeesWithAliasVariablesAndArrayResponse,
+          variables: {
+            bossName: "Tester McBoss"
+          },
+        });
+
+        let queryResult = cache.readQuery({
+          query: employeesWithAliasVariablesAndArrayResponseQuery,
+          variables: {
+            employeeName: "Tester McTest",
+            bossName: "Tester McBoss"
+          },
+        });
+        expect(queryResult).toEqual({
+          bosses: [
+            employee3,
+          ]
+        });
+
+        expect(cache.extract(true, false)).toEqual({
+          [employee3.toRef()]: employee3,
+          ROOT_QUERY: {
+            __typename: "Query",
+            "employees({\"name\":\"Tester McBoss\"})": [{ __ref: employee3.toRef() }],
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        queryResult = cache.readQuery({
+          query: employeesWithAliasVariablesAndArrayResponseQuery,
+          variables: {
+            employeeName: "Tester McTest",
+            bossName: "Tester McBoss"
+          },
+        });
+
+        expect(queryResult).toEqual({
+          bosses: [],
+        });
+        expect(cache.extract(true, false)).toEqual({
+          ROOT_QUERY: {
+            __typename: "Query",
+            // The employees field remains in the cache since it's cached value has no __typename field and is not evicted
+            // itself when read.
+            "employees({\"name\":\"Tester McBoss\"})": [{ __ref: employee3.toRef() }],
           },
         });
       });
