@@ -1,3 +1,10 @@
+3.3.3 (VillePakarinenPosti)
+
+Fixes bug where optional params to `broadcastWatches` were not being passed through to the `InvalidationPolicyCache`.
+
+Bugfix: https://github.com/NerdWalletOSS/apollo-cache-policies/issues/86
+Reporter: https://github.com/VillePakarinenPosti
+
 3.3.2 (Dan Reynolds)
 
 Fixes bug where query responses without a typename are never evicted.
