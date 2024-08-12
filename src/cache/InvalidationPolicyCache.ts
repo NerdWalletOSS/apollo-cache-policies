@@ -17,7 +17,7 @@ import _orderBy from "lodash/orderBy";
 import InvalidationPolicyManager from "../policies/InvalidationPolicyManager";
 import { EntityStoreWatcher, EntityTypeMap } from "../entity-store";
 import { makeEntityId, isQuery, maybeDeepClone, fieldNameFromStoreName } from "../helpers";
-import { FragmentWhereFilter, FragmentWhereOrderBy, InvalidationPolicyCacheConfig } from "./types";
+import { BroadcastOptions, FragmentWhereFilter, FragmentWhereOrderBy, InvalidationPolicyCacheConfig } from "./types";
 import { CacheResultProcessor, ReadResultStatus } from "./CacheResultProcessor";
 import { InvalidationPolicies, InvalidationPolicyEvent, ReadFieldOptions } from "../policies/types";
 import { FragmentDefinitionNode } from 'graphql';
@@ -129,9 +129,9 @@ export default class InvalidationPolicyCache extends InMemoryCache {
     );
   }
 
-  protected broadcastWatches() {
+  protected broadcastWatches(options?: BroadcastOptions) {
     this.isBroadcasting = true;
-    super.broadcastWatches();
+    super.broadcastWatches(options);
     this.isBroadcasting = false;
   }
 
