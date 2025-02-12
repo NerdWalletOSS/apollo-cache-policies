@@ -3,9 +3,11 @@ import { InvalidationPolicyCache } from ".";
 
 var rvCache!: ReactiveVarsCache;
 
-export const cachedReactiveVarTypename = 'CachedReactiveVar';
+export const cachedReactiveVarTypename = "CachedReactiveVar";
 
-export function initReactiveVarsCache(cache: InvalidationPolicyCache): ReactiveVarsCache {
+export function initReactiveVarsCache(
+  cache: InvalidationPolicyCache
+): ReactiveVarsCache {
   rvCache = new ReactiveVarsCache({
     cache,
   });
@@ -17,7 +19,7 @@ const cachedReactiveVarFragment = gql`
     id
     value
   }
-`
+`;
 
 export function makeCachedVar<T>(id: string, value: T): ReactiveVar<T> {
   return rvCache.registerCachedVar<T>(id, value);
@@ -28,10 +30,13 @@ interface ReactiveVarsCacheConfig {
 }
 
 export class ReactiveVarsCache {
-  registeredVars: Record<string, {
-    rv: ReactiveVar<any>;
-    defaultValue: any;
-  }> = {};
+  registeredVars: Record<
+    string,
+    {
+      rv: ReactiveVar<any>;
+      defaultValue: any;
+    }
+  > = {};
   cache!: InvalidationPolicyCache;
 
   constructor({ cache }: ReactiveVarsCacheConfig) {
@@ -40,7 +45,7 @@ export class ReactiveVarsCache {
 
   private watchReactiveVar<T>(id: string, rv: ReactiveVar<T>) {
     rv.onNextChange((value) => {
-      this.writeCachedVar(id, value)
+      this.writeCachedVar(id, value);
       // Reactive variables support an `onNextChange` API that allows listeners
       // to subscribe to the next value change. This only applies to a single change,
       // so to subscribe to every change, a new listener must be added after processing
@@ -54,13 +59,15 @@ export class ReactiveVarsCache {
     const rv = makeVar<T>(cachedValue ?? defaultValue);
 
     if (this.registeredVars[id]) {
-      console.warn(`Duplicate cached reactive variable with ID ${id} detected. Multiple cached reactive variables should not share the same ID.`);
+      console.warn(
+        `Duplicate cached reactive variable with ID ${id} detected. Multiple cached reactive variables should not share the same ID.`
+      );
     }
 
     this.registeredVars[id] = {
       rv,
       defaultValue,
-    }
+    };
 
     // If the cache did not already had a value for the CachedReactiveVar with this ID,
     // then it should be seeded with one using the provided default value.
@@ -97,7 +104,7 @@ export class ReactiveVarsCache {
           __typename: cachedReactiveVarTypename,
           id,
           value,
-        }
+        },
       });
     }
   }
