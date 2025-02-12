@@ -240,7 +240,7 @@ describe("InvalidationPolicyCache", () => {
     },
   };
 
-  describe('with collections enabled', () => {
+  describe("with collections enabled", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         enableCollections: true,
@@ -251,14 +251,12 @@ describe("InvalidationPolicyCache", () => {
       });
     });
 
-    test('should record refs under the correct collection entity by type', () => {
+    test("should record refs under the correct collection entity by type", () => {
       expect(cache.extract(true, false)).toEqual({
         "CacheExtensionsCollectionEntity:Employee": {
-          __typename: 'CacheExtensionsCollectionEntity',
-          id: 'Employee',
-          data: [
-            { __ref: employee.toRef() }, { __ref: employee2.toRef() }
-          ],
+          __typename: "CacheExtensionsCollectionEntity",
+          id: "Employee",
+          data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
         },
         [employee.toRef()]: employee,
         [employee2.toRef()]: employee2,
@@ -270,16 +268,14 @@ describe("InvalidationPolicyCache", () => {
           },
         },
         __META: {
-          extraRootIds: [
-            'CacheExtensionsCollectionEntity:Employee'
-          ]
-        }
+          extraRootIds: ["CacheExtensionsCollectionEntity:Employee"],
+        },
       });
     });
 
-    describe('readFragmentWhere', () => {
-      describe('with an object filter', () => {
-        test('should return matching entities', () => {
+    describe("readFragmentWhere", () => {
+      describe("with an object filter", () => {
+        test("should return matching entities", () => {
           const employeeFragment = gql`
             fragment employee on Employee {
               id
@@ -301,8 +297,8 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      describe('with a function filter', () => {
-        test('should return matching entities', () => {
+      describe("with a function filter", () => {
+        test("should return matching entities", () => {
           const employeeFragment = gql`
             fragment employee on Employee {
               id
@@ -312,18 +308,18 @@ describe("InvalidationPolicyCache", () => {
             }
           `;
 
-
           const matchingEntities = cache.readFragmentWhere<EmployeeType>({
             fragment: employeeFragment,
-            filter: (ref, readField) => readField('employee_name', ref) === employee.employee_name,
+            filter: (ref, readField) =>
+              readField("employee_name", ref) === employee.employee_name,
           });
 
           expect(matchingEntities).toEqual([employee]);
         });
       });
 
-      describe('with no filter', () => {
-        test('should return all entities of the given type', () => {
+      describe("with no filter", () => {
+        test("should return all entities of the given type", () => {
           const employeeFragment = gql`
             fragment employee on Employee {
               id
@@ -341,8 +337,8 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      describe('with a limit', () => {
-        test('should return the limited list of entities', () => {
+      describe("with a limit", () => {
+        test("should return the limited list of entities", () => {
           const employeeFragment = gql`
             fragment employee on Employee {
               id
@@ -361,8 +357,8 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      describe('with an object orderBy', () => {
-        test('should return the ordered list of entities', () => {
+      describe("with an object orderBy", () => {
+        test("should return the ordered list of entities", () => {
           const employeeFragment = gql`
             fragment employee on Employee {
               id
@@ -375,9 +371,9 @@ describe("InvalidationPolicyCache", () => {
           const matchingEntities = cache.readFragmentWhere<EmployeeType>({
             fragment: employeeFragment,
             orderBy: {
-              field: 'employee_name',
+              field: "employee_name",
               descending: true,
-            }
+            },
           });
 
           expect(matchingEntities).toEqual([employee2, employee]);
@@ -385,16 +381,16 @@ describe("InvalidationPolicyCache", () => {
       });
     });
 
-    describe('writeFragmentWhere', () => {
-      test('should write matching entities', () => {
+    describe("writeFragmentWhere", () => {
+      test("should write matching entities", () => {
         const employeeFragment = gql`
-            fragment employee on Employee {
-              id
-              employee_name
-              employee_age
-              employee_salary
-            }
-          `;
+          fragment employee on Employee {
+            id
+            employee_name
+            employee_age
+            employee_salary
+          }
+        `;
 
         cache.writeFragmentWhere<EmployeeType>({
           fragment: employeeFragment,
@@ -410,11 +406,9 @@ describe("InvalidationPolicyCache", () => {
 
         expect(cache.extract(true, false)).toEqual({
           "CacheExtensionsCollectionEntity:Employee": {
-            __typename: 'CacheExtensionsCollectionEntity',
-            id: 'Employee',
-            data: [
-              { __ref: employee.toRef() }, { __ref: employee2.toRef() }
-            ],
+            __typename: "CacheExtensionsCollectionEntity",
+            id: "Employee",
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
           },
           [employee.toRef()]: {
             ...employee,
@@ -430,15 +424,14 @@ describe("InvalidationPolicyCache", () => {
           },
           __META: {
             extraRootIds: [
-              'CacheExtensionsCollectionEntity:Employee',
+              "CacheExtensionsCollectionEntity:Employee",
               employee.toRef(),
-            ]
-          }
+            ],
+          },
         });
       });
     });
   });
-
 
   describe("with an Evict-on-Write cache policy", () => {
     beforeEach(() => {
@@ -1095,7 +1088,7 @@ describe("InvalidationPolicyCache", () => {
                       'employees({"name":"Tester McTest"})': {
                         cacheTime: 0,
                         variables: { name: "Tester McTest" },
-                        args: { name: "Tester McTest" }
+                        args: { name: "Tester McTest" },
                       },
                     },
                   },
@@ -1166,8 +1159,8 @@ describe("InvalidationPolicyCache", () => {
             query: createEmployeeMutationWithVariables,
             data: createEmployeeResponse,
             variables: {
-              name: 'Tester McTest'
-            }
+              name: "Tester McTest",
+            },
           });
           expect(cache.extract(true, false)).toEqual({
             [employee.toRef()]: employee,
@@ -1190,7 +1183,7 @@ describe("InvalidationPolicyCache", () => {
             },
           });
         });
-      })
+      });
 
       describe("while operating on an optimistic layer", () => {
         test("should not trigger write policies", () => {
@@ -1303,10 +1296,8 @@ describe("InvalidationPolicyCache", () => {
             },
           },
           __META: {
-            extraRootIds: [
-              employee.toRef(),
-            ],
-          }
+            extraRootIds: [employee.toRef()],
+          },
         });
       });
 
@@ -1739,14 +1730,14 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      test('should evict an expired entity with custom Query keyArgs', () => {
+      test("should evict an expired entity with custom Query keyArgs", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
             types: {
               EmployeesResponse: {
                 timeToLive: 100,
-              }
-            }
+              },
+            },
           },
           typePolicies: {
             Query: {
@@ -1754,9 +1745,9 @@ describe("InvalidationPolicyCache", () => {
                 employees: {
                   keyArgs: false,
                 },
-              }
-            }
-          }
+              },
+            },
+          },
         });
         dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
         cache.writeQuery({
@@ -1793,14 +1784,14 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      test('should evict an expired entity with a field alias', () => {
+      test("should evict an expired entity with a field alias", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
             types: {
               EmployeesResponse: {
                 timeToLive: 100,
-              }
-            }
+              },
+            },
           },
         });
         dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
@@ -1809,7 +1800,7 @@ describe("InvalidationPolicyCache", () => {
           data: employeesAndBossesResponse,
           variables: {
             employeeName: "Tester McTest",
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
 
@@ -1817,18 +1808,18 @@ describe("InvalidationPolicyCache", () => {
           query: employeesAndBossesWithVariablesQuery,
           variables: {
             employeeName: "Tester McTest",
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
         expect(queryResult).toEqual({
           employees: {
-            __typename: 'EmployeesResponse',
-            data: [employee, employee2]
+            __typename: "EmployeesResponse",
+            data: [employee, employee2],
           },
           bosses: {
-            __typename: 'EmployeesResponse',
-            data: [employee3]
-          }
+            __typename: "EmployeesResponse",
+            data: [employee3],
+          },
         });
         expect(cache.extract(true, false)).toEqual({
           [employee.toRef()]: employee,
@@ -1836,11 +1827,11 @@ describe("InvalidationPolicyCache", () => {
           [employee3.toRef()]: employee3,
           ROOT_QUERY: {
             __typename: "Query",
-            "employees({\"name\":\"Tester McTest\"})": {
+            'employees({"name":"Tester McTest"})': {
               __typename: "EmployeesResponse",
               data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
             },
-            "employees({\"name\":\"Tester McBoss\"})": {
+            'employees({"name":"Tester McBoss"})': {
               __typename: "EmployeesResponse",
               data: [{ __ref: employee3.toRef() }],
             },
@@ -1850,11 +1841,11 @@ describe("InvalidationPolicyCache", () => {
         dateNowSpy.mockRestore();
         dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
 
-         queryResult = cache.readQuery({
+        queryResult = cache.readQuery({
           query: employeesAndBossesWithVariablesQuery,
           variables: {
             employeeName: "Tester McTest",
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
         expect(queryResult).toEqual({});
@@ -1868,7 +1859,7 @@ describe("InvalidationPolicyCache", () => {
         });
       });
 
-      test('should evict an expired array response entity with a field alias', () => {
+      test("should evict an expired array response entity with a field alias", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
             timeToLive: 100,
@@ -1879,7 +1870,7 @@ describe("InvalidationPolicyCache", () => {
           query: employeesWithAliasVariablesAndArrayResponseQuery,
           data: employeesWithAliasVariablesAndArrayResponse,
           variables: {
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
 
@@ -1887,20 +1878,20 @@ describe("InvalidationPolicyCache", () => {
           query: employeesWithAliasVariablesAndArrayResponseQuery,
           variables: {
             employeeName: "Tester McTest",
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
         expect(queryResult).toEqual({
-          bosses: [
-            employee3,
-          ]
+          bosses: [employee3],
         });
 
         expect(cache.extract(true, false)).toEqual({
           [employee3.toRef()]: employee3,
           ROOT_QUERY: {
             __typename: "Query",
-            "employees({\"name\":\"Tester McBoss\"})": [{ __ref: employee3.toRef() }],
+            'employees({"name":"Tester McBoss"})': [
+              { __ref: employee3.toRef() },
+            ],
           },
         });
 
@@ -1911,7 +1902,7 @@ describe("InvalidationPolicyCache", () => {
           query: employeesWithAliasVariablesAndArrayResponseQuery,
           variables: {
             employeeName: "Tester McTest",
-            bossName: "Tester McBoss"
+            bossName: "Tester McBoss",
           },
         });
 
@@ -2893,7 +2884,7 @@ describe("InvalidationPolicyCache", () => {
     });
 
     describe("with a WriteOnly renewal policy", () => {
-      test("should evict the expired entities on write", () => {
+      test("should evict the expired entities on read", () => {
         cache = new InvalidationPolicyCache({
           invalidationPolicies: {
             timeToLive: 100,
@@ -2931,6 +2922,156 @@ describe("InvalidationPolicyCache", () => {
         const queryResult = cache.readQuery({
           query: employeesAndMessagesQuery,
         });
+        expect(queryResult).toEqual({});
+        expect(cache.extract(true, false)).toEqual({
+          ROOT_QUERY: {
+            __typename: "Query",
+          },
+        });
+      });
+
+      test("should renew the TTL on rewritten entities", () => {
+        cache = new InvalidationPolicyCache({
+          invalidationPolicies: {
+            timeToLive: 100,
+            renewalPolicy: RenewalPolicy.WriteOnly,
+          },
+        });
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(50);
+        cache.writeQuery({
+          query: employeesAndMessagesQuery,
+          data: employeesAndMessagesResponse,
+        });
+
+        expect(cache.extract(true, true)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+          invalidation: {
+            entitiesById: {
+              [employee.toRef()]: {
+                dataId: employee.toRef(),
+                typename: "Employee",
+                cacheTime: 50,
+              },
+              [employee2.toRef()]: {
+                dataId: employee2.toRef(),
+                typename: "Employee",
+                cacheTime: 50,
+              },
+              [employeeMessage.toRef()]: {
+                dataId: employeeMessage.toRef(),
+                typename: "EmployeeMessage",
+                cacheTime: 50,
+              },
+              [employeeMessage2.toRef()]: {
+                dataId: employeeMessage2.toRef(),
+                typename: "EmployeeMessage",
+                cacheTime: 50,
+              },
+              "ROOT_QUERY.employees": {
+                dataId: "ROOT_QUERY",
+                typename: "EmployeesResponse",
+                fieldName: "employees",
+                storeFieldNames: {
+                  __size: 1,
+                  entries: {
+                    variables: undefined,
+                    employees: {
+                      args: null,
+                      cacheTime: 50,
+                    },
+                  },
+                },
+              },
+              "ROOT_QUERY.employeeMessages": {
+                dataId: "ROOT_QUERY",
+                typename: "EmployeeMessagesResponse",
+                fieldName: "employeeMessages",
+                storeFieldNames: {
+                  __size: 1,
+                  entries: {
+                    variables: undefined,
+                    employeeMessages: {
+                      args: null,
+                      cacheTime: 50,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(101);
+
+        let queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+
+        // Entities should not yet be evicted, since they were renewed.
+        expect(queryResult).toEqual({
+          employees: {
+            __typename: "EmployeesResponse",
+            data: [employee, employee2],
+          },
+          employeeMessages: {
+            __typename: "EmployeeMessagesResponse",
+            data: [employeeMessage, employeeMessage2],
+          },
+        });
+        expect(cache.extract(true, false)).toEqual({
+          [employee.toRef()]: employee,
+          [employee2.toRef()]: employee2,
+          [employeeMessage.toRef()]: employeeMessage,
+          [employeeMessage2.toRef()]: employeeMessage2,
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
+            employeeMessages: {
+              __typename: "EmployeeMessagesResponse",
+              data: [
+                { __ref: employeeMessage.toRef() },
+                { __ref: employeeMessage2.toRef() },
+              ],
+            },
+          },
+        });
+
+        dateNowSpy.mockRestore();
+        dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(151);
+
+        queryResult = cache.readQuery({
+          query: employeesAndMessagesQuery,
+        });
+
+        // Now the entities should be removed since they were read after their renewed
+        // TTL expiry.
         expect(queryResult).toEqual({});
         expect(cache.extract(true, false)).toEqual({
           ROOT_QUERY: {
@@ -2994,22 +3135,22 @@ describe("InvalidationPolicyCache", () => {
       });
     });
 
-    describe('with a relay-style pagination type policy', () => {
+    describe("with a relay-style pagination type policy", () => {
       test("should evict an expired entity", () => {
         cache = new InvalidationPolicyCache({
           typePolicies: {
             Query: {
               fields: {
                 employees: relayStylePagination(["after"]),
-              }
+              },
             },
           },
           invalidationPolicies: {
             types: {
               EmployeesResponse: {
                 timeToLive: 100,
-              }
-            }
+              },
+            },
           },
         });
         dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
@@ -3022,7 +3163,7 @@ describe("InvalidationPolicyCache", () => {
           data: employeesResponse,
           variables: {
             after: employee.id,
-          }
+          },
         });
 
         expect(cache.extract(true, false)).toEqual({
@@ -3031,33 +3172,27 @@ describe("InvalidationPolicyCache", () => {
           ROOT_QUERY: {
             __typename: "Query",
             "employees:{}": {
-              __typename: 'EmployeesResponse',
-              data: [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() }
-              ],
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
               edges: [],
               pageInfo: {
                 endCursor: "",
                 hasNextPage: true,
                 hasPreviousPage: false,
                 startCursor: "",
-              }
+              },
             },
             [`employees:{\"after\":\"${employee.id}\"}`]: {
-              __typename: 'EmployeesResponse',
-              data: [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() }
-              ],
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
               edges: [],
               pageInfo: {
                 endCursor: "",
                 hasNextPage: true,
                 hasPreviousPage: false,
                 startCursor: "",
-              }
-            }
+              },
+            },
           },
         });
 
@@ -3071,7 +3206,7 @@ describe("InvalidationPolicyCache", () => {
           query: employeesWithRelayStylePaginationQuery,
           variables: {
             after: employee.id,
-          }
+          },
         });
         expect(queryResult).toEqual({});
         expect(afterQueryResult).toEqual({});
@@ -3086,7 +3221,7 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
-  describe('with an object default cache policy', () => {
+  describe("with an object default cache policy", () => {
     let sideEffect: string;
 
     beforeEach(() => {
@@ -3095,9 +3230,12 @@ describe("InvalidationPolicyCache", () => {
           types: {
             EmployeesResponse: {
               onWrite: {
-                __default: (_cacheOperations, { parent: { storeFieldName } }) => {
+                __default: (
+                  _cacheOperations,
+                  { parent: { storeFieldName } }
+                ) => {
                   sideEffect = `${storeFieldName} field written to the cache`;
-                }
+                },
               },
             },
           },
@@ -3114,11 +3252,11 @@ describe("InvalidationPolicyCache", () => {
         query: employeesQuery,
         data: employeesResponse,
       });
-      expect(sideEffect).toEqual('employees field written to the cache');
+      expect(sideEffect).toEqual("employees field written to the cache");
     });
   });
 
-  describe('with a function default cache policy', () => {
+  describe("with a function default cache policy", () => {
     let sideEffect: string;
 
     beforeEach(() => {
@@ -3128,7 +3266,7 @@ describe("InvalidationPolicyCache", () => {
             EmployeesResponse: {
               onWrite: (_cacheOperations, { parent: { storeFieldName } }) => {
                 sideEffect = `${storeFieldName} field written to the cache`;
-              }
+              },
             },
           },
         },
@@ -3144,7 +3282,7 @@ describe("InvalidationPolicyCache", () => {
         query: employeesQuery,
         data: employeesResponse,
       });
-      expect(sideEffect).toEqual('employees field written to the cache');
+      expect(sideEffect).toEqual("employees field written to the cache");
     });
   });
 
@@ -3261,7 +3399,7 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
-  describe('expiredEntities', () => {
+  describe("expiredEntities", () => {
     let dateNowSpy: any;
 
     test("should report all expired entities but not evict them", () => {
@@ -3330,66 +3468,74 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
-  describe('#activatePolicies', () => {
+  describe("#activatePolicies", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache();
     });
 
-    describe('with no policies passed', () => {
-      test('should activate all policies', () => {
+    describe("with no policies passed", () => {
+      test("should activate all policies", () => {
         expect(cache.activePolicyEvents()).toEqual([]);
         cache.activatePolicyEvents();
-        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
-          InvalidationPolicyEvent.Read,
-          InvalidationPolicyEvent.Write,
-          InvalidationPolicyEvent.Evict,
-        ]));
-      })
+        expect(cache.activePolicyEvents()).toEqual(
+          expect.arrayContaining([
+            InvalidationPolicyEvent.Read,
+            InvalidationPolicyEvent.Write,
+            InvalidationPolicyEvent.Evict,
+          ])
+        );
+      });
     });
 
-    describe('with policies passed', () => {
-      test('should activate the provided policies', () => {
+    describe("with policies passed", () => {
+      test("should activate the provided policies", () => {
         expect(cache.activePolicyEvents()).toEqual([]);
         cache.activatePolicyEvents(InvalidationPolicyEvent.Read);
-        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
-          InvalidationPolicyEvent.Read,
-        ]));
-      })
+        expect(cache.activePolicyEvents()).toEqual(
+          expect.arrayContaining([InvalidationPolicyEvent.Read])
+        );
+      });
     });
   });
 
-  describe('#deactivatePolicies', () => {
+  describe("#deactivatePolicies", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache();
     });
 
-    describe('with no policies passed', () => {
-      test('should deactivate all policies', () => {
+    describe("with no policies passed", () => {
+      test("should deactivate all policies", () => {
         cache.activatePolicyEvents();
-        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
-          InvalidationPolicyEvent.Read,
-          InvalidationPolicyEvent.Write,
-          InvalidationPolicyEvent.Evict,
-        ]));
+        expect(cache.activePolicyEvents()).toEqual(
+          expect.arrayContaining([
+            InvalidationPolicyEvent.Read,
+            InvalidationPolicyEvent.Write,
+            InvalidationPolicyEvent.Evict,
+          ])
+        );
         cache.deactivatePolicyEvents();
         expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([]));
-      })
+      });
     });
 
-    describe('with policies passed', () => {
-      test('should deactivate the provided policies', () => {
+    describe("with policies passed", () => {
+      test("should deactivate the provided policies", () => {
         cache.activatePolicyEvents();
-        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
-          InvalidationPolicyEvent.Read,
-          InvalidationPolicyEvent.Write,
-          InvalidationPolicyEvent.Evict,
-        ]));
+        expect(cache.activePolicyEvents()).toEqual(
+          expect.arrayContaining([
+            InvalidationPolicyEvent.Read,
+            InvalidationPolicyEvent.Write,
+            InvalidationPolicyEvent.Evict,
+          ])
+        );
         cache.deactivatePolicyEvents(InvalidationPolicyEvent.Read);
-        expect(cache.activePolicyEvents()).toEqual(expect.arrayContaining([
-          InvalidationPolicyEvent.Write,
-          InvalidationPolicyEvent.Evict,
-        ]));
-      })
+        expect(cache.activePolicyEvents()).toEqual(
+          expect.arrayContaining([
+            InvalidationPolicyEvent.Write,
+            InvalidationPolicyEvent.Evict,
+          ])
+        );
+      });
     });
   });
 
@@ -3477,7 +3623,7 @@ describe("InvalidationPolicyCache", () => {
     });
   });
 
-  describe('#init', () => {
+  describe("#init", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache();
       cache.writeQuery({
@@ -3486,7 +3632,7 @@ describe("InvalidationPolicyCache", () => {
       });
     });
 
-    test('should reset the entity store watcher and entity type map along with the entity store', () => {
+    test("should reset the entity store watcher and entity type map along with the entity store", () => {
       const expectedEntityStore = {
         [employee.toRef()]: employee,
         [employee2.toRef()]: employee2,
@@ -3500,68 +3646,66 @@ describe("InvalidationPolicyCache", () => {
       };
 
       const expectedEntityTypeMap = {
-        "entitiesById": {
+        entitiesById: {
           [employee.toRef()]: {
-            "dataId": employee.toRef(),
-            "typename": "Employee",
-            "cacheTime": expect.any(Number),
+            dataId: employee.toRef(),
+            typename: "Employee",
+            cacheTime: expect.any(Number),
           },
           [employee2.toRef()]: {
-            "dataId": employee2.toRef(),
-            "typename": "Employee",
-            "cacheTime": expect.any(Number)
+            dataId: employee2.toRef(),
+            typename: "Employee",
+            cacheTime: expect.any(Number),
           },
           "ROOT_QUERY.employees": {
-            "dataId": "ROOT_QUERY",
-            "typename": "EmployeesResponse",
-            "fieldName": "employees",
-            "storeFieldNames": {
-              "__size": 1,
-              "entries": {
-                "employees": {
-                  "cacheTime": expect.any(Number)
-                }
-              }
-            }
-          }
+            dataId: "ROOT_QUERY",
+            typename: "EmployeesResponse",
+            fieldName: "employees",
+            storeFieldNames: {
+              __size: 1,
+              entries: {
+                employees: {
+                  cacheTime: expect.any(Number),
+                },
+              },
+            },
+          },
         },
-        "entitiesByType": {
-          "Employee": {
+        entitiesByType: {
+          Employee: {
             [employee.toRef()]: {
-              "dataId": employee.toRef(),
-              "typename": "Employee",
-              "cacheTime": expect.any(Number)
+              dataId: employee.toRef(),
+              typename: "Employee",
+              cacheTime: expect.any(Number),
             },
             [employee2.toRef()]: {
-              "dataId": employee2.toRef(),
-              "typename": "Employee",
-              "cacheTime": expect.any(Number)
-            }
+              dataId: employee2.toRef(),
+              typename: "Employee",
+              cacheTime: expect.any(Number),
+            },
           },
-          "EmployeesResponse": {
+          EmployeesResponse: {
             "ROOT_QUERY.employees": {
-              "dataId": "ROOT_QUERY",
-              "typename": "EmployeesResponse",
-              "fieldName": "employees",
-              "storeFieldNames": {
-                "__size": 1,
-                "entries": {
-                  "employees": {
-                    "cacheTime": expect.any(Number)
-                  }
-                }
-              }
-            }
-          }
-        }
+              dataId: "ROOT_QUERY",
+              typename: "EmployeesResponse",
+              fieldName: "employees",
+              storeFieldNames: {
+                __size: 1,
+                entries: {
+                  employees: {
+                    cacheTime: expect.any(Number),
+                  },
+                },
+              },
+            },
+          },
+        },
       };
 
       expect(cache.extract(true, false)).toEqual(expectedEntityStore);
 
       // @ts-ignore testing private API
-      expect(cache.entityTypeMap.extract()).toEqual(
-        expectedEntityTypeMap
-      );
+      expect(cache.entityTypeMap.extract()).toEqual(expectedEntityTypeMap);
 
       // @ts-ignore testing private API
       cache.init();
@@ -3585,13 +3729,11 @@ describe("InvalidationPolicyCache", () => {
       expect(cache.extract(true, false)).toEqual(expectedEntityStore);
 
       // @ts-ignore testing private API
-      expect(cache.entityTypeMap.extract()).toEqual(
-        expectedEntityTypeMap
-      );
+      expect(cache.entityTypeMap.extract()).toEqual(expectedEntityTypeMap);
     });
   });
 
-  describe('#evictWhere', () => {
+  describe("#evictWhere", () => {
     beforeEach(() => {
       cache = new InvalidationPolicyCache({
         enableCollections: true,
@@ -3602,83 +3744,67 @@ describe("InvalidationPolicyCache", () => {
       });
     });
 
-    describe('with an object filter', () => {
-      test('should evict matching entities', () => {
+    describe("with an object filter", () => {
+      test("should evict matching entities", () => {
         cache.evictWhere({
-          __typename: 'Employee',
+          __typename: "Employee",
           filter: {
             id: employee.id,
-          }
+          },
         });
 
         expect(cache.extract(true, false)).toEqual({
           "CacheExtensionsCollectionEntity:Employee": {
             id: "Employee",
             __typename: "CacheExtensionsCollectionEntity",
-            data: [
-              { __ref: employee.toRef() },
-              { __ref: employee2.toRef() },
-            ]
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
           },
           [employee2.toRef()]: employee2,
-          "ROOT_QUERY": {
-            "__typename": "Query",
-            "employees": {
-              "__typename": "EmployeesResponse",
-              "data": [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() },
-              ]
-            }
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
           },
-          "__META": {
-            "extraRootIds": [
-              "CacheExtensionsCollectionEntity:Employee"
-            ]
-          }
+          __META: {
+            extraRootIds: ["CacheExtensionsCollectionEntity:Employee"],
+          },
         });
       });
 
-      test('should de-dupe collection references', () => {
+      test("should de-dupe collection references", () => {
         cache.evictWhere({
-          __typename: 'Employee',
+          __typename: "Employee",
           filter: {
             id: employee.id,
-          }
+          },
         });
 
         expect(cache.extract(true, false)).toEqual({
           "CacheExtensionsCollectionEntity:Employee": {
             id: "Employee",
             __typename: "CacheExtensionsCollectionEntity",
-            data: [
-              { __ref: employee.toRef() },
-              { __ref: employee2.toRef() },
-            ]
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
           },
           [employee2.toRef()]: employee2,
-          "ROOT_QUERY": {
-            "__typename": "Query",
-            "employees": {
-              "__typename": "EmployeesResponse",
-              "data": [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() },
-              ]
-            }
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
           },
-          "__META": {
-            "extraRootIds": [
-              "CacheExtensionsCollectionEntity:Employee"
-            ]
-          }
+          __META: {
+            extraRootIds: ["CacheExtensionsCollectionEntity:Employee"],
+          },
         });
 
         cache.writeQuery({
           query: employeesQuery,
           data: employeesResponse,
         });
-  
+
         expect(cache.extract(true, false)).toEqual({
           "CacheExtensionsCollectionEntity:Employee": {
             id: "Employee",
@@ -3687,61 +3813,48 @@ describe("InvalidationPolicyCache", () => {
               // Note no duplicate references as a result of write->evict->write.
               { __ref: employee.toRef() },
               { __ref: employee2.toRef() },
-            ]
+            ],
           },
           [employee.toRef()]: employee,
           [employee2.toRef()]: employee2,
-          "ROOT_QUERY": {
-            "__typename": "Query",
-            "employees": {
-              "__typename": "EmployeesResponse",
-              "data": [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() },
-              ]
-            }
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
           },
-          "__META": {
-            "extraRootIds": [
-              "CacheExtensionsCollectionEntity:Employee"
-            ]
-          }
+          __META: {
+            extraRootIds: ["CacheExtensionsCollectionEntity:Employee"],
+          },
         });
       });
     });
 
-    describe('with a function filter', () => {
-      test('should evict matching entities', () => {
+    describe("with a function filter", () => {
+      test("should evict matching entities", () => {
         cache.evictWhere({
-          __typename: 'Employee',
-          filter: (ref, readField) => readField('id', ref) === employee.id,
+          __typename: "Employee",
+          filter: (ref, readField) => readField("id", ref) === employee.id,
         });
 
         expect(cache.extract(true, false)).toEqual({
           "CacheExtensionsCollectionEntity:Employee": {
             id: "Employee",
             __typename: "CacheExtensionsCollectionEntity",
-            data: [
-              { __ref: employee.toRef() },
-              { __ref: employee2.toRef() },
-            ]
+            data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
           },
           [employee2.toRef()]: employee2,
-          "ROOT_QUERY": {
-            "__typename": "Query",
-            "employees": {
-              "__typename": "EmployeesResponse",
-              "data": [
-                { __ref: employee.toRef() },
-                { __ref: employee2.toRef() },
-              ]
-            }
+          ROOT_QUERY: {
+            __typename: "Query",
+            employees: {
+              __typename: "EmployeesResponse",
+              data: [{ __ref: employee.toRef() }, { __ref: employee2.toRef() }],
+            },
           },
-          "__META": {
-            "extraRootIds": [
-              "CacheExtensionsCollectionEntity:Employee"
-            ]
-          }
+          __META: {
+            extraRootIds: ["CacheExtensionsCollectionEntity:Employee"],
+          },
         });
       });
     });
