@@ -1,9 +1,9 @@
 import { getApolloContext } from '@apollo/client';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { DocumentNode } from 'graphql';
-import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
-import { buildWatchFragmentWhereQuery } from '../client/utils';
-import { FragmentWhereFilter, FragmentWhereOrderBy } from '../cache/types';
+import InvalidationPolicyCache from '../../cache/InvalidationPolicyCache';
+import { buildWatchFragmentWhereQuery } from '../../client/utils';
+import { FragmentWhereFilter, FragmentWhereOrderBy } from '../../cache/types';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 import { makeVar } from '@apollo/client';

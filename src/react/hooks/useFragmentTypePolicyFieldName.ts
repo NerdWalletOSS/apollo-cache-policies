@@ -1,7 +1,7 @@
 import { useApolloClient } from "@apollo/client";
 import { useEffect, useMemo } from "react"
-import { InvalidationPolicyCache } from "../cache";
-import { generateFragmentFieldName } from "../helpers";
+import { InvalidationPolicyCache } from "../../cache";
+import { generateFragmentFieldName } from "../../helpers";
 import { usePrevious } from "./utils";
 
 // Creates a field name to be used for a dynamically added field policy.

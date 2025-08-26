@@ -1,9 +1,9 @@
 import { getApolloContext } from '@apollo/client';
 import { useContext } from 'react';
 import { useOnce } from './utils';
-import InvalidationPolicyCache from '../cache/InvalidationPolicyCache';
+import InvalidationPolicyCache from '../../cache/InvalidationPolicyCache';
 import { DocumentNode } from 'graphql';
-import { buildWatchFragmentQuery } from '../client/utils';
+import { buildWatchFragmentQuery } from '../../client/utils';
 import { useFragmentTypePolicyFieldName } from './useFragmentTypePolicyFieldName';
 import { useGetQueryDataByFieldName } from './useGetQueryDataByFieldName';
 
