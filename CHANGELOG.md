@@ -1,3 +1,7 @@
+4.0.0
+
+[Breaking] Move React hooks to new entrypoint
+
 3.3.2 (Dan Reynolds)
 
 Fixes bug where query responses without a typename are never evicted.

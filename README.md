@@ -136,7 +136,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   Now our client can filter all entites of a particular type in the cache like `Employee` in one operation without having to write any type policies.
 
   ```js
-  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
+  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies/react';
 
   const { data } = useFragmentWhere(
     gql`
@@ -154,7 +154,7 @@ Type-based TTLs are useful when you want to specify requirements on how long an 
   If we just want to retrieve all entities in the cache for a particular type, we can omit the filter altogether:
 
   ```js
-  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies';
+  import { useFragmentWhere } from '@nerdwallet/apollo-cache-policies/react';
 
   const { data } = useFragmentWhere(
     gql`
